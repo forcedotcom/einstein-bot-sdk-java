@@ -1,0 +1,86 @@
+{
+  "ref": "api",
+  "dependencies": [
+    {
+      "ref": "ENGINE_V232",
+      "dependencies": [
+        {
+          "status": "GREEN",
+          "details": {
+            "responseTimeMs": 10
+          },
+          "dependencies": [
+          ],
+          "type": "ENGINE_HOST_PING",
+          "ref": "https://sfdc-cb-eng-stg-ore-232.herokuapp.com"
+        }
+      ],
+      "status": "GREEN",
+      "details": {
+      },
+      "type": "ENGINE_PING"
+    },
+    {
+      "ref": "ENGINE_V236",
+      "dependencies": [
+        {
+          "status": "GREEN",
+          "details": {
+            "responseTimeMs": 12
+          },
+          "dependencies": [
+          ],
+          "type": "ENGINE_HOST_PING",
+          "ref": "https://sfdc-cb-eng-stg-ore-236.herokuapp.com"
+        }
+      ],
+      "status": "GREEN",
+      "details": {
+      },
+      "type": "ENGINE_PING"
+    },
+    {
+      "ref": "ENGINE_V234",
+      "dependencies": [
+        {
+          "status": "GREEN",
+          "details": {
+            "responseTimeMs": 10
+          },
+          "dependencies": [
+          ],
+          "type": "ENGINE_HOST_PING",
+          "ref": "https://sfdc-cb-eng-stg-ore-234.herokuapp.com"
+        }
+      ],
+      "status": "GREEN",
+      "details": {
+      },
+      "type": "ENGINE_PING"
+    },
+    {
+      "ref": "CACHE_STORE",
+      "status": "GREEN",
+      "details": {
+        "responseTimeMs": 0
+      },
+      "dependencies": [
+      ],
+      "type": "CACHE_STORE_INFO"
+    },
+    {
+      "details": {
+        "responseTimeMs": 7
+      },
+      "status": "GREEN",
+      "dependencies": [
+      ],
+      "type": "AUTH_PING",
+      "ref": "AUTH_SERVICE"
+    }
+  ],
+  "status": "GREEN",
+  "details": {
+  },
+  "type": "API"
+}

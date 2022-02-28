@@ -1,0 +1,58 @@
+[
+  {
+    "name": "textVar",
+    "type": "text",
+    "value": "text_value"
+  },
+  {
+    "name": "dateTimeVar",
+    "type": "dateTime",
+    "value": "12/11/2020 00:00:00"
+  },
+  {
+    "name": "dateVar",
+    "type": "date",
+    "value": "12/11/2020"
+  },
+  {
+    "name": "boolVar",
+    "type": "boolean",
+    "value": true
+  },
+  {
+    "name": "boolVar",
+    "type": "money",
+    "value": "true"
+  },
+  {
+    "name": "moneyVar",
+    "type": "ref",
+    "value": "10$"
+  },
+  {
+    "name": "numVar",
+    "type": "number",
+    "value": 1
+  },
+  {
+    "name": "listVar",
+    "type": "list",
+    "value": [
+      {
+        "type": "ref",
+        "value": "1M5xx000000000BCAQ"
+      }
+    ]
+  },
+  {
+    "name": "objVar",
+    "type": "object",
+    "value": [
+      {
+        "name": "fullName",
+        "type": "text",
+        "value": "Matt Smith"
+      }
+    ]
+  }
+]

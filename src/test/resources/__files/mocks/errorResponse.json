@@ -1,0 +1,8 @@
+{
+  "error": "NullPointerException",
+  "message": "Something went wrong",
+  "path": "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages",
+  "requestId": "19c056ab-d909-49df-b976-65e56b6ab214",
+  "status": 500,
+  "timestamp": 1531245973799
+}

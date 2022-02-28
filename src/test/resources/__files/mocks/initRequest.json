@@ -1,0 +1,40 @@
+{
+  "botId": "0Xxxx0000000001CAA",
+  "externalSessionKey": "57904eb6-5352-4c5e-adf6-5f100572cf5d",
+  "forceConfig": {
+    "endpoint": "https://na44.stmfa.stm.salesforce.com:8443"
+  },
+  "messages": [
+    {
+      "referrers": [
+        {
+          "type": "Salesforce:Core:Bot:Id",
+          "value": "string"
+        }
+      ],
+      "sequenceId": 1,
+      "text": "string",
+      "type": "init",
+      "tz": "string",
+      "variables": [
+        {
+          "name": "isShipped",
+          "type": "boolean",
+          "value": true
+        }
+      ]
+    }
+  ],
+  "responseOptions": {
+    "metrics": true,
+    "variables": {
+      "filter": [
+        "OrderQty",
+        "OrderType"
+      ],
+      "include": true,
+      "onlyChanged": true
+    }
+  },
+  "sessionId": "57904eb6-5352-4c5e-adf6-5f100572cf5d"
+}

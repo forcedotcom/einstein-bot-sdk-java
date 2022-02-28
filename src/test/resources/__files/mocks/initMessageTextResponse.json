@@ -1,0 +1,19 @@
+{
+  "sessionId": "57904eb6-5352-4c5e-adf6-5f100572cf5d",
+  "botId": "0Xxxx0000000001CAA",
+  "orgId": "00Dxx0000006GbL",
+  "botVersion": "0X9xx0000000001CAA",
+  "processedSequenceIds": [
+    1
+  ],
+  "messages": [
+    {
+      "id": "a133c185-73a7-4adf-b6d9-b7fd62babb4e",
+      "type": "text",
+      "text": "Hello world! Mocked",
+      "schedule": {
+        "responseDelayMilliseconds": 1200
+      }
+    }
+  ]
+}
