@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * ChatbotResponseMessage - Base type to support polymorphic anyOf for RequestMessage. Uses Jackson
+ * AnyRequestMessage - Base type to support polymorphic anyOf for RequestMessage. Uses Jackson
  * annotations to resolve subclass type based on value of 'type' field.
  *
  * @author relango

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * ChatbotVariable - Base type to support polymorphic anyOf for Variables. Uses Jackson annotations
+ * AnyVariable - Base type to support polymorphic anyOf for Variables. Uses Jackson annotations
  * to resolve subclass type based on value of 'type' field.
  *
  * @author relango
