@@ -109,10 +109,10 @@
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <typeMappings>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage=AnyResponseMessage,ResponseEnvelopeMessagesOneOf=AnyResponseMessage,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage=AnyRequestMessage,RequestEnvelopeMessagesOneOf=AnyRequestMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage=AnyRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage=AnyResponseMessage
                             </typeMappings>
                             <languageSpecificPrimitives>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage,ResponseEnvelopeMessagesOneOf,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage,RequestEnvelopeMessagesOneOf=AnyRequestMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage
                             </languageSpecificPrimitives>
                             <library>webclient</library>
                         </configuration>

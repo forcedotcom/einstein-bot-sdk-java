@@ -17,7 +17,7 @@ import com.salesforce.einsteinbot.sdk.client.SessionManagedChatbotClient;
 import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessage;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.RequestEnvelopeMessagesOneOf;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import java.util.Arrays;
@@ -62,7 +62,7 @@ public class ChatbotClientExamples {
         .authMechanism(oAuth)
         .build();
 
-    RequestEnvelopeMessagesOneOf textMessage = buildInitMessage(Optional.of("Initial message"));
+    AnyRequestMessage textMessage = buildInitMessage(Optional.of("Initial message"));
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId,
         forceConfigEndPoint, Arrays.asList(textMessage));
     RequestHeaders headers = RequestHeaders.builder()
@@ -85,7 +85,7 @@ public class ChatbotClientExamples {
         .cache(new InMemoryCache(600))
         .build();
 
-    RequestEnvelopeMessagesOneOf textMessage = buildTextMessage("Initial message");
+    AnyRequestMessage textMessage = buildTextMessage("Initial message");
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId,
         forceConfigEndPoint, Arrays.asList(textMessage));
 
@@ -98,14 +98,14 @@ public class ChatbotClientExamples {
     System.out.println(resp);
   }
 
-  public static RequestEnvelopeMessagesOneOf buildTextMessage(String msg) {
+  public static AnyRequestMessage buildTextMessage(String msg) {
     return new TextMessage()
         .text(msg)
         .type(TextMessage.TypeEnum.TEXT)
         .sequenceId(System.currentTimeMillis());
   }
 
-  public static RequestEnvelopeMessagesOneOf buildInitMessage(Optional<String> msg) {
+  public static AnyRequestMessage buildInitMessage(Optional<String> msg) {
     return new InitMessage()
         .text(msg.orElse(""))
         .type(InitMessage.TypeEnum.INIT)
@@ -115,7 +115,7 @@ public class ChatbotClientExamples {
   public static RequestEnvelope buildRequestEnvelop(String sessionId,
       String orgId, String botId,
       String forceConfigEndPoint,
-      List<RequestEnvelopeMessagesOneOf> messages) {
+      List<AnyRequestMessage> messages) {
     return new RequestEnvelope()
         .externalSessionKey(sessionId)
         .botId(botId)

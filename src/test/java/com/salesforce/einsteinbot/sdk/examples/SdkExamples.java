@@ -14,7 +14,7 @@ import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.InitMessage;
 import com.salesforce.einsteinbot.sdk.model.Referrer;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.RequestEnvelopeMessagesOneOf;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.util.Arrays;
@@ -121,7 +121,7 @@ public class SdkExamples {
         .value("textVal");
     Referrer referrer = new Referrer().type(Referrer.TypeEnum.BOTRUNTIME_SESSION_ID)
         .value("session-id");
-    RequestEnvelopeMessagesOneOf message = new InitMessage()
+    AnyRequestMessage message = new InitMessage()
         .type(InitMessage.TypeEnum.INIT)
         .text("Hi")
         .sequenceId(1L)
