@@ -29,11 +29,11 @@
         <javax-annotation-version>1.3.2</javax-annotation-version>
         <spring-boot-starter-webflux-version>2.4.5</spring-boot-starter-webflux-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <module-openapi-codegen-version>4.3.2</module-openapi-codegen-version>
+        <einstein-bot-openapi-codegen-version>5.4.1</einstein-bot-openapi-codegen-version>
         <junit-jupiter-version>5.5.2</junit-jupiter-version>
         <spring-reactor-test-version>3.2.3.RELEASE</spring-reactor-test-version>
         <spring-reactor-core-version>3.4.5</spring-reactor-core-version>
-        <openapi-generator-version>4.3.1</openapi-generator-version>
+        <openapi-generator-version>5.4.0</openapi-generator-version>
         <runtime-api-spec-url>https://runtime-api-na-east.prod.chatbots.sfdc.sh/docs/specs/${api-spec-yaml-file}</runtime-api-spec-url>
         <api-spec-yaml-file>v4_0_0_api_specs.yml</api-spec-yaml-file>
     </properties>
@@ -105,14 +105,14 @@
                             <invokerPackage>${base-sdk-package}.handler</invokerPackage>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModelDocumentation>true</generateModelDocumentation>
-                            <generatorName>chatbot</generatorName>
+                            <generatorName>einsteinbot</generatorName>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <typeMappings>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,AnyOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,ResponseEnvelopeMessagesOneOf=AnyResponseMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage=AnyRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage=AnyResponseMessage
                             </typeMappings>
                             <languageSpecificPrimitives>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,AnyOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,ResponseEnvelopeMessagesOneOf
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage
                             </languageSpecificPrimitives>
                             <library>webclient</library>
                         </configuration>
@@ -120,9 +120,9 @@
                 </executions>
                <dependencies>
                     <dependency>
-                        <groupId>com.salesforce.chatbot</groupId>
-                        <artifactId>module-openapi-codegen</artifactId>
-                        <version>${module-openapi-codegen-version}</version>
+                        <groupId>com.salesforce.einsteinbot</groupId>
+                        <artifactId>einstein-bot-openapi-codegen-maven-plugin</artifactId>
+                        <version>${einstein-bot-openapi-codegen-version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

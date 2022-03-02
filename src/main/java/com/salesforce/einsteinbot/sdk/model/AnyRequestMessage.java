@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * AnyResponseMessage - Base type to support polymorphic anyOf for ResponseMessage. Uses Jackson
+ * AnyRequestMessage - Base type to support polymorphic anyOf for RequestMessage. Uses Jackson
  * annotations to resolve subclass type based on value of 'type' field.
  *
  * @author relango
@@ -18,13 +18,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = TextResponseMessage.class, name = "text"),
-    @JsonSubTypes.Type(value = ChoicesResponseMessage.class, name = "choices"),
-    @JsonSubTypes.Type(value = EscalateResponseMessage.class, name = "escalate"),
-    @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, name = "sessionEnded")
-})
-public interface AnyResponseMessage {
+public interface AnyRequestMessage {
 
-  Schedule getSchedule();
 }

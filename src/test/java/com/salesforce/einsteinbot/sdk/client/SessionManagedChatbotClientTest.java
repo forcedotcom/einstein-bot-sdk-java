@@ -22,7 +22,7 @@ import com.salesforce.einsteinbot.sdk.cache.Cache;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
 import com.salesforce.einsteinbot.sdk.model.InitMessage;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.RequestEnvelopeMessagesOneOf;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
@@ -140,7 +140,7 @@ public class SessionManagedChatbotClientTest {
   }
 
   private String getMessageText(RequestEnvelope sentRequest) {
-    RequestEnvelopeMessagesOneOf message = sentRequest.getMessages().get(0);
+    AnyRequestMessage message = sentRequest.getMessages().get(0);
     if (message instanceof InitMessage) {
       return ((InitMessage) message).getText();
     } else if (message instanceof TextMessage) {
@@ -152,7 +152,7 @@ public class SessionManagedChatbotClientTest {
   }
 
   private long getMessageSequenceId(RequestEnvelope sentRequest) {
-    RequestEnvelopeMessagesOneOf message = sentRequest.getMessages().get(0);
+    AnyRequestMessage message = sentRequest.getMessages().get(0);
     if (message instanceof InitMessage) {
       return ((InitMessage) message).getSequenceId();
     } else if (message instanceof TextMessage) {
