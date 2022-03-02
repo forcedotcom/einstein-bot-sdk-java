@@ -17,7 +17,7 @@ import com.salesforce.einsteinbot.sdk.model.InitMessage;
 import com.salesforce.einsteinbot.sdk.model.InitMessage.TypeEnum;
 import com.salesforce.einsteinbot.sdk.model.RedirectMessage;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.RequestEnvelopeMessagesOneOf;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
@@ -66,7 +66,7 @@ public class SessionManagedChatbotClient implements ChatbotClient {
 
   private void addSequenceIds(RequestEnvelope requestEnvelope) {
     Long sequenceId = System.currentTimeMillis();
-    for (RequestEnvelopeMessagesOneOf message : requestEnvelope.getMessages()) {
+    for (AnyRequestMessage message : requestEnvelope.getMessages()) {
       if (message instanceof ChoiceMessage) {
         ChoiceMessage choiceMessage = (ChoiceMessage) message;
         choiceMessage.setSequenceId(sequenceId);
@@ -110,7 +110,7 @@ public class SessionManagedChatbotClient implements ChatbotClient {
         requestEnvelope.getMessages() != null && !requestEnvelope.getMessages().isEmpty(),
         "No messages found in requestEnvelope");
 
-    RequestEnvelopeMessagesOneOf firstMessage = requestEnvelope.getMessages().get(0);
+    AnyRequestMessage firstMessage = requestEnvelope.getMessages().get(0);
 
     InitMessage initMessage;
     if (firstMessage instanceof InitMessage) {
