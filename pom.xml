@@ -441,7 +441,7 @@
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
                             </gpgArguments>
-                            <keyname>${gpg.keyname}</keyname>
+                            <keyname>0xA102B34F</keyname>
                         </configuration>
                         <executions>
                             <execution>
