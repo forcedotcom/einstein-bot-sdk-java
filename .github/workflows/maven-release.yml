@@ -1,24 +1,35 @@
-# This workflow will build a package using Maven and then publish it to maven snapshots
+# This workflow will build a package using Maven and then publish it to maven cnetral
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
 
-name: Maven Publish Snapshot
+name: Maven Release
 
 on:
-  push:
-    tags:
-      - 'v*' # Push events to matching v*
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release-body:
+        description: 'Text describing the contents of the release.'
+        required: false
+        default: ''
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     environment: Maven
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v2
+        with: # running setup-java again overwrites the settings.xml
+          distribution: 'zulu'
+          java-version: '11'
+          server-id: ossrh
+          server-username: MAVEN_CENTRAL_USER # env variable for username in deploy
+          server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
+          settings-path: ${{ github.workspace }}/generated-settings
       - name: Import GPG Key
         uses: crazy-max/ghaction-import-gpg@v4
         with:
@@ -28,23 +39,35 @@ jobs:
           git_commit_gpgsign: true
           git_tag_gpgsign: true
           git_push_gpgsign: false
-      - name: Set up Apache Maven Central
-        uses: actions/setup-java@v2
-        with: # running setup-java again overwrites the settings.xml
-          distribution: 'zulu'
-          java-version: '11'
-          server-username: MAVEN_CENTRAL_USER # env variable for username in deploy
-          server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
-          settings-path: ${{ github.workspace }}/generated-settings
       - name: Cache local Maven repository
         uses: actions/cache@v2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
-      - name: Release to Apache Maven Central
-        run: mvn deploy -B -P sign-artifacts -s $GITHUB_WORKSPACE/maven-settings.xml
+      - name: Prepare Release
+        id: release
+        run: >
+          mvn -V -gs $GITHUB_WORKSPACE/generated-settings/settings.xml -B -P sign-artifacts,releases -e release:clean release:prepare &&
+          echo "::set-output name=RELEASED_VERSION::$(grep scm.tag= release.properties | cut -d'=' -f2 | cut -c2-)"
         env:
-          MAVEN_CENTRAL_USER:   ${{ secrets.MAVEN_CENTRAL_USER   }}
-          MAVEN_CENTRAL_TOKEN:  ${{ secrets.MAVEN_CENTRAL_TOKEN  }}
+          MAVEN_CENTRAL_USER: ${{ secrets.MAVEN_CENTRAL_USER }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Perform Release
+        run: >
+          mvn -gs $GITHUB_WORKSPACE/generated-settings/settings.xml -B -P sign-artifacts,releases -e release:perform
+        env:
+          MAVEN_CENTRAL_USER: ${{ secrets.MAVEN_CENTRAL_USER }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release Entry
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.release.outputs.RELEASED_VERSION }}
+          release_name: Einstein Bot SDK Java ${{ steps.release.outputs.RELEASED_VERSION }}
+          body: ${{ github.event.inputs.release-body }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
