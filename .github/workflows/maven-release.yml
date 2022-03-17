@@ -1,0 +1,50 @@
+# This workflow will build a package using Maven and then publish it to maven snapshots
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+name: Maven Publish Snapshot
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Maven
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Import GPG Key
+        uses: crazy-max/ghaction-import-gpg@v4
+        with:
+          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_tag_gpgsign: true
+          git_push_gpgsign: false
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v2
+        with: # running setup-java again overwrites the settings.xml
+          distribution: 'zulu'
+          java-version: '11'
+          server-username: MAVEN_CENTRAL_USER # env variable for username in deploy
+          server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
+          settings-path: ${{ github.workspace }}/generated-settings
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Release to Apache Maven Central
+        run: mvn deploy -B -P sign-artifacts -s $GITHUB_WORKSPACE/maven-settings.xml
+        env:
+          MAVEN_CENTRAL_USER:   ${{ secrets.MAVEN_CENTRAL_USER   }}
+          MAVEN_CENTRAL_TOKEN:  ${{ secrets.MAVEN_CENTRAL_TOKEN  }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}

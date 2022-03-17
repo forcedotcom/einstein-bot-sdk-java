@@ -25,4 +25,5 @@ target
 .idea
 build
 certs/
+generated-settings/
 
