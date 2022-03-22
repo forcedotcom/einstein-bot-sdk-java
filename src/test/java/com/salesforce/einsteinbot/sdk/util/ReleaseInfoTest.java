@@ -7,6 +7,7 @@
 
 package com.salesforce.einsteinbot.sdk.util;
 
+import com.salesforce.einsteinbot.sdk.utils.TestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,12 +17,10 @@ import org.junit.Test;
  */
 public class ReleaseInfoTest {
 
-  private static final String EXPECTED_SDK_NAME = "einstein-bot-sdk-java";
-
   @Test
   public void testReleaseInfoProperties(){
     ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
-    Assert.assertEquals(EXPECTED_SDK_NAME, releaseInfo.getSdkName());
+    Assert.assertEquals(TestUtils.EXPECTED_SDK_NAME, releaseInfo.getSdkName());
     Assert.assertNotNull(releaseInfo.getSdkVersion());
   }
 
@@ -29,6 +28,6 @@ public class ReleaseInfoTest {
   public void testUserAgent(){
     ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
     String version = releaseInfo.getSdkVersion();
-    Assert.assertEquals(EXPECTED_SDK_NAME + "/" + version, releaseInfo.getAsUserAgent());
+    Assert.assertEquals(TestUtils.EXPECTED_SDK_NAME + "/" + version, releaseInfo.getAsUserAgent());
   }
 }
