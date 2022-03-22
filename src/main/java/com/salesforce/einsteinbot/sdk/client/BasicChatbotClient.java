@@ -21,6 +21,7 @@ import com.salesforce.einsteinbot.sdk.model.Error;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
+import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -42,6 +43,7 @@ public class BasicChatbotClient implements ChatbotClient {
   protected MessagesApi messagesApi;
   protected ApiClient apiClient;
   protected AuthMechanism authMechanism;
+  protected ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
 
   protected BasicChatbotClient(String basePath,
       AuthMechanism authMechanism,
@@ -52,6 +54,7 @@ public class BasicChatbotClient implements ChatbotClient {
         ClientBuilderUtil
             .createDefaultDateFormat());
     apiClient.setBasePath(basePath);
+    apiClient.setUserAgent(releaseInfo.getAsUserAgent());
     messagesApi = new MessagesApi(apiClient);
   }
 

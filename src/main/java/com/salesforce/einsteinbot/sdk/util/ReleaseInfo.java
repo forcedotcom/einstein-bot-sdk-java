@@ -62,7 +62,7 @@ public class ReleaseInfo {
 
     if (inputStream == null) {
       throw new FileNotFoundException(
-          "Missing Release Info Properties file : " + RELEASE_INFO_PROPERTIES_FILE);
+          "Missing Release Info Properties file : " + RELEASE_INFO_PROPERTIES_FILE + " in classpath.") ;
     }
 
     return inputStream;
@@ -79,5 +79,9 @@ public class ReleaseInfo {
 
   public String getSdkVersion() {
     return sdkVersion;
+  }
+
+  public String getAsUserAgent(){
+    return String.format("%s/%s", sdkName, sdkVersion);
   }
 }

@@ -16,10 +16,19 @@ import org.junit.Test;
  */
 public class ReleaseInfoTest {
 
+  private static final String EXPECTED_SDK_NAME = "Einstein-Bot-Sdk-Java";
+
   @Test
   public void testReleaseInfoProperties(){
     ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
-    Assert.assertEquals("Einstein-Bot-Sdk-Java", releaseInfo.getSdkName());
+    Assert.assertEquals(EXPECTED_SDK_NAME, releaseInfo.getSdkName());
     Assert.assertNotNull(releaseInfo.getSdkVersion());
+  }
+
+  @Test
+  public void testUserAgent(){
+    ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
+    String version = releaseInfo.getSdkVersion();
+    Assert.assertEquals(EXPECTED_SDK_NAME + "/" + version, releaseInfo.getAsUserAgent());
   }
 }
