@@ -13,7 +13,7 @@
     <artifactId>einstein-bot-sdk-java</artifactId>
     <version>1.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>einstein-bot-sdk-java</name>
+    <name>Einstein-Bot-Sdk-Java</name>
     <description>Java SDK to interact with Einstein Bots Runtime.
         This SDK is a wrapper around the Einstein Bots Runtime API that provides a few added features out of the box like Auth support, Session management
     </description>
@@ -83,6 +83,15 @@
     </distributionManagement>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!-- The Runtime Spec uses additionalProperties: true to be able to use schema between internal and public,
             But open api code generator uses HashMap if additionalProperties is true and uses statically declared getters & setters doesn't work
