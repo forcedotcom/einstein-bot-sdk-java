@@ -13,7 +13,7 @@
     <artifactId>einstein-bot-sdk-java</artifactId>
     <version>1.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Einstein-Bot-Sdk-Java</name>
+    <name>einstein-bot-sdk-java</name>
     <description>Java SDK to interact with Einstein Bots Runtime.
         This SDK is a wrapper around the Einstein Bots Runtime API that provides a few added features out of the box like Auth support, Session management
     </description>

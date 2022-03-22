@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 public class ReleaseInfoTest {
 
-  private static final String EXPECTED_SDK_NAME = "Einstein-Bot-Sdk-Java";
+  private static final String EXPECTED_SDK_NAME = "einstein-bot-sdk-java";
 
   @Test
   public void testReleaseInfoProperties(){
