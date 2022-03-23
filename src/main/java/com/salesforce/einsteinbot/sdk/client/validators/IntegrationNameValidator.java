@@ -12,11 +12,7 @@ public class IntegrationNameValidator {
   private static final int MAX_LENGTH = 128;
 
   public static void validateIntegrationName(String name) {
-    if (name == null) {
-      throw new IllegalArgumentException("Integration name cannot be null");
-    }
-
-    if (name.length() > MAX_LENGTH) {
+    if (name != null && name.length() > MAX_LENGTH) {
       throw new IllegalArgumentException("Integration name exceeds max length");
     }
   }
