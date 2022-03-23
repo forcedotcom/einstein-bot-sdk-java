@@ -39,37 +39,21 @@ public class UtilFunctions {
     List<AnyVariable> contextVariables = currentContextVariables == null ? new ArrayList<>()
         : new ArrayList<>(currentContextVariables);
 
-    integrationNameOptional.ifPresent( integrationName -> {
-      boolean integrationTypeFound = false;
-      boolean integrationNameFound = false;
-      boolean integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
+    contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API));
 
-      Iterator<AnyVariable> iterator = contextVariables.iterator();
+    if (integrationNameOptional.isPresent() && !isIntegrationNameFoundInContextVariables(contextVariables)){
+      contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME,
+          integrationNameOptional.get()));
+    }
 
-      while (iterator.hasNext() && !integrationTypeAndNameFound) {
-
-        AnyVariable contextVariable = iterator.next();
-
-        integrationTypeFound = integrationTypeFound || isIntegrationTypeVariable(contextVariable);
-        integrationNameFound = integrationNameFound || isIntegrationNameVariable(contextVariable);
-
-        integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
-      }
-
-      if (!integrationTypeFound){
-        contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API));
-      }
-
-      if (!integrationNameFound) {
-        contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, integrationName));
-      }
-    });
     return contextVariables;
   }
 
-  private static boolean isIntegrationTypeVariable(AnyVariable contextVariable) {
-    return contextVariable.getName()
-        .equals(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE);
+  private static boolean isIntegrationNameFoundInContextVariables(List<AnyVariable> contextVariables) {
+    return contextVariables
+        .stream().filter(UtilFunctions::isIntegrationNameVariable)
+        .findFirst()
+        .isPresent();
   }
 
   private static boolean isIntegrationNameVariable(AnyVariable contextVariable) {

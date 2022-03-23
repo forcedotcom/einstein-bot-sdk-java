@@ -59,20 +59,6 @@ public class UtilFunctionsTest {
   }
 
   @Test
-  public void testDoNotAddIntegrationTypeIfPresent() {
-
-    AnyVariable myIntegrationTypeVariable = createTextVariable(
-        CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, "MyAPI");
-
-    List<AnyVariable> currentContextVariables = Arrays.asList(myIntegrationTypeVariable);
-    List<AnyVariable> newContextVariables = addIntegrationTypeAndNameToContextVariables(
-        currentContextVariables, Optional.of(testIntegrationName));
-
-    assertThat(newContextVariables,
-        contains(myIntegrationTypeVariable, expectedIntegrationNameVar));
-  }
-
-  @Test
   public void testDoNotAddIntegrationNameIfPresent() {
 
     AnyVariable myIntegrationNameVariable = createTextVariable(
@@ -86,28 +72,12 @@ public class UtilFunctionsTest {
   }
 
   @Test
-  public void testDoNotAddIntegrationNameAndIntegrationTypeIfPresent() {
-
-    AnyVariable myIntegrationTypeVariable = createTextVariable(
-        CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, "MyAPI");
-    AnyVariable myIntegrationNameVariable = createTextVariable(
-        CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, "MyIntegrationName");
-
-    List<AnyVariable> currentContextVariables = Arrays
-        .asList(myIntegrationTypeVariable, myIntegrationNameVariable);
-    List<AnyVariable> newContextVariables = addIntegrationTypeAndNameToContextVariables(
-        currentContextVariables, Optional.of(testIntegrationName));
-
-    assertThat(newContextVariables, contains(myIntegrationTypeVariable, myIntegrationNameVariable));
-  }
-
-  @Test
   public void testDoNotAddIntegrationNameIfGivenIsEmpty() {
 
     List<AnyVariable> currentContextVariables = new ArrayList<>();
     List<AnyVariable> newContextVariables = addIntegrationTypeAndNameToContextVariables(
         currentContextVariables, Optional.empty());
 
-    assertTrue(newContextVariables.isEmpty());
+    assertThat(newContextVariables, contains(expectedIntegrationType));
   }
 }
