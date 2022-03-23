@@ -14,6 +14,7 @@ import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.createTextVariab
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -228,22 +229,20 @@ public class SessionManagedChatbotClientTest {
 
   @Test
   public void invalidIntegrationNames() {
-    assertThrows(IllegalArgumentException.class, () -> {
+    assertNotNull(
       SessionManagedChatbotClient.builder()
           .basicClient(chatbotClient)
           .cache(cache)
           .integrationName(null)
-          .build();
-    });
+          .build()
+    );
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      SessionManagedChatbotClient.builder()
-          .basicClient(chatbotClient)
-          .cache(cache)
-          .integrationName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
-              + "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
-          .build();
-    });
+    assertThrows(IllegalArgumentException.class, () -> SessionManagedChatbotClient.builder()
+        .basicClient(chatbotClient)
+        .cache(cache)
+        .integrationName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+            + "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
+        .build());
   }
 
   /*@Test

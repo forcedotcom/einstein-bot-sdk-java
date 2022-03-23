@@ -157,7 +157,7 @@ public class SessionManagedChatbotClient implements ChatbotClient {
       CacheBuilder, Builder {
 
     private ChatbotClient basicClient;
-    private Optional<String> integrationName;
+    private Optional<String> integrationName = Optional.empty();
     private Cache cache;
 
     FluentBuilder() {
@@ -170,7 +170,7 @@ public class SessionManagedChatbotClient implements ChatbotClient {
 
     public FluentBuilder integrationName(String integrationName) {
       IntegrationNameValidator.validateIntegrationName(integrationName);
-      this.integrationName = Optional.of(integrationName);
+      this.integrationName = Optional.ofNullable(integrationName);
       return this;
     }
 
