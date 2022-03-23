@@ -14,9 +14,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static com.salesforce.einsteinbot.sdk.utils.TestUtils.EXPECTED_SDK_NAME;
-import static com.salesforce.einsteinbot.sdk.utils.TestUtils.TEST_MOCK_DIR;
-import static com.salesforce.einsteinbot.sdk.utils.TestUtils.readTestFileAsString;
+import static com.salesforce.einsteinbot.sdk.util.TestUtils.EXPECTED_SDK_NAME;
+import static com.salesforce.einsteinbot.sdk.util.TestUtils.TEST_MOCK_DIR;
+import static com.salesforce.einsteinbot.sdk.util.TestUtils.readTestFileAsString;
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

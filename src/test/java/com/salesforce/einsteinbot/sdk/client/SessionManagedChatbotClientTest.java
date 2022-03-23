@@ -264,19 +264,18 @@ public class SessionManagedChatbotClientTest {
   }*/
 
   private void addTextMessageToRequest() {
-    TextMessage textMessage = new TextMessage();
-    textMessage.setText("Hello");
-    textMessage.setType(TextMessage.TypeEnum.TEXT);
-    textMessage.setSequenceId(0L);
+    TextMessage textMessage = new TextMessage()
+        .text("Hello")
+        .type(TextMessage.TypeEnum.TEXT)
+        .sequenceId(0l);
 
     requestEnvelope.getMessages().add(textMessage);
   }
 
   private void addChoiceMessageToRequest() {
-    ChoiceMessage choiceMessage = new ChoiceMessage();
-    choiceMessage.setType(ChoiceMessage.TypeEnum.CHOICE);
-    choiceMessage.setChoiceId("1");
-    choiceMessage.setSequenceId(0L);
+    ChoiceMessage choiceMessage = new ChoiceMessage()
+        .type(ChoiceMessage.TypeEnum.CHOICE)
+        .choiceId("1").sequenceId(0L);
 
     requestEnvelope.getMessages().add(choiceMessage);
   }

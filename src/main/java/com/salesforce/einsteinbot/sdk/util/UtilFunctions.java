@@ -50,8 +50,8 @@ public class UtilFunctions {
 
         AnyVariable contextVariable = iterator.next();
 
-        integrationTypeFound = isIntegrationTypeVariable(contextVariable);
-        integrationNameFound = isIntegrationNameVariable(contextVariable);
+        integrationTypeFound = integrationTypeFound || isIntegrationTypeVariable(contextVariable);
+        integrationNameFound = integrationNameFound || isIntegrationNameVariable(contextVariable);
 
         integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
       }

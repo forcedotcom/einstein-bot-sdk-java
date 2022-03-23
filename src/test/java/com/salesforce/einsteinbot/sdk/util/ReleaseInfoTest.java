@@ -7,7 +7,6 @@
 
 package com.salesforce.einsteinbot.sdk.util;
 
-import com.salesforce.einsteinbot.sdk.utils.TestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
