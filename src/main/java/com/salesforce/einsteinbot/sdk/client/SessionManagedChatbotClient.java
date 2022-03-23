@@ -7,25 +7,22 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.addIntegrationTypeAndNameToContextVariables;
+
 import com.google.common.base.Preconditions;
 import com.salesforce.einsteinbot.sdk.cache.Cache;
 import com.salesforce.einsteinbot.sdk.client.validators.IntegrationNameValidator;
-import com.salesforce.einsteinbot.sdk.model.AnyVariable;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
 import com.salesforce.einsteinbot.sdk.model.EndSessionMessage;
 import com.salesforce.einsteinbot.sdk.model.InitMessage;
 import com.salesforce.einsteinbot.sdk.model.InitMessage.TypeEnum;
 import com.salesforce.einsteinbot.sdk.model.RedirectMessage;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
-import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import com.salesforce.einsteinbot.sdk.model.TransferFailedRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.TransferSucceededRequestMessage;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,17 +34,13 @@ import java.util.Optional;
  */
 public class SessionManagedChatbotClient implements ChatbotClient {
 
-  public static final String CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE = "$Context.IntegrationType";
-  public static final String CONTEXT_VARIABLE_NAME_INTEGRATION_NAME = "$Context.IntegrationName";
-  public static final String CONTEXT_VARIABLE_VALUE_API = "API";
   private ChatbotClient basicClient;
   private Cache cache;
-  private String integrationName;
+  private Optional<String> integrationName;
 
   private SessionManagedChatbotClient(ChatbotClient chatbotClient,
-      String integrationName,
+      Optional<String> integrationName,
       Cache cache) {
-    IntegrationNameValidator.validateIntegrationName(integrationName);
 
     basicClient = chatbotClient;
     this.cache = cache;
@@ -126,51 +119,16 @@ public class SessionManagedChatbotClient implements ChatbotClient {
           .type(TypeEnum.INIT);
     } else {
       throw new IllegalArgumentException(
-          "Message needs to be of type TextMessage to create a new session. But received : " + firstMessage.getClass());
+          "Message needs to be of type TextMessage to create a new session. But received : "
+              + firstMessage.getClass());
     }
 
-
-    List<AnyVariable> contextVariables = addIntegrationTypeAndNameToContextVariables(initMessage.getVariables());
-
-    initMessage.setVariables(contextVariables);
+    initMessage.setVariables(
+        addIntegrationTypeAndNameToContextVariables(initMessage.getVariables(), integrationName));
 
     //replace first message with init message
     requestEnvelope.getMessages().set(0, initMessage);
 
-  }
-
-  private List<AnyVariable> addIntegrationTypeAndNameToContextVariables(List<AnyVariable> currentContextVariables) {
-
-    List<AnyVariable> contextVariables = currentContextVariables == null ? new ArrayList<>()
-        : new ArrayList<>(currentContextVariables);
-
-    boolean integrationTypeFound = false;
-    boolean integrationNameFound = false;
-    boolean integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
-
-    Iterator<AnyVariable> iterator = contextVariables.iterator();
-    while (iterator.hasNext() && !integrationTypeAndNameFound) {
-      AnyVariable contextVariable = iterator.next();
-      integrationTypeFound = contextVariable.getName().equals(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE);
-      integrationNameFound = contextVariable.getName().equals(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME);
-      integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
-    }
-
-    if (!integrationTypeFound){
-      contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API));
-    }
-
-    if (!integrationNameFound) {
-      contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, integrationName));
-    }
-    return contextVariables;
-  }
-
-  private TextVariable createTextVariable(String name, String value) {
-    return new TextVariable()
-        .name(name)
-        .type(TextVariable.TypeEnum.TEXT)
-        .value(value);
   }
 
   private String getCacheKey(RequestEnvelope request, RequestHeaders requestHeaders) {
@@ -195,11 +153,11 @@ public class SessionManagedChatbotClient implements ChatbotClient {
   /**
    * FluentBuilder provides Fluent API to create Session Managed Chatbot Client.
    */
-  public static class FluentBuilder implements BasicClientBuilder, IntegrationNameBuilder,
+  public static class FluentBuilder implements BasicClientBuilder,
       CacheBuilder, Builder {
 
     private ChatbotClient basicClient;
-    private String integrationName;
+    private Optional<String> integrationName;
     private Cache cache;
 
     FluentBuilder() {
@@ -211,7 +169,8 @@ public class SessionManagedChatbotClient implements ChatbotClient {
     }
 
     public FluentBuilder integrationName(String integrationName) {
-      this.integrationName = integrationName;
+      IntegrationNameValidator.validateIntegrationName(integrationName);
+      this.integrationName = Optional.of(integrationName);
       return this;
     }
 
@@ -223,8 +182,6 @@ public class SessionManagedChatbotClient implements ChatbotClient {
     public SessionManagedChatbotClient build() {
       String errorMessageTemplate = "Please provide non-null value for %s ";
       Objects.requireNonNull(basicClient, () -> String.format(errorMessageTemplate, "basicClient"));
-      Objects.requireNonNull(integrationName,
-          () -> String.format(errorMessageTemplate, "integrationName"));
       Objects.requireNonNull(cache, () -> String.format(errorMessageTemplate, "cache"));
       return new SessionManagedChatbotClient(this.basicClient, this.integrationName, this.cache);
     }
@@ -233,12 +190,7 @@ public class SessionManagedChatbotClient implements ChatbotClient {
 
   public interface BasicClientBuilder {
 
-    SessionManagedChatbotClient.IntegrationNameBuilder basicClient(ChatbotClient basicClient);
-  }
-
-  public interface IntegrationNameBuilder {
-
-    SessionManagedChatbotClient.CacheBuilder integrationName(String integrationName);
+    SessionManagedChatbotClient.CacheBuilder basicClient(ChatbotClient basicClient);
   }
 
   public interface CacheBuilder {
@@ -248,6 +200,7 @@ public class SessionManagedChatbotClient implements ChatbotClient {
 
   public interface Builder {
 
+    SessionManagedChatbotClient.Builder integrationName(String integrationName);
     SessionManagedChatbotClient build();
   }
 

@@ -84,8 +84,8 @@ public class ChatbotClientExamples {
             .basePath(basePath)
             .authMechanism(oAuth)
             .build())
-        .integrationName(integrationName)
         .cache(new InMemoryCache(600))
+        .integrationName(integrationName)
         .build();
 
     AnyRequestMessage textMessage = buildTextMessage("Initial message");

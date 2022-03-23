@@ -7,6 +7,10 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_NAME;
+import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE;
+import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_VALUE_API;
+import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.createTextVariable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,14 +84,10 @@ public class SessionManagedChatbotClientTest {
         .orgId(orgId)
         .build();
 
-  /*  basicClient = BasicChatbotClient.builder()
-        .basePath(basePath)
-        .authMechanism(authMechanism).build();*/
-
     sessionManagedClient = SessionManagedChatbotClient.builder()
         .basicClient(chatbotClient)
-        .integrationName(integrationName)
         .cache(cache)
+        .integrationName(integrationName)
         .build();
   }
 
@@ -108,15 +108,8 @@ public class SessionManagedChatbotClientTest {
     RequestEnvelope sentRequest = requestCaptor.getValue();
     verifySentRequestAndHeader(sentRequest, headerCaptor.getValue(), InitMessage.class);
 
-    TextVariable integrationType = new TextVariable();
-    integrationType.setName("$Context.IntegrationType");
-    integrationType.setType(TextVariable.TypeEnum.TEXT);
-    integrationType.setValue("API");
-
-    TextVariable integrationNameVar = new TextVariable();
-    integrationNameVar.setName("$Context.IntegrationName");
-    integrationNameVar.setType(TextVariable.TypeEnum.TEXT);
-    integrationNameVar.setValue(integrationName);
+    TextVariable integrationType = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API);
+    TextVariable integrationNameVar = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, integrationName);
 
     assertThat(((InitMessage) sentRequest.getMessages().get(0)).getVariables(),
         contains(integrationType, integrationNameVar));
@@ -235,20 +228,20 @@ public class SessionManagedChatbotClientTest {
 
   @Test
   public void invalidIntegrationNames() {
-    assertThrows(NullPointerException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       SessionManagedChatbotClient.builder()
           .basicClient(chatbotClient)
-          .integrationName(null)
           .cache(cache)
+          .integrationName(null)
           .build();
     });
 
     assertThrows(IllegalArgumentException.class, () -> {
       SessionManagedChatbotClient.builder()
           .basicClient(chatbotClient)
+          .cache(cache)
           .integrationName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
               + "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
-          .cache(cache)
           .build();
     });
   }
