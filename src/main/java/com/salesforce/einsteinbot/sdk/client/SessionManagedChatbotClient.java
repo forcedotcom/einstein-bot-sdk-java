@@ -24,6 +24,7 @@ import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import com.salesforce.einsteinbot.sdk.model.TransferFailedRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.TransferSucceededRequestMessage;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,6 +37,9 @@ import java.util.Optional;
  */
 public class SessionManagedChatbotClient implements ChatbotClient {
 
+  public static final String CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE = "$Context.IntegrationType";
+  public static final String CONTEXT_VARIABLE_NAME_INTEGRATION_NAME = "$Context.IntegrationName";
+  public static final String CONTEXT_VARIABLE_VALUE_API = "API";
   private ChatbotClient basicClient;
   private Cache cache;
   private String integrationName;
@@ -117,34 +121,56 @@ public class SessionManagedChatbotClient implements ChatbotClient {
       initMessage = (InitMessage) firstMessage;
     } else if (firstMessage instanceof TextMessage) {
       TextMessage firstTextMessage = (TextMessage) firstMessage;
-      initMessage = new InitMessage();
-      initMessage.setText(firstTextMessage.getText());
-      initMessage.setType(TypeEnum.INIT);
+      initMessage = new InitMessage()
+          .text(firstTextMessage.getText())
+          .type(TypeEnum.INIT);
     } else {
       throw new IllegalArgumentException(
-          "Message needs to be of type TextMessage to create a new session.");
+          "Message needs to be of type TextMessage to create a new session. But received : " + firstMessage.getClass());
     }
 
-    TextVariable integrationType = new TextVariable();
-    integrationType.setName("$Context.IntegrationType");
-    integrationType.setType(TextVariable.TypeEnum.TEXT);
-    integrationType.setValue("API");
 
-    TextVariable integrationNameVar = new TextVariable();
-    integrationNameVar.setName("$Context.IntegrationName");
-    integrationNameVar.setType(TextVariable.TypeEnum.TEXT);
-    integrationNameVar.setValue(integrationName);
+    List<AnyVariable> contextVariables = addIntegrationTypeAndNameToContextVariables(initMessage.getVariables());
 
-    List<AnyVariable> currentContextVariables = initMessage.getVariables();
-    List<AnyVariable> contextVariables = currentContextVariables == null ? new ArrayList<>()
-        : new ArrayList<>(currentContextVariables);
-    contextVariables.add(integrationType);
-    contextVariables.add(integrationNameVar);
     initMessage.setVariables(contextVariables);
 
     //replace first message with init message
     requestEnvelope.getMessages().set(0, initMessage);
 
+  }
+
+  private List<AnyVariable> addIntegrationTypeAndNameToContextVariables(List<AnyVariable> currentContextVariables) {
+
+    List<AnyVariable> contextVariables = currentContextVariables == null ? new ArrayList<>()
+        : new ArrayList<>(currentContextVariables);
+
+    boolean integrationTypeFound = false;
+    boolean integrationNameFound = false;
+    boolean integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
+
+    Iterator<AnyVariable> iterator = contextVariables.iterator();
+    while (iterator.hasNext() && !integrationTypeAndNameFound) {
+      AnyVariable contextVariable = iterator.next();
+      integrationTypeFound = contextVariable.getName().equals(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE);
+      integrationNameFound = contextVariable.getName().equals(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME);
+      integrationTypeAndNameFound = integrationTypeFound && integrationNameFound;
+    }
+
+    if (!integrationTypeFound){
+      contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API));
+    }
+
+    if (!integrationNameFound) {
+      contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, integrationName));
+    }
+    return contextVariables;
+  }
+
+  private TextVariable createTextVariable(String name, String value) {
+    return new TextVariable()
+        .name(name)
+        .type(TextVariable.TypeEnum.TEXT)
+        .value(value);
   }
 
   private String getCacheKey(RequestEnvelope request, RequestHeaders requestHeaders) {

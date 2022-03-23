@@ -30,5 +30,5 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = RefVariable.class, name = "ref")
 })
 public interface AnyVariable {
-
+  String getName();
 }
