@@ -83,6 +83,15 @@
     </distributionManagement>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!-- The Runtime Spec uses additionalProperties: true to be able to use schema between internal and public,
             But open api code generator uses HashMap if additionalProperties is true and uses statically declared getters & setters doesn't work
