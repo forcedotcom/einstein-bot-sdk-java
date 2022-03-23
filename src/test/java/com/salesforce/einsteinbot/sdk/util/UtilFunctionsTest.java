@@ -68,7 +68,7 @@ public class UtilFunctionsTest {
     List<AnyVariable> newContextVariables = addIntegrationTypeAndNameToContextVariables(
         currentContextVariables, Optional.of(testIntegrationName));
 
-    assertThat(newContextVariables, contains(myIntegrationNameVariable, expectedIntegrationType));
+    assertThat(newContextVariables, contains(myIntegrationNameVariable));
   }
 
   @Test
@@ -78,6 +78,6 @@ public class UtilFunctionsTest {
     List<AnyVariable> newContextVariables = addIntegrationTypeAndNameToContextVariables(
         currentContextVariables, Optional.empty());
 
-    assertThat(newContextVariables, contains(expectedIntegrationType));
+    assertTrue(newContextVariables.isEmpty());
   }
 }

@@ -14,12 +14,12 @@ import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_VAL
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * UtilFunctions - Contains static utility functions used in Application
+ *
  * @author relango
  */
 public class UtilFunctions {
@@ -31,17 +31,27 @@ public class UtilFunctions {
         .value(value);
   }
 
-  /* todo: Add unit test
+
+  /**
+   * Adds IntegrationType and IntegrationName context variables to given ContextVariables only if
+   * integrationNameOptional is present and IntegrationName Context Variable doesn't already exist
+   * in given currentContextVariables.
+   *
+   * @param currentContextVariables
+   * @param integrationNameOptional
+   * @return
    */
-  public static List<AnyVariable> addIntegrationTypeAndNameToContextVariables(List<AnyVariable> currentContextVariables,
+  public static List<AnyVariable> addIntegrationTypeAndNameToContextVariables(
+      List<AnyVariable> currentContextVariables,
       Optional<String> integrationNameOptional) {
 
     List<AnyVariable> contextVariables = currentContextVariables == null ? new ArrayList<>()
         : new ArrayList<>(currentContextVariables);
 
-    contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API));
-
-    if (integrationNameOptional.isPresent() && !isIntegrationNameFoundInContextVariables(contextVariables)){
+    if (integrationNameOptional.isPresent() && !isIntegrationNameFoundInContextVariables(
+        contextVariables)) {
+      contextVariables.add(
+          createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API));
       contextVariables.add(createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME,
           integrationNameOptional.get()));
     }
@@ -49,9 +59,11 @@ public class UtilFunctions {
     return contextVariables;
   }
 
-  private static boolean isIntegrationNameFoundInContextVariables(List<AnyVariable> contextVariables) {
+  private static boolean isIntegrationNameFoundInContextVariables(
+      List<AnyVariable> contextVariables) {
     return contextVariables
-        .stream().filter(UtilFunctions::isIntegrationNameVariable)
+        .stream()
+        .filter(UtilFunctions::isIntegrationNameVariable)
         .findFirst()
         .isPresent();
   }
