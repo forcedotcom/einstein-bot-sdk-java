@@ -18,6 +18,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
+
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = InitMessage.class, name = "init"),
+    @JsonSubTypes.Type(value = TextMessage.class, name = "text"),
+    @JsonSubTypes.Type(value = ChoiceMessage.class, name = "choice"),
+    @JsonSubTypes.Type(value = RedirectMessage.class, name = "redirect"),
+    @JsonSubTypes.Type(value = TransferSucceededRequestMessage.class, name = "transferSucceeded"),
+    @JsonSubTypes.Type(value = TransferFailedRequestMessage.class, name = "transferFailed"),
+    @JsonSubTypes.Type(value = EndSessionMessage.class, name = "endSession"),
+})
 public interface AnyRequestMessage {
 
 }
