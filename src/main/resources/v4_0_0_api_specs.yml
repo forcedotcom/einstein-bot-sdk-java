@@ -19,6 +19,18 @@ servers:
     description: Einstein Bots API - AP East
 
 paths:
+
+  /status:
+    get:
+      tags:
+        - "health"
+      summary: "Health status information for runtime"
+      responses:
+        200:
+          $ref: '#/components/responses/StatusResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
   /v4.0.0/messages:
     post:
       tags:
@@ -834,6 +846,17 @@ components:
         - "onlyChanged"
       additionalProperties: false
 
+    Status:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          description: "the health check status"
+          enum: [ "UP", "DOWN" ]
+      required:
+        - "status"
+      additionalProperties: false
+
     Error:
       type: "object"
       properties:
@@ -872,6 +895,14 @@ components:
       additionalProperties: false
 
   responses:
+
+    StatusResponse:
+      description: "Runtime health status check response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Status"
+
     ErrorResponse:
       description: "Something went wrong"
       content:

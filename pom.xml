@@ -38,7 +38,7 @@
         <spring-reactor-test-version>3.2.3.RELEASE</spring-reactor-test-version>
         <spring-reactor-core-version>3.4.5</spring-reactor-core-version>
         <openapi-generator-version>5.4.0</openapi-generator-version>
-        <runtime-api-spec-url>https://runtime-api-na-east.prod.chatbots.sfdc.sh/docs/specs/${api-spec-yaml-file}</runtime-api-spec-url>
+        <runtime-api-spec-url>https://runtime-api-na-west.stg.chatbots.sfdc.sh/docs/specs/${api-spec-yaml-file}</runtime-api-spec-url>
         <api-spec-yaml-file>v4_0_0_api_specs.yml</api-spec-yaml-file>
     </properties>
 
