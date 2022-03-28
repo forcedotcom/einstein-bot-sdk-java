@@ -55,6 +55,10 @@ public class RequestHeaders {
     return new FluentBuilder();
   }
 
+  public static RequestHeaders withJustOrgId(String orgId){
+    return builder().orgId(orgId).build();
+  }
+
   /**
    * FluentBuilder provides Fluent API to create RequestHeaders.
    */

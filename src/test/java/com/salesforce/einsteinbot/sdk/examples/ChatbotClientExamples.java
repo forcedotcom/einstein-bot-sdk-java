@@ -68,12 +68,14 @@ public class ChatbotClientExamples {
     AnyRequestMessage textMessage = buildInitMessage(Optional.of("Initial message"));
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId,
         forceConfigEndPoint, Arrays.asList(textMessage));
-    RequestHeaders headers = RequestHeaders.builder()
-        .orgId(orgId)
-        .build();
+    RequestHeaders headers = buildRequestHeaders();
     ResponseEnvelope resp = client.sendChatbotRequest(envelope, headers);
 
     System.out.println(resp);
+  }
+
+  private RequestHeaders buildRequestHeaders() {
+    return RequestHeaders.withJustOrgId(orgId);
   }
 
   private void sendUsingSessionManagedClient() {
@@ -92,9 +94,7 @@ public class ChatbotClientExamples {
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId,
         forceConfigEndPoint, Arrays.asList(textMessage));
 
-    RequestHeaders headers = RequestHeaders.builder()
-        .orgId(orgId)
-        .build();
+    RequestHeaders headers = buildRequestHeaders();
 
     ResponseEnvelope resp = client.sendChatbotRequest(envelope, headers);
 
