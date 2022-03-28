@@ -66,16 +66,16 @@ public JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connec
 ```
 ### 3. Setup Chatbot Client
 
-Follow **step 3A** to use `BasicChatbotClient` (step 3A) if you want to track sessions yourself or 
+Follow **step 3A** to use `BasicChatbotClient` if you want to track sessions yourself or 
 follow **step 3B** to use `SessionManagedChatbotClient` for sessions to be managed by SDK.
 
 #### 3A. Setup Basic Chatbot Client
 
 ```java
-ChatbotClient client = BasicChatbotClient.builder()
-        .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
-        .authMechanism(oAuth) // 'oAuth' created in Step 2
-        .build();
+    ChatbotClient client = BasicChatbotClient.builder()
+            .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
+            .authMechanism(oAuth) // 'oAuth' created in Step 2
+            .build();
 ```
 
 #### 3B. Setup Session Managed Chatbot Client
@@ -87,7 +87,7 @@ ChatbotClient client = BasicChatbotClient.builder()
         .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
         .authMechanism(oAuth)  // 'oAuth' created in Step 2
         .build())
-        .cache(new InMemoryCache(600))  // 'cache' created in Step 1
+        .cache(cache)  // 'cache' created in Step 1
         .integrationName(integrationName) // Should match integrationName used when adding API Connection for connected app.
         .build();
 ```
