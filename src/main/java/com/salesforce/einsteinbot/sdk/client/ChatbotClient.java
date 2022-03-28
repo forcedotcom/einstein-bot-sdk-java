@@ -9,6 +9,7 @@ package com.salesforce.einsteinbot.sdk.client;
 
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
+import com.salesforce.einsteinbot.sdk.model.Status;
 
 /**
  * Base interface for Chatbot client. It provides a single method to send a chat request to Einstein
@@ -18,4 +19,6 @@ public interface ChatbotClient {
 
   ResponseEnvelope sendChatbotRequest(RequestEnvelope requestEnvelope,
       RequestHeaders requestHeaders);
+
+  Status getHealthStatus();
 }

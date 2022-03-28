@@ -29,16 +29,16 @@ the external session ID could be a combination of Slack app ID, Slack user ID an
 
 ```xml
 <dependency>
-  <groupId>com.salesforce.chatbot</groupId>
-  <artifactId>module-api-sdk-java</artifactId>
-  <version>${module-api-sdk-java-version}</version>
+  <groupId>com.salesforce.einsteinbot</groupId>
+  <artifactId>einstein-bot-sdk-java</artifactId>
+  <version>${einstein-bot-sdk-java-version}</version>
 </dependency>
 ```
 
 ### 1. Create Redis Cache
 ```java
 
-    Cache redis = new RedisCache(); // uses default values for ttl (259,140 seonds) and redisUrl (redis://127.0.0.1:6379)
+    Cache redis = new RedisCache(); // uses default values for ttl (3 days) and redisUrl (redis://127.0.0.1:6379)
     
     // for custom ttl or redis url:
     Cache redis = new RedisCache(ttlSeconds, redisUrl);
@@ -64,6 +64,33 @@ You are also able to use a different constructor and pass in a `java.security.Pr
 public JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connectedAppId, String connectedAppSecret,
       String userId, Cache cache)
 ```
+### 3. Setup Chatbot Client
+
+Follow **step 3A** to use `BasicChatbotClient` if you want to track sessions yourself or 
+follow **step 3B** to use `SessionManagedChatbotClient` for sessions to be managed by SDK.
+
+#### 3A. Setup Basic Chatbot Client
+
+```java
+    ChatbotClient client = BasicChatbotClient.builder()
+            .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
+            .authMechanism(oAuth) // 'oAuth' created in Step 2
+            .build();
+```
+
+#### 3B. Setup Session Managed Chatbot Client
+
+```java
+    SessionManagedChatbotClient client = SessionManagedChatbotClient
+        .builder()
+        .basicClient(BasicChatbotClient.builder()
+        .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
+        .authMechanism(oAuth)  // 'oAuth' created in Step 2
+        .build())
+        .cache(cache)  // 'cache' created in Step 1
+        .integrationName(integrationName) // Should match integrationName used when adding API Connection for connected app.
+        .build();
+```
 
 ### 3. Setup Session Managed Chatbot Client
 
@@ -79,14 +106,24 @@ public JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connec
 ### 4. Sending a Message
 
 ```Java
+
+private void sendUsingBasicClient(){
+
+    AnyRequestMessage textMessage = buildInitMessage(Optional.of("Initial message"));
+    RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey,orgId,botId,
+      forceConfigEndPoint,Arrays.asList(textMessage));
+    
+    RequestHeaders headers = buildRequestHeaders();
+    ResponseEnvelope resp=client.sendChatbotRequest(envelope , headers); // 'client' created in Step 3A.
+}
+
 private void sendUsingSessionManagedClient() {
 
     RequestEnvelopeMessagesOneOf textMessage = buildTextMessage("Initial message");
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId, forceConfigEndPoint, Arrays.asList(textMessage));
 
-    ResponseEnvelope resp = client.sendChatbotRequest(envelope); // 'client' created in Step 3.
-
-    System.out.println(resp);
+    RequestHeaders headers = buildRequestHeaders();
+    ResponseEnvelope resp = client.sendChatbotRequest(envelope, headers); // 'client' created in Step 3B.
   }
 
 public static RequestEnvelopeMessagesOneOf buildTextMessage(String msg) {
@@ -95,6 +132,13 @@ public static RequestEnvelopeMessagesOneOf buildTextMessage(String msg) {
       .type(TextMessage.TypeEnum.TEXT)
       .sequenceId(System.currentTimeMillis());
   }
+
+public static AnyRequestMessage buildInitMessage(Optional<String> msg) {
+    return new InitMessage()
+    .text(msg.orElse(""))
+    .type(InitMessage.TypeEnum.INIT)
+    .sequenceId(System.currentTimeMillis());
+    }
 
 public static RequestEnvelope buildRequestEnvelop(String sessionId,
                                                     String orgId, String botId,
@@ -106,6 +150,18 @@ public static RequestEnvelope buildRequestEnvelop(String sessionId,
       .botId(botId)
       .forceConfig(new ForceConfig().endpoint(forceConfigEndPoint))
       .messages(messages);
+  }
+
+private RequestHeaders buildRequestHeaders() {
+    return RequestHeaders.withJustOrgId(orgId);
+    }
+```
+
+### 5. Getting Health Status
+
+```java
+private void getHealthStatus() {
+    System.out.println(client.getHealthStatus()); // 'client' created in Step 3A or 3B
   }
 ```
 
