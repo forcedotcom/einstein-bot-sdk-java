@@ -73,12 +73,7 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testGetHealthStatus() {
-    Mono<Status> monoResponse = Mono.fromCallable(new Callable<Status>() {
-      @Override
-      public Status call() throws Exception {
-        return healthStatus;
-      }
-    });
+    Mono<Status> monoResponse = Mono.fromCallable(() -> healthStatus);
 
     when(mockHealthApi.statusGet()).thenReturn(monoResponse);
 
