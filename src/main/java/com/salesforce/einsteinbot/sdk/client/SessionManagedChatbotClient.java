@@ -20,6 +20,7 @@ import com.salesforce.einsteinbot.sdk.model.InitMessage.TypeEnum;
 import com.salesforce.einsteinbot.sdk.model.RedirectMessage;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
+import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TransferFailedRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.TransferSucceededRequestMessage;
@@ -59,6 +60,11 @@ public class SessionManagedChatbotClient implements ChatbotClient {
     cacheSessionId(requestEnvelope.getExternalSessionKey(), response, requestHeaders.getOrgId());
 
     return response;
+  }
+
+  @Override
+  public Status getHealthStatus() {
+    return basicClient.getHealthStatus();
   }
 
   private void addSequenceIds(RequestEnvelope requestEnvelope) {

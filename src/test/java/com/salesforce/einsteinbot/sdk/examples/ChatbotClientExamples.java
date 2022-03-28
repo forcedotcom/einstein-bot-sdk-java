@@ -46,7 +46,7 @@ public class ChatbotClientExamples {
   private final String secret = "YOUR_CONNECTED_APP_SECRET";
   private final String userId = "SALESFORCE_LOGIN_USER";
 
-  private AuthMechanism oAuth = new JwtBearerOAuth("src/test/resources/PrivateKeyFalconTest1.der",
+  private AuthMechanism oAuth = new JwtBearerOAuth("src/test/resources/YourConnectedAppPrivateKey.der",
       loginEndpoint, connectedAppId, secret, userId, new InMemoryCache(300L));
 
   public static void main(String[] args) throws Exception {
@@ -56,7 +56,7 @@ public class ChatbotClientExamples {
   private void run() {
     sendUsingBasicClient();
     sendUsingSessionManagedClient();
-    //getHealthStatus();
+    getHealthStatus();
   }
 
   private void sendUsingBasicClient() {
@@ -126,12 +126,12 @@ public class ChatbotClientExamples {
         .messages(messages);
   }
 
-  /*private void getHealthStatus() {
+  private void getHealthStatus() {
     ChatbotClient client = BasicChatbotClient.builder()
         .basePath(basePath)
         .authMechanism(oAuth)
         .build();
 
     System.out.println(client.getHealthStatus());
-  }*/
+  }
 }

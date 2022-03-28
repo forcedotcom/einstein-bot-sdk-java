@@ -29,6 +29,7 @@ import com.salesforce.einsteinbot.sdk.model.InitMessage;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
+import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.util.Optional;
@@ -47,9 +48,6 @@ public class SessionManagedChatbotClientTest {
   private ChatbotClient chatbotClient;
 
   @Mock
-  private AuthMechanism authMechanism;
-
-  @Mock
   private Cache cache;
 
   @Captor
@@ -58,7 +56,6 @@ public class SessionManagedChatbotClientTest {
   @Captor
   private ArgumentCaptor<RequestHeaders> headerCaptor;
 
-  private final String basePath = "basePath";
   private final String integrationName = "integrationName";
   private final String orgId = "00DSB0000001ThY2AU";
   private final String botId = "botId";
@@ -68,7 +65,6 @@ public class SessionManagedChatbotClientTest {
   private RequestEnvelope requestEnvelope;
   private ResponseEnvelope response;
   private RequestHeaders requestHeaders;
-  //private ChatbotClient basicClient;
   private ChatbotClient sessionManagedClient;
 
   @BeforeEach
@@ -245,22 +241,13 @@ public class SessionManagedChatbotClientTest {
         .build());
   }
 
-  /*@Test
+  @Test
   public void getHealthStatus() {
     Status healthStatus = new Status();
 
     doReturn(healthStatus).when(chatbotClient).getHealthStatus();
-
-    SessionManagedChatbotClient cut = SessionManagedChatbotClient.builder()
-        .basePath(basePath)
-        .authMechanism(authMechanism)
-        .integrationName(integrationName)
-        .cache(cache)
-        .build();
-    cut.setChatbotClient(chatbotClient);
-
-    assertEquals(healthStatus, cut.getHealthStatus());
-  }*/
+    assertEquals(healthStatus, sessionManagedClient.getHealthStatus());
+  }
 
   private void addTextMessageToRequest() {
     TextMessage textMessage = new TextMessage()

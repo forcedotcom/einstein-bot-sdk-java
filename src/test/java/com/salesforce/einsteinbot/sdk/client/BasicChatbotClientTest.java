@@ -7,15 +7,19 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
+import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.api.MessagesApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
+import com.salesforce.einsteinbot.sdk.model.Status;
+import java.util.concurrent.Callable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,14 +37,14 @@ public class BasicChatbotClientTest {
   @Mock
   private MessagesApi mockMessagesApi;
 
-  /*@Mock
-  private HealthApi mockHealthApi;*/
+  @Mock
+  private HealthApi mockHealthApi;
 
   @Mock
   private ResponseEnvelope response;
 
- /* @Mock
-  private Status healthStatus;*/
+  @Mock
+  private Status healthStatus;
 
   @Mock
   private AuthMechanism mockAuthMechanism;
@@ -64,10 +68,10 @@ public class BasicChatbotClientTest {
         .build();
     cut.setMessagesApi(mockMessagesApi);
 
-    Assertions.assertEquals(response, cut.sendChatbotRequest(requestEnvelope, headers));
+    assertEquals(response, cut.sendChatbotRequest(requestEnvelope, headers));
   }
 
- /* @Test
+  @Test
   public void testGetHealthStatus() {
     Mono<Status> monoResponse = Mono.fromCallable(new Callable<Status>() {
       @Override
@@ -86,5 +90,5 @@ public class BasicChatbotClientTest {
 
     assertEquals(healthStatus, cut.getHealthStatus());
 
-  }*/
+  }
 }

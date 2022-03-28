@@ -13,6 +13,7 @@ import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createLoggingReq
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.api.MessagesApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
@@ -20,6 +21,7 @@ import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.model.Error;
 import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
+import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
 import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
 import java.util.Objects;
@@ -41,6 +43,7 @@ import reactor.core.publisher.Mono;
 public class BasicChatbotClient implements ChatbotClient {
 
   protected MessagesApi messagesApi;
+  protected HealthApi healthApi;
   protected ApiClient apiClient;
   protected AuthMechanism authMechanism;
   protected ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
@@ -56,11 +59,17 @@ public class BasicChatbotClient implements ChatbotClient {
     apiClient.setBasePath(basePath);
     apiClient.setUserAgent(releaseInfo.getAsUserAgent());
     messagesApi = new MessagesApi(apiClient);
+    healthApi = new HealthApi(apiClient);
   }
 
   @VisibleForTesting
   void setMessagesApi(MessagesApi messagesApi) {
     this.messagesApi = messagesApi;
+  }
+
+  @VisibleForTesting
+  void setHealthApi(HealthApi healthApi) {
+    this.healthApi = healthApi;
   }
 
   @Override
@@ -83,6 +92,16 @@ public class BasicChatbotClient implements ChatbotClient {
             requestHeaders.getRequestIdOr(UUID.randomUUID().toString()), requestEnvelope,
             requestHeaders.getRuntimeCRC()).toFuture();
     return futureResponse;
+  }
+
+  public Status getHealthStatus() {
+    CompletableFuture<Status> statusFuture = healthApi.statusGet().toFuture();
+
+    try {
+      return statusFuture.get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private WebClient createWebClient(WebClient.Builder webClientBuilder) {
