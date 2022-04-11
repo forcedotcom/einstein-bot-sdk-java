@@ -24,6 +24,8 @@ import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TransferFailedRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.TransferSucceededRequestMessage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -133,8 +135,9 @@ public class SessionManagedChatbotClient implements ChatbotClient {
         addIntegrationTypeAndNameToContextVariables(initMessage.getVariables(), integrationName));
 
     //replace first message with init message
-    requestEnvelope.getMessages().set(0, initMessage);
-
+    List<AnyRequestMessage> messages = new ArrayList<>(requestEnvelope.getMessages());
+    messages.set(0, initMessage);
+    requestEnvelope.setMessages(messages);
   }
 
   private String getCacheKey(RequestEnvelope request, RequestHeaders requestHeaders) {
