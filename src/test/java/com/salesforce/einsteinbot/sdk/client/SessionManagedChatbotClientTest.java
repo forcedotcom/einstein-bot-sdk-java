@@ -32,6 +32,7 @@ import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
+import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -255,7 +256,7 @@ public class SessionManagedChatbotClientTest {
         .type(TextMessage.TypeEnum.TEXT)
         .sequenceId(0l);
 
-    requestEnvelope.getMessages().add(textMessage);
+    requestEnvelope.setMessages(Collections.singletonList(textMessage));
   }
 
   private void addChoiceMessageToRequest() {
