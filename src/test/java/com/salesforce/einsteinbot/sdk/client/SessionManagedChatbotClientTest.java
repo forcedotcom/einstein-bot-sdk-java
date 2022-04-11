@@ -7,9 +7,14 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildBotSendMessageRequest;
+import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildSessionBotEndSessionRequest;
+import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildTextMessage;
+import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_NAME;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_VALUE_API;
+import static com.salesforce.einsteinbot.sdk.util.TestUtils.createResponseEntity;
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.createTextVariable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -20,16 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.cache.Cache;
-import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
-import com.salesforce.einsteinbot.sdk.model.InitMessage;
-import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
+import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
+import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
+import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
+import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
+import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
+import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
-import com.salesforce.einsteinbot.sdk.model.Status;
+import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.util.Collections;
@@ -41,136 +48,127 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
+/**
+ * Unit tests for SessionManagedChatbotClient
+ *
+ * @author relango
+ */
 @ExtendWith(MockitoExtension.class)
 public class SessionManagedChatbotClientTest {
 
+  public static final String messageText = "hello";
   @Mock
-  private ChatbotClient chatbotClient;
+  private BasicChatbotClient basicChatbotClient;
 
   @Mock
   private Cache cache;
 
   @Captor
-  private ArgumentCaptor<RequestEnvelope> requestCaptor;
+  private ArgumentCaptor<BotSendMessageRequest> messageRequestCaptor;
 
   @Captor
-  private ArgumentCaptor<RequestHeaders> headerCaptor;
+  private ArgumentCaptor<BotEndSessionRequest> endSessionRequestCaptor;
+
+  @Captor
+  private ArgumentCaptor<RequestConfig> configCaptor;
+
+  @Captor
+  private ArgumentCaptor<ExternalSessionId> externalSessionIdCaptor;
+
+  @Captor
+  private ArgumentCaptor<RuntimeSessionId> runtimeSessionIdCaptor;
+
 
   private final String integrationName = "integrationName";
   private final String orgId = "00DSB0000001ThY2AU";
   private final String botId = "botId";
   private final String externalSessionKey = "session1";
   private final String chatbotSessionId = "chatbotSessionId";
+  private final RuntimeSessionId runtimeSessionId = new RuntimeSessionId(chatbotSessionId);
+  private final ExternalSessionId externalSessionId = new ExternalSessionId(externalSessionKey);
+  private final String forceConfigEndpoint = "testForceConfig";
+  private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
+  private final HttpStatus httpStatus = HttpStatus.OK;
+  private final BotHttpHeaders httpHeaders = BotHttpHeaders.with().build();
 
-  private RequestEnvelope requestEnvelope;
-  private ResponseEnvelope response;
-  private RequestHeaders requestHeaders;
-  private ChatbotClient sessionManagedClient;
+  private BotResponse response;
+  private RequestConfig requestConfig;
+  private SessionManagedChatbotClient sessionManagedClient;
+  private BotSendMessageRequest botSendMessageRequest;
+  private BotEndSessionRequest botEndSessionRequest;
+
 
   @BeforeEach
   public void setup() {
-    response = new ResponseEnvelope();
-    response.setOrgId(orgId);
-    response.setBotId(botId);
-    response.setSessionId(chatbotSessionId);
+    response = fromResponseEnvelopeResponseEntity(createResponseEntity(new ResponseEnvelope()
+        .sessionId(chatbotSessionId), httpHeaders, httpStatus));
 
-    requestEnvelope = new RequestEnvelope();
-    requestEnvelope.setBotId(botId);
-    requestEnvelope.setExternalSessionKey(externalSessionKey);
-    requestHeaders = RequestHeaders.builder()
+    requestConfig = RequestConfig
+        .with()
+        .botId(botId)
         .orgId(orgId)
+        .forceConfigEndpoint(forceConfigEndpoint)
         .build();
 
-    sessionManagedClient = SessionManagedChatbotClient.builder()
-        .basicClient(chatbotClient)
+    sessionManagedClient = ChatbotClients.sessionManaged()
+        .basicClient(basicChatbotClient)
         .cache(cache)
         .integrationName(integrationName)
         .build();
+
+    botSendMessageRequest = buildBotSendMessageRequest(buildTextMessage(messageText), Optional.empty());
+
+    botEndSessionRequest = buildSessionBotEndSessionRequest(endSessionReason, Optional.empty());
   }
 
   @Test
-  public void send_withoutSessionIdInCache() {
-    addTextMessageToRequest();
-    doReturn(Optional.empty()).when(cache)
-        .get(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey));
+  public void testSendMessageWithoutSessionIdInCache() {
 
-    doReturn(response).when(chatbotClient).sendChatbotRequest(any(), any());
+    stubCacheToReturnEmptyOrExistingSession(Optional.empty());
+    stubStartChatSession();
 
     // call method being tested
-    sessionManagedClient.sendChatbotRequest(requestEnvelope, requestHeaders);
+    sessionManagedClient.sendMessage(requestConfig, externalSessionId, botSendMessageRequest);
 
-    // verify init message is sent
-    verify(chatbotClient).sendChatbotRequest(requestCaptor.capture(), headerCaptor.capture());
+    // verify startChatSession is called
+    verify(basicChatbotClient)
+        .startChatSession(configCaptor.capture(), externalSessionIdCaptor.capture(), messageRequestCaptor.capture());
 
-    RequestEnvelope sentRequest = requestCaptor.getValue();
-    verifySentRequestAndHeader(sentRequest, headerCaptor.getValue(), InitMessage.class);
+    assertEquals(requestConfig, configCaptor.getValue());
+    assertEquals(externalSessionId, externalSessionIdCaptor.getValue());
+
+    BotSendMessageRequest sentRequest = messageRequestCaptor.getValue();
+    verifySentRequest(sentRequest, TextMessage.class);
+
+    // verify cache is updated
+    verify(cache)
+        .set(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey), chatbotSessionId);
 
     TextVariable integrationType = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API);
     TextVariable integrationNameVar = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, integrationName);
 
-    assertThat(((InitMessage) sentRequest.getMessages().get(0)).getVariables(),
+    assertThat(sentRequest.getVariables(),
         contains(integrationType, integrationNameVar));
-
-    // verify cache is updated
-    verify(cache)
-        .set(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey), chatbotSessionId);
-  }
-
-  private <T> void verifySentRequestAndHeader(RequestEnvelope sentRequest,
-      RequestHeaders sentHeader, Class<T> messageType) {
-
-    assertEquals(sentRequest.getMessages().size(), 1, "There should only be one message sent.");
-    assertTrue(messageType.isInstance(sentRequest.getMessages().get(0)),
-        "Message should be of type " + messageType.getName());
-    assertEquals(orgId, sentHeader.getOrgId(), "OrgId in Request Header is incorrect");
-
-    assertEquals(getMessageText(sentRequest), "Hello", "Message should say Hello");
-    assertTrue(getMessageSequenceId(sentRequest) > 0L, "SequenceID should have been updated");
-
-  }
-
-  private String getMessageText(RequestEnvelope sentRequest) {
-    AnyRequestMessage message = sentRequest.getMessages().get(0);
-    if (message instanceof InitMessage) {
-      return ((InitMessage) message).getText();
-    } else if (message instanceof TextMessage) {
-      return ((TextMessage) message).getText();
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported Request Message Type : " + message.getClass());
-    }
-  }
-
-  private long getMessageSequenceId(RequestEnvelope sentRequest) {
-    AnyRequestMessage message = sentRequest.getMessages().get(0);
-    if (message instanceof InitMessage) {
-      return ((InitMessage) message).getSequenceId();
-    } else if (message instanceof TextMessage) {
-      return ((TextMessage) message).getSequenceId();
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported Request Message Type : " + message.getClass());
-    }
   }
 
   @Test
-  public void send_withSessionIdInCache() {
-    addTextMessageToRequest();
-    doReturn(Optional.of(chatbotSessionId)).when(cache)
-        .get(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey));
+  public void testSendMessageWithSessionIdInCache() {
 
-    doReturn(response).when(chatbotClient).sendChatbotRequest(any(), any());
+    stubCacheToReturnEmptyOrExistingSession(Optional.of(chatbotSessionId));
+    stubSendMessage();
 
     // call method being tested
-    sessionManagedClient.sendChatbotRequest(requestEnvelope, requestHeaders);
+    sessionManagedClient.sendMessage(requestConfig, externalSessionId, botSendMessageRequest);
 
-    // verify text message is sent as is (i.e. no init message)
+    // verify sendMessage is invoked (i.e not startChatSession invoked)
+    verify(basicChatbotClient).sendMessage(configCaptor.capture(), runtimeSessionIdCaptor.capture(), messageRequestCaptor.capture());
 
-    verify(chatbotClient).sendChatbotRequest(requestCaptor.capture(), headerCaptor.capture());
+    verifyRequestConfigAndRuntimeSessionId();
 
-    RequestEnvelope sentRequest = requestCaptor.getValue();
-    verifySentRequestAndHeader(sentRequest, headerCaptor.getValue(), TextMessage.class);
+    BotSendMessageRequest sentRequest = messageRequestCaptor.getValue();
+    verifySentRequest(sentRequest, TextMessage.class);
 
     // verify cache is updated
     verify(cache)
@@ -178,92 +176,101 @@ public class SessionManagedChatbotClientTest {
   }
 
   @Test
-  public void send_withSessionIdAlreadySetInRequest() {
-    addTextMessageToRequest();
-    requestEnvelope.setSessionId(chatbotSessionId);
+  public void testEndChatWithoutSessionIdInCache() {
 
-    doReturn(response).when(chatbotClient).sendChatbotRequest(any(), any());
-
+    stubCacheToReturnEmptyOrExistingSession(Optional.empty());
     // call method being tested
-    sessionManagedClient.sendChatbotRequest(requestEnvelope, requestHeaders);
+    Throwable exception = assertThrows(IllegalStateException.class,
+        () -> sessionManagedClient.endChatSession(requestConfig, externalSessionId,
+            botEndSessionRequest)
+    );
 
-    // verify text message is sent as is (i.e. no init message)
-    ArgumentCaptor<RequestEnvelope> requestCaptor = ArgumentCaptor.forClass(RequestEnvelope.class);
-    verify(chatbotClient).sendChatbotRequest(requestCaptor.capture(), headerCaptor.capture());
-
-    RequestEnvelope sentRequest = requestCaptor.getValue();
-    verifySentRequestAndHeader(sentRequest, headerCaptor.getValue(), TextMessage.class);
-
-    // verify cache was only updated, it was never checked since sessionId was passed in
-    verify(cache)
-        .set(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey), chatbotSessionId);
-    verifyNoMoreInteractions(cache);
+    assertTrue(exception.getMessage().contains("No session found"));
   }
 
   @Test
-  public void send_requestWithoutAnyMessages() {
-    doReturn(Optional.empty()).when(cache)
-        .get(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey));
+  public void testEndChatWithSessionIdInCache() {
+
+    stubCacheToReturnEmptyOrExistingSession(Optional.of(chatbotSessionId));
+    stubEndChat();
 
     // call method being tested
-    assertThrows(IllegalArgumentException.class, () -> {
-      sessionManagedClient.sendChatbotRequest(requestEnvelope, requestHeaders);
-    });
+    sessionManagedClient.endChatSession(requestConfig, externalSessionId, botEndSessionRequest);
 
+    // verify sendMessage is invoked (i.e not startChatSession invoked)
+    verify(basicChatbotClient).endChatSession(configCaptor.capture(), runtimeSessionIdCaptor.capture(), endSessionRequestCaptor.capture());
+
+    verifyRequestConfigAndRuntimeSessionId();
+
+    BotEndSessionRequest sentRequest = endSessionRequestCaptor.getValue();
+    assertEquals(endSessionReason, sentRequest.getEndSessionReason());
   }
 
-  @Test
-  public void send_invalidFirstMessageTypeForNewSession() {
-    addChoiceMessageToRequest();
-    doReturn(Optional.empty()).when(cache)
-        .get(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey));
+  private void verifyRequestConfigAndRuntimeSessionId() {
+    assertEquals(requestConfig, configCaptor.getValue());
+    assertEquals(runtimeSessionId, runtimeSessionIdCaptor.getValue());
+  }
 
-    // call method being tested
-    assertThrows(IllegalArgumentException.class, () -> {
-      sessionManagedClient.sendChatbotRequest(requestEnvelope, requestHeaders);
-    });
+  private void stubStartChatSession() {
+    when(basicChatbotClient
+        .startChatSession(any(RequestConfig.class), any(ExternalSessionId.class), any(
+            BotSendMessageRequest.class)))
+        .thenReturn(response);
+  }
+
+  private void stubSendMessage() {
+    when(basicChatbotClient.sendMessage(any(RequestConfig.class), any(RuntimeSessionId.class), any(
+        BotSendMessageRequest.class)))
+        .thenReturn(response);
+  }
+
+  private void stubEndChat() {
+    when(basicChatbotClient
+        .endChatSession(
+          any(RequestConfig.class),
+          any(RuntimeSessionId.class),
+          any(BotEndSessionRequest.class)))
+        .thenReturn(response);
   }
 
   @Test
   public void invalidIntegrationNames() {
     assertNotNull(
-      SessionManagedChatbotClient.builder()
-          .basicClient(chatbotClient)
-          .cache(cache)
-          .integrationName(null)
-          .build()
+        ChatbotClients.sessionManaged()
+            .basicClient(basicChatbotClient)
+            .cache(cache)
+            .integrationName(null)
+            .build()
     );
 
-    assertThrows(IllegalArgumentException.class, () -> SessionManagedChatbotClient.builder()
-        .basicClient(chatbotClient)
+    assertThrows(IllegalArgumentException.class, () -> ChatbotClients.sessionManaged()
+        .basicClient(basicChatbotClient)
         .cache(cache)
         .integrationName("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
             + "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")
         .build());
   }
 
-  @Test
-  public void getHealthStatus() {
-    Status healthStatus = new Status();
-
-    doReturn(healthStatus).when(chatbotClient).getHealthStatus();
-    assertEquals(healthStatus, sessionManagedClient.getHealthStatus());
+  private void stubCacheToReturnEmptyOrExistingSession(Optional<String> chatbotSessionId) {
+    when(cache.get(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey)))
+        .thenReturn(chatbotSessionId);
   }
 
-  private void addTextMessageToRequest() {
-    TextMessage textMessage = new TextMessage()
-        .text("Hello")
-        .type(TextMessage.TypeEnum.TEXT)
-        .sequenceId(0l);
+  private <T> void verifySentRequest(BotSendMessageRequest sentRequest, Class<T> messageType) {
 
-    requestEnvelope.setMessages(Collections.singletonList(textMessage));
+    assertTrue(messageType.isInstance(sentRequest.getMessage()),
+        "Message should be of type " + messageType.getName());
+
+    assertEquals(getMessageText(sentRequest), messageText, "Message should say " + messageText);
+    assertTrue(getMessageSequenceId(sentRequest) > 0L, "SequenceID should have been updated");
+
   }
 
-  private void addChoiceMessageToRequest() {
-    ChoiceMessage choiceMessage = new ChoiceMessage()
-        .type(ChoiceMessage.TypeEnum.CHOICE)
-        .choiceId("1").sequenceId(0L);
+  private String getMessageText(BotSendMessageRequest sentRequest) {
+    return ((TextMessage) sentRequest.getMessage()).getText();
+  }
 
-    requestEnvelope.getMessages().add(choiceMessage);
+  private long getMessageSequenceId(BotSendMessageRequest sentRequest) {
+    return ((TextMessage) sentRequest.getMessage()).getSequenceId();
   }
 }

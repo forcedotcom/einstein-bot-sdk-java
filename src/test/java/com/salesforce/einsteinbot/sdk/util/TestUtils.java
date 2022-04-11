@@ -7,11 +7,14 @@
 
 package com.salesforce.einsteinbot.sdk.util;
 
+import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * TestUtils - Contains utility methods used by tests
@@ -30,5 +33,9 @@ public class TestUtils {
 
   public static String readFileAsString(Path path) throws IOException {
     return new String(Files.readAllBytes(path));
+  }
+
+  public static  <T> ResponseEntity<T> createResponseEntity(T responseEnvelope, BotHttpHeaders httpHeaders, HttpStatus httpStatus){
+    return  new ResponseEntity(responseEnvelope, httpHeaders.toMultiValueMap(), httpStatus);
   }
 }

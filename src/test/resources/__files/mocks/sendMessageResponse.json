@@ -1,0 +1,62 @@
+{
+  "sessionId" : "chatbotSessionId",
+  "botVersion" : "0X9SB00000006wf0AA",
+  "processedSequenceIds" : [
+    1649209601248
+  ],
+  "messages" : [
+    {
+      "type" : "text",
+      "id" : "bc63a909-433c-4e3e-992a-516958ffc965",
+      "text" : "You should receive your item tomorrow.",
+      "schedule" : {
+        "responseDelayMilliseconds" : 1200
+      }
+    },
+    {
+      "type" : "text",
+      "id" : "d4574b7a-c3a0-4877-b7f9-846b6b5f98bf",
+      "text" : "Choose one of the options below",
+      "schedule" : {
+        "responseDelayMilliseconds" : 1200
+      }
+    },
+    {
+      "type" : "choices",
+      "id" : "8509150a-7489-4bfe-8831-216ab28d516c",
+      "choices" : [
+        {
+          "label" : "Order Status",
+          "alias" : "1",
+          "id" : "b02405c0-c4a0-437c-909b-b3d0d0820be0"
+        },
+        {
+          "label" : "Account Issues",
+          "alias" : "2",
+          "id" : "d418337e-a176-4882-9b44-722576c09349"
+        },
+        {
+          "label" : "Frequently Asked Questions",
+          "alias" : "3",
+          "id" : "66061b0b-3c6d-4b04-96d4-23f951e9bbe3"
+        },
+        {
+          "label" : "End Chat",
+          "alias" : "4",
+          "id" : "208c2133-4507-4b61-acad-a475c000c903"
+        },
+        {
+          "label" : "Transfer To Agent",
+          "alias" : "5",
+          "id" : "30ec1490-ac0d-421a-90e0-b314015299f2"
+        }
+      ],
+      "widget" : "menu",
+      "schedule" : {
+        "responseDelayMilliseconds" : 1200
+      }
+    }
+  ],
+  "variables" : null,
+  "_links" : null
+}

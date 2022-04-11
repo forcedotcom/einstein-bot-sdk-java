@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.salesforce.einsteinbot.sdk.client.validators;
+package com.salesforce.einsteinbot.sdk.client.util;
 
 public class IntegrationNameValidator {
 

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 /**
  * Cache interface provides an abstraction for plugging in a cache mechanism for maintaining the
- * session cache. This interface is used by SessionManagedChatbotClient to manage the mapping
+ * session cache. This interface is used by SessionManagedChatbotClientImpl to manage the mapping
  * between client session id Einstein Bots session id.
  */
 public interface Cache {
