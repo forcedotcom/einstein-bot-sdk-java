@@ -135,7 +135,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       BotEndSessionRequest botEndSessionRequest) {
 
     EndSessionReason endSessionReason = botEndSessionRequest.getEndSessionReason();
-    notifyRequestEnvelopeInterceptor(botEndSessionRequest, endSessionReason);
+    notifyRequestEnvelopeInterceptor(botEndSessionRequest, "EndSessionReason: " + endSessionReason);
     CompletableFuture<BotResponse> futureResponse = invokeEndChatSession(config.getOrgId(),
         sessionId.getValue(),
         endSessionReason,

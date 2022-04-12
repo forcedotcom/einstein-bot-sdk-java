@@ -112,12 +112,14 @@ public class BotRequest {
       this.requestId = requestEnvelope.getRequestId();
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
       this.variables = requestEnvelope.getVariables();
+      this.requestEnvelopeInterceptor = requestEnvelope.getRequestEnvelopeInterceptor();
     }
 
     private FluentBuilder(BotEndSessionRequest requestEnvelope){
       this(requestEnvelope.getEndSessionReason());
       this.requestId = requestEnvelope.getRequestId();
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
+      this.requestEnvelopeInterceptor = requestEnvelope.getRequestEnvelopeInterceptor();
     }
 
     @Override
@@ -146,6 +148,7 @@ public class BotRequest {
     @Override
     public FinalBuilder<T> requestEnvelopeInterceptor(
         RequestEnvelopeInterceptor requestEnvelopeInterceptor) {
+
       this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
       return this;
     }
