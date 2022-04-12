@@ -7,18 +7,35 @@
 
 package com.salesforce.einsteinbot.sdk.examples;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -34,13 +51,17 @@ public class ApiExampleWithoutUsingSDK {
   //Replace following variables with real values before running. //TODO
   private final String loginEndpoint = "https://login.test1.pc-rnd.salesforce.com/";
   private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
-  private final String secret = "1B57EFD4F6D22302A6D4FA9077430191CFFDFAEA22C6ABDA6FCB45993A8AD421";
   private final String userId = "admin1@esw5.sdb3";
+  private final String privateKeyFile = "src/test/resources/PrivateKeyFalconTest1.der";
+
+  private final int jwtExpiryMinutes = 60;
+
   private static ObjectMapper mapper = new ObjectMapper();
 
   private static final String START_SESSION_URI = "/v5.0.0/bots/{botId}/sessions";
   private static final String SEND_MESSAGE_URI = "/v5.0.0/sessions/{sessionId}/messages";
   private static final String END_SESSION_URI = "/v5.0.0/sessions/{sessionId}";
+  private final String OAUTH_URL = loginEndpoint + "/services/oauth2/token";
 
   private RestTemplate restTemplate = new RestTemplate();
 
@@ -51,8 +72,11 @@ public class ApiExampleWithoutUsingSDK {
     prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
   }
 
-  private void runExampleRequests() throws JsonProcessingException {
-    String token = "00DSB0000001ThY!AQEAQO7xRclWBwPMhb2BLOgSKSwQsqG1oTAPQkNVsEnfolKl_cTWfTxfDPcMuCQcAGH92dzr8ZXdmx42G1pIVcxI6r_aYcix";
+  private void runExampleRequests() throws Exception {
+
+    PrivateKey privateKey = getPrivateKey(privateKeyFile);
+    String jwt = createJwt(privateKey);
+    String token = getOAuthToken(jwt);
 
     String startChatSessionResponse = startChatSession(token, "hello");
     System.out.println("Bot Start Session Response : " + getPrettyPrintedJson(startChatSessionResponse));
@@ -110,6 +134,24 @@ public class ApiExampleWithoutUsingSDK {
     return sessionIdNode.asText();
   }
 
+  private String getOAuthToken(String jwt) throws Exception{
+    MultiValueMap<String, String> formData= new LinkedMultiValueMap<>();
+    formData.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
+    formData.add("assertion", jwt);
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    HttpEntity<Map> httpRequest = new HttpEntity<>(formData, httpHeaders);
+
+    ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_URL, httpRequest, String.class);
+    System.out.println(response.getStatusCode());
+    return getTokenFromOAuthResponse(response.getBody());
+  }
+
+  private String getTokenFromOAuthResponse(String response) throws Exception{
+    ObjectNode node = new ObjectMapper().readValue(response, ObjectNode.class);
+    return node.get("access_token").asText();
+  }
 
   public static String newRandomUUID() {
     return UUID.randomUUID().toString();
@@ -181,10 +223,40 @@ public class ApiExampleWithoutUsingSDK {
     return mapper.writer(prettyPrinter).writeValueAsString(mapper.readValue(json, Object.class));
   }
 
-  public static void main(String[] args) throws JsonProcessingException {
+  private PrivateKey getPrivateKey(String filename) {
+    try {
+      File f = new File(filename);
+      FileInputStream fis = new FileInputStream(f);
+      DataInputStream dis = new DataInputStream(fis);
+      byte[] keyBytes = new byte[(int) f.length()];
+      dis.readFully(keyBytes);
+      dis.close();
+
+      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+      return kf.generatePrivate(spec);
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private String createJwt(PrivateKey privateKey){
+
+    Map<String, Object> headers = new HashMap<String, Object>();
+    headers.put("alg", "RS256");
+    Algorithm algorithm = Algorithm.RSA256(null, (RSAPrivateKey) privateKey);
+    return JWT.create()
+        .withHeader(headers)
+        .withAudience(loginEndpoint)
+        .withExpiresAt(Date.from(Instant.now().plus(jwtExpiryMinutes, ChronoUnit.MINUTES)))
+        .withIssuer(connectedAppId)
+        .withSubject(userId)
+        .sign(algorithm);
+  }
+
+  public static void main(String[] args) throws Exception {
     new ApiExampleWithoutUsingSDK()
         .runExampleRequests();
 
   }
-
 }
