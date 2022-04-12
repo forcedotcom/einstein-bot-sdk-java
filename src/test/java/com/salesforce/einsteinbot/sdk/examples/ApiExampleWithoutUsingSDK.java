@@ -49,10 +49,10 @@ public class ApiExampleWithoutUsingSDK {
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running. //TODO
-  private final String loginEndpoint = "https://login.test1.pc-rnd.salesforce.com/";
-  private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
-  private final String userId = "admin1@esw5.sdb3";
-  private final String privateKeyFile = "src/test/resources/PrivateKeyFalconTest1.der";
+  private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
+  private final String connectedAppId = "YOUR_CONNECTED_APP_ID";
+  private final String userId = "SALESFORCE_LOGIN_USER";
+  private final String privateKeyFile = "src/test/resources/YourPrivateKeyFile.der";
 
   private final int jwtExpiryMinutes = 60;
 
@@ -89,6 +89,51 @@ public class ApiExampleWithoutUsingSDK {
 
     String endSessionResponse = endChatConversation(token, sessionId, "UserRequest");
     System.out.println("Bot End Session Response : " + getPrettyPrintedJson(endSessionResponse));
+  }
+
+  private PrivateKey getPrivateKey(String filename) {
+    try {
+      File f = new File(filename);
+      FileInputStream fis = new FileInputStream(f);
+      DataInputStream dis = new DataInputStream(fis);
+      byte[] keyBytes = new byte[(int) f.length()];
+      dis.readFully(keyBytes);
+      dis.close();
+
+      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+      return kf.generatePrivate(spec);
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private String createJwt(PrivateKey privateKey){
+
+    Map<String, Object> headers = new HashMap<String, Object>();
+    headers.put("alg", "RS256");
+    Algorithm algorithm = Algorithm.RSA256(null, (RSAPrivateKey) privateKey);
+    return JWT.create()
+        .withHeader(headers)
+        .withAudience(loginEndpoint)
+        .withExpiresAt(Date.from(Instant.now().plus(jwtExpiryMinutes, ChronoUnit.MINUTES)))
+        .withIssuer(connectedAppId)
+        .withSubject(userId)
+        .sign(algorithm);
+  }
+
+  private String getOAuthToken(String jwt) throws Exception{
+    MultiValueMap<String, String> formData= new LinkedMultiValueMap<>();
+    formData.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
+    formData.add("assertion", jwt);
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    HttpEntity<Map> httpRequest = new HttpEntity<>(formData, httpHeaders);
+
+    ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_URL, httpRequest, String.class);
+    System.out.println(response.getStatusCode());
+    return getTokenFromOAuthResponse(response.getBody());
   }
 
   private String startChatSession(String token, String initMessage){
@@ -134,19 +179,7 @@ public class ApiExampleWithoutUsingSDK {
     return sessionIdNode.asText();
   }
 
-  private String getOAuthToken(String jwt) throws Exception{
-    MultiValueMap<String, String> formData= new LinkedMultiValueMap<>();
-    formData.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-    formData.add("assertion", jwt);
 
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    HttpEntity<Map> httpRequest = new HttpEntity<>(formData, httpHeaders);
-
-    ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_URL, httpRequest, String.class);
-    System.out.println(response.getStatusCode());
-    return getTokenFromOAuthResponse(response.getBody());
-  }
 
   private String getTokenFromOAuthResponse(String response) throws Exception{
     ObjectNode node = new ObjectMapper().readValue(response, ObjectNode.class);
@@ -200,10 +233,7 @@ public class ApiExampleWithoutUsingSDK {
           + "  },\n"
           + "  \"forceConfig\": {\n"
           + "    \"endpoint\": \"" + forceConfigEndPoint + "\"\n"
-          + "  },\n"
-          + "  \"variables\": [\n" //TODO remove variable if not needed
-          + "    \n"
-          + "  ]\n"
+          + "  }\n"
         + "}";
   }
 
@@ -223,36 +253,7 @@ public class ApiExampleWithoutUsingSDK {
     return mapper.writer(prettyPrinter).writeValueAsString(mapper.readValue(json, Object.class));
   }
 
-  private PrivateKey getPrivateKey(String filename) {
-    try {
-      File f = new File(filename);
-      FileInputStream fis = new FileInputStream(f);
-      DataInputStream dis = new DataInputStream(fis);
-      byte[] keyBytes = new byte[(int) f.length()];
-      dis.readFully(keyBytes);
-      dis.close();
 
-      PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-      KeyFactory kf = KeyFactory.getInstance("RSA");
-      return kf.generatePrivate(spec);
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
-    }
-  }
-
-  private String createJwt(PrivateKey privateKey){
-
-    Map<String, Object> headers = new HashMap<String, Object>();
-    headers.put("alg", "RS256");
-    Algorithm algorithm = Algorithm.RSA256(null, (RSAPrivateKey) privateKey);
-    return JWT.create()
-        .withHeader(headers)
-        .withAudience(loginEndpoint)
-        .withExpiresAt(Date.from(Instant.now().plus(jwtExpiryMinutes, ChronoUnit.MINUTES)))
-        .withIssuer(connectedAppId)
-        .withSubject(userId)
-        .sign(algorithm);
-  }
 
   public static void main(String[] args) throws Exception {
     new ApiExampleWithoutUsingSDK()
