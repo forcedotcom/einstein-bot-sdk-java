@@ -39,7 +39,6 @@ import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
-import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -227,9 +226,9 @@ public class SessionManagedChatbotClientTest {
   private void stubEndChat() {
     when(basicChatbotClient
         .endChatSession(
-          any(RequestConfig.class),
-          any(RuntimeSessionId.class),
-          any(BotEndSessionRequest.class)))
+            any(RequestConfig.class),
+            any(RuntimeSessionId.class),
+            any(BotEndSessionRequest.class)))
         .thenReturn(response);
   }
 

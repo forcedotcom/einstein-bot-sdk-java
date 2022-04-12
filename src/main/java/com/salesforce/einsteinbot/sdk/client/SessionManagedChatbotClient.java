@@ -8,10 +8,17 @@
 package com.salesforce.einsteinbot.sdk.client;
 
 import com.salesforce.einsteinbot.sdk.cache.Cache;
+import com.salesforce.einsteinbot.sdk.client.util.IntegrationNameValidator;
+import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * SessionManagedChatbotClient - Interface for Session Managed chatbot client that provide simpler
+ * sendMessage API and new session will automatically created based on user provided ExternalSessionId.
+ * So user doesn't track if they need to start a new session or continue existing session.
+ *
+ * @author relango
  */
 public interface SessionManagedChatbotClient extends ChatbotClient<ExternalSessionId> {
 
