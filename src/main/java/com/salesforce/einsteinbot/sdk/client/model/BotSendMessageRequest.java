@@ -7,6 +7,7 @@
 
 package com.salesforce.einsteinbot.sdk.client.model;
 
+import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import java.util.List;
@@ -27,8 +28,9 @@ public class BotSendMessageRequest extends BotRequest {
   private AnyRequestMessage message;
 
   BotSendMessageRequest( Optional<String> requestId, Optional<String> runtimeCRC,
+      RequestEnvelopeInterceptor requestEnvelopeInterceptor,
       List<AnyVariable> variables, AnyRequestMessage message) {
-    super(requestId, runtimeCRC);
+    super(requestId, runtimeCRC, requestEnvelopeInterceptor);
     Objects.requireNonNull(message);
     Objects.requireNonNull(variables);
     this.variables = variables;

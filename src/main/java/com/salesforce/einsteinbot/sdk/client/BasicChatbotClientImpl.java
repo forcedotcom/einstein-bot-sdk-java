@@ -96,6 +96,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
         botSendMessageRequest.getMessage(),
         botSendMessageRequest.getVariables());
 
+    notifyRequestEnvelopeInterceptor(botSendMessageRequest, initMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeEstablishChatSession(config,
         initMessageEnvelope,
         botSendMessageRequest);
@@ -110,10 +111,17 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   public BotResponse sendMessage(RequestConfig config,
       RuntimeSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
+
+    ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope(botSendMessageRequest
+        .getMessage()
+    );
+
+    notifyRequestEnvelopeInterceptor(botSendMessageRequest, chatMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeContinueChatSession(config.getOrgId(),
         sessionId.getValue(),
-        buildChatMessageEnvelope(botSendMessageRequest.getMessage()),
+        chatMessageEnvelope,
         botSendMessageRequest);
+
     try {
       return futureResponse.get();
     } catch (InterruptedException | ExecutionException e) {
@@ -125,15 +133,24 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   public BotResponse endChatSession(RequestConfig config,
       RuntimeSessionId sessionId,
       BotEndSessionRequest botEndSessionRequest) {
+
+    EndSessionReason endSessionReason = botEndSessionRequest.getEndSessionReason();
+    notifyRequestEnvelopeInterceptor(botEndSessionRequest, endSessionReason);
     CompletableFuture<BotResponse> futureResponse = invokeEndChatSession(config.getOrgId(),
         sessionId.getValue(),
-        botEndSessionRequest.getEndSessionReason(),
+        endSessionReason,
         botEndSessionRequest);
     try {
       return futureResponse.get();
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  //TODO : Update unit tests
+  private void notifyRequestEnvelopeInterceptor(BotRequest botRequest, Object requestEnvelope){
+    botRequest.getRequestEnvelopeInterceptor()
+        .accept(requestEnvelope);
   }
 
   protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId, EndSessionReason endSessionReason, BotRequest botRequest) {

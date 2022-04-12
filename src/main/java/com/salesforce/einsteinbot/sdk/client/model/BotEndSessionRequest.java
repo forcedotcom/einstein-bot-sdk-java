@@ -7,6 +7,7 @@
 
 package com.salesforce.einsteinbot.sdk.client.model;
 
+import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,8 +22,8 @@ public class BotEndSessionRequest extends BotRequest {
   private EndSessionReason endSessionReason;
 
   BotEndSessionRequest( Optional<String> requestId, Optional<String> runtimeCRC,
-      EndSessionReason endSessionReason) {
-    super(requestId, runtimeCRC);
+      RequestEnvelopeInterceptor requestEnvelopeInterceptor, EndSessionReason endSessionReason) {
+    super(requestId, runtimeCRC, requestEnvelopeInterceptor);
     Objects.requireNonNull(endSessionReason);
     this.endSessionReason = endSessionReason;
   }

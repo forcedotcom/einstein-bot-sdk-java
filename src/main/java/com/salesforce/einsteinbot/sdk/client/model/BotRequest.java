@@ -9,6 +9,7 @@ package com.salesforce.einsteinbot.sdk.client.model;
 
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.newRandomUUID;
 
+import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
@@ -29,12 +30,15 @@ public class BotRequest {
 
   private Optional<String> requestId;
   private Optional<String> runtimeCRC;
+  private RequestEnvelopeInterceptor requestEnvelopeInterceptor;
 
-  BotRequest(Optional<String> requestId, Optional<String> runtimeCRC) {
+  BotRequest(Optional<String> requestId, Optional<String> runtimeCRC, RequestEnvelopeInterceptor requestEnvelopeInterceptor) {
     Objects.requireNonNull(requestId);
     Objects.requireNonNull(runtimeCRC);
+    Objects.requireNonNull(requestEnvelopeInterceptor);
     this.requestId = requestId;
     this.runtimeCRC = runtimeCRC;
+    this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
   }
 
   public String getOrCreateRequestId() {
@@ -47,6 +51,10 @@ public class BotRequest {
 
   public Optional<String> getRuntimeCRC() {
     return runtimeCRC;
+  }
+
+  public RequestEnvelopeInterceptor getRequestEnvelopeInterceptor() {
+    return requestEnvelopeInterceptor;
   }
 
   @Override
@@ -77,7 +85,6 @@ public class BotRequest {
 
   /**
    * FluentBuilder provides Fluent API to create BotRequest.
-   * TODO: Add unit tests.
    */
   public static class FluentBuilder<T extends BotRequest> implements VariablesBuilder<T>,
       FinalBuilder<T> , SendMessageRequestCloneBuilder<T>, FinalCloneBuilder<T>{
@@ -88,6 +95,7 @@ public class BotRequest {
     private AnyRequestMessage message;
     private List<AnyVariable> variables = Collections.emptyList();
     private Type type;
+    private RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
 
     private FluentBuilder(AnyRequestMessage message) {
       this.type = Type.Message;
@@ -136,6 +144,13 @@ public class BotRequest {
     }
 
     @Override
+    public FinalBuilder<T> requestEnvelopeInterceptor(
+        RequestEnvelopeInterceptor requestEnvelopeInterceptor) {
+      this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
+      return this;
+    }
+
+    @Override
     public FinalCloneBuilder<T> setRequestId(String requestId) {
       this.requestId = Optional.of(requestId);
       return this;
@@ -160,6 +175,13 @@ public class BotRequest {
     }
 
     @Override
+    public FinalCloneBuilder<T> setRequestEnvelopeInterceptor(
+        RequestEnvelopeInterceptor requestEnvelopeInterceptor) {
+      this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
+      return this;
+    }
+
+    @Override
     public FinalBuilder<T> variables(List<AnyVariable> variables) {
       this.variables = variables;
       return this;
@@ -174,9 +196,9 @@ public class BotRequest {
     @Override
     public T build() {
       if (type == Type.Message){
-        return (T) new BotSendMessageRequest(requestId, runtimeCRC, variables, message);
+        return (T) new BotSendMessageRequest(requestId, runtimeCRC, requestEnvelopeInterceptor, variables, message);
       }else if (type == Type.EndSession){
-        return (T) new BotEndSessionRequest(requestId, runtimeCRC, endSessionReason);
+        return (T) new BotEndSessionRequest(requestId, runtimeCRC, requestEnvelopeInterceptor, endSessionReason);
       }else {
         throw new IllegalArgumentException("Invalid type : " + type);
       }
@@ -201,6 +223,8 @@ public class BotRequest {
 
     FinalCloneBuilder<T> setRuntimeCRC(String runtimeCRC);
 
+    FinalCloneBuilder<T> setRequestEnvelopeInterceptor(RequestEnvelopeInterceptor requestEnvelopeInterceptor);
+
     T build();
   }
 
@@ -213,6 +237,8 @@ public class BotRequest {
     FinalBuilder<T> runtimeCRC(Optional<String> runtimeCRC);
 
     FinalBuilder<T> runtimeCRC(String runtimeCRC);
+
+    FinalBuilder<T> requestEnvelopeInterceptor(RequestEnvelopeInterceptor requestEnvelopeInterceptor);
 
     T build();
   }
