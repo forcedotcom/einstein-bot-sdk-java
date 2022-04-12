@@ -7,13 +7,12 @@
 
 package com.salesforce.einsteinbot.sdk.examples;
 
-import static java.util.Collections.singletonList;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.TextNode;
-import java.util.Collections;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.UUID;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +36,7 @@ public class ApiExampleWithoutUsingSDK {
   private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
   private final String secret = "1B57EFD4F6D22302A6D4FA9077430191CFFDFAEA22C6ABDA6FCB45993A8AD421";
   private final String userId = "admin1@esw5.sdb3";
-  private ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = new ObjectMapper();
 
   private static final String START_SESSION_URI = "/v5.0.0/bots/{botId}/sessions";
   private static final String SEND_MESSAGE_URI = "/v5.0.0/sessions/{sessionId}/messages";
@@ -45,19 +44,30 @@ public class ApiExampleWithoutUsingSDK {
 
   private RestTemplate restTemplate = new RestTemplate();
 
+  private static final DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+
+  static {
+    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+    prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+  }
+
   private void runExampleRequests() throws JsonProcessingException {
     String token = "00DSB0000001ThY!AQEAQO7xRclWBwPMhb2BLOgSKSwQsqG1oTAPQkNVsEnfolKl_cTWfTxfDPcMuCQcAGH92dzr8ZXdmx42G1pIVcxI6r_aYcix";
-    String initResponseJson = startChatConversation(token, "hello");
-    String sessionId = retrieveSessionIdFromResponse(initResponseJson);
+
+    String startChatSessionResponse = startChatSession(token, "hello");
+    System.out.println("Bot Start Session Response : " + getPrettyPrintedJson(startChatSessionResponse));
+
+    String sessionId = getSessionIdFromResponse(startChatSessionResponse);
     System.out.println(sessionId);
 
     String botResponse = sendTextMessage(token, sessionId, "Order Status");
+    System.out.println("Bot Response : " + getPrettyPrintedJson(botResponse));
 
     String endSessionResponse = endChatConversation(token, sessionId, "UserRequest");
-
+    System.out.println("Bot End Session Response : " + getPrettyPrintedJson(endSessionResponse));
   }
 
-  private String startChatConversation(String token, String initMessage){
+  private String startChatSession(String token, String initMessage){
     String url = createStartSessionUrl();
     HttpHeaders requestHeaders = createHttpHeaders(token);
     String requestBody = createInitRequestBody(newRandomUUID(), initMessage);
@@ -66,7 +76,6 @@ public class ApiExampleWithoutUsingSDK {
     ResponseEntity<String> response = restTemplate.postForEntity(url, httpRequest , String.class);
 
     System.out.println(response.getStatusCode());
-    System.out.println(response.getBody());
     return response.getBody();
   }
 
@@ -79,7 +88,6 @@ public class ApiExampleWithoutUsingSDK {
     ResponseEntity<String> response = restTemplate.postForEntity(url, httpRequest , String.class);
 
     System.out.println(response.getStatusCode());
-    System.out.println(response.getBody());
     return response.getBody();
   }
 
@@ -96,7 +104,7 @@ public class ApiExampleWithoutUsingSDK {
     return response.getBody();
   }
 
-  private String retrieveSessionIdFromResponse(String json) throws JsonProcessingException {
+  private String getSessionIdFromResponse(String json) throws JsonProcessingException {
     JsonNode node = mapper.readValue(json, JsonNode.class);
     JsonNode sessionIdNode = node.get("sessionId");
     return sessionIdNode.asText();
@@ -167,6 +175,10 @@ public class ApiExampleWithoutUsingSDK {
           + "  }\n"
           + ""
         + "}";
+  }
+
+  public String getPrettyPrintedJson(String json) throws JsonProcessingException {
+    return mapper.writer(prettyPrinter).writeValueAsString(mapper.readValue(json, Object.class));
   }
 
   public static void main(String[] args) throws JsonProcessingException {
