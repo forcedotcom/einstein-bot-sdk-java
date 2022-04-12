@@ -38,7 +38,7 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
 
   private BasicChatbotClient basicClient;
   private Cache cache;
-  private Optional<String> integrationName; //TODO FIX
+  private Optional<String> integrationName;
 
   SessionManagedChatbotClientImpl(BasicChatbotClient basicChatbotClient,
       Optional<String> integrationName,
@@ -66,7 +66,7 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
     } else {
       botResponse = continueExistingSession(config, botSendMessageRequest, runtimeSessionIdOptional);
     }
-    //TODO: Also cache runtimeCRC and send it in subsequent request.
+    //TODO: Also cache runtimeCRC and send it in subsequent request for both v5 and v4.
     cacheSessionId(botId, externalSessionIdValue, botResponse.getResponseEnvelope(), orgId);
     return botResponse;
   }
