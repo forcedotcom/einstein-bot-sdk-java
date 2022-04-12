@@ -42,13 +42,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ApiExampleWithoutUsingSDK {
 
   private static final String RUNTIME_URL = "https://runtime-api-na-west.stg.chatbots.sfdc.sh";
-  private final String integrationName = "ConnectorExample";
 
   private final String orgId = "00DSB0000001ThY2AU";
   private final String botId = "0XxSB00000006rp0AA";
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
-  //Replace following variables with real values before running. //TODO
+  //Replace following variables with real values before running.
   private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
   private final String connectedAppId = "YOUR_CONNECTED_APP_ID";
   private final String userId = "SALESFORCE_LOGIN_USER";
