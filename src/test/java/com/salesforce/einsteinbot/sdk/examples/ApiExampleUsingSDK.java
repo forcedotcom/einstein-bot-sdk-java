@@ -23,7 +23,9 @@ import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
 
 
@@ -58,51 +60,63 @@ public class ApiExampleUsingSDK {
   }
 
   private void sendUsingBasicClient() throws Exception{
+
+    //1. Create JwtBearer Auth Mechanism.
     AuthMechanism oAuth = new JwtBearerOAuth(privateKeyFilePath,
         loginEndpoint, connectedAppId, secret, userId, new InMemoryCache(300L));
 
+    //2. Create Chatbot Client
     BasicChatbotClient client = ChatbotClients.basic()
         .basePath(basePath)
         .authMechanism(oAuth)
         .build();
 
-    RequestConfig config = createRequestConfig();
-
-    BotSendMessageRequest botSendInitMessageRequest = BotRequest
-        .withMessage(buildTextMessage("Hello"))
+    //3. Create Request Config
+    RequestConfig config = RequestConfig.with()
+        .botId(botId)
+        .orgId(orgId)
+        .forceConfigEndpoint(forceConfigEndPoint)
         .build();
 
-    ExternalSessionId externalSessionKey = new ExternalSessionId(UtilFunctions.newRandomUUID());
+    //4. Bot Send Message Request
+    AnyRequestMessage message = new TextMessage()
+        .text("Hello")
+        .type(TextMessage.TypeEnum.TEXT)
+        .sequenceId(System.currentTimeMillis());
 
+    BotSendMessageRequest botSendInitMessageRequest = BotRequest
+        .withMessage(message)
+        .build();
+
+    //5. Send Request to Start Chat Session.
+    ExternalSessionId externalSessionKey = new ExternalSessionId(UtilFunctions.newRandomUUID());
     BotResponse resp = client.startChatSession(config, externalSessionKey, botSendInitMessageRequest);
 
     System.out.println("Init Message Response :" + convertObjectToJson(resp));
+
+    // Get SessionId from Response.
     String sessionId = resp.getResponseEnvelope().getSessionId();
 
+    // Build Bot Send Message Request
     BotSendMessageRequest botSendMessageRequest =  BotRequest
         .withMessage(buildTextMessage("Order Status"))
         .build();
 
+    // Send a message to existing Session
     BotResponse textMsgResponse = client
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Text Message Response :" + convertObjectToJson(textMsgResponse));
 
+    // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
         .withEndSession(EndSessionReason.USERREQUEST).build();
 
+    // Send Request to End Chat session
     BotResponse endSessionResponse = client
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
 
-  }
-
-  private RequestConfig createRequestConfig(){
-    return RequestConfig.with()
-        .botId(botId)
-        .orgId(orgId)
-        .forceConfigEndpoint(forceConfigEndPoint)
-        .build();
   }
 }
