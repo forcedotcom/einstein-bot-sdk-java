@@ -48,10 +48,15 @@ public class ApiExampleWithoutUsingSDK {
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running.
-  private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
+  /*private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
   private final String connectedAppId = "YOUR_CONNECTED_APP_ID";
   private final String userId = "SALESFORCE_LOGIN_USER";
-  private final String privateKeyFile = "src/test/resources/YourPrivateKeyFile.der";
+  private final String privateKeyFile = "src/test/resources/YourPrivateKeyFile.der";*///TODO
+
+  private final String loginEndpoint = "https://login.test1.pc-rnd.salesforce.com/";
+  private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
+  private final String userId = "admin1@esw5.sdb3";
+  private final String privateKeyFile = "src/test/resources/PrivateKeyFalconTest1.der";
 
   private final int jwtExpiryMinutes = 60;
 

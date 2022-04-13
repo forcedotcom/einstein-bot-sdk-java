@@ -7,7 +7,6 @@
 
 package com.salesforce.einsteinbot.sdk.examples;
 
-import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildTextMessage;
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.convertObjectToJson;
 
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
@@ -15,7 +14,6 @@ import com.salesforce.einsteinbot.sdk.auth.JwtBearerOAuth;
 import com.salesforce.einsteinbot.sdk.cache.InMemoryCache;
 import com.salesforce.einsteinbot.sdk.client.BasicChatbotClient;
 import com.salesforce.einsteinbot.sdk.client.ChatbotClients;
-import com.salesforce.einsteinbot.sdk.client.SessionManagedChatbotClient;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
@@ -37,7 +35,7 @@ import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
  *
  * @author relango
  */
-public class ApiExampleUsingSDK {
+public class ApiExampleUsingSDK2 {
 
   private final String basePath = "https://runtime-api-na-west.stg.chatbots.sfdc.sh";
 
@@ -46,20 +44,14 @@ public class ApiExampleUsingSDK {
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running.
-  /*private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
+  private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
   private final String connectedAppId = "YOUR_CONNECTED_APP_ID";
   private final String secret = "YOUR_CONNECTED_APP_SECRET";
   private final String userId = "SALESFORCE_LOGIN_USER";
-  private final String privateKeyFilePath = "src/test/resources/YourConnectedAppPrivateKey.der"; */ //TODO
-
-  private final String loginEndpoint = "https://login.test1.pc-rnd.salesforce.com/";
-  private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
-  private final String userId = "admin1@esw5.sdb3";
-  private final String secret = "1B57EFD4F6D22302A6D4FA9077430191CFFDFAEA22C6ABDA6FCB45993A8AD421";
-  private final String privateKeyFilePath = "src/test/resources/PrivateKeyFalconTest1.der";
+  private final String privateKeyFilePath = "src/test/resources/YourConnectedAppPrivateKey.der";
 
   public static void main(String[] args) throws Exception {
-    new ApiExampleUsingSDK().run();
+    new ApiExampleUsingSDK2().run();
   }
 
   private void run() throws Exception{
@@ -79,10 +71,17 @@ public class ApiExampleUsingSDK {
         .build();
 
     //3. Create Request Config
-    RequestConfig config = createRequestConfig();
+    RequestConfig config = RequestConfig.with()
+        .botId(botId)
+        .orgId(orgId)
+        .forceConfigEndpoint(forceConfigEndPoint)
+        .build();
 
     //4. Bot Send Message Request
-    AnyRequestMessage message = buildTextMessage("Hello");
+    AnyRequestMessage message = new TextMessage()
+        .text("Hello")
+        .type(TextMessage.TypeEnum.TEXT)
+        .sequenceId(System.currentTimeMillis());
 
     BotSendMessageRequest botSendInitMessageRequest = BotRequest
         .withMessage(message)
@@ -118,13 +117,5 @@ public class ApiExampleUsingSDK {
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
 
-  }
-
-  private RequestConfig createRequestConfig() {
-    return RequestConfig.with()
-        .botId(botId)
-        .orgId(orgId)
-        .forceConfigEndpoint(forceConfigEndPoint)
-        .build();
   }
 }

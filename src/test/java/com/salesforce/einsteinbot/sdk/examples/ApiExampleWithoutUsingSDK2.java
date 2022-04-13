@@ -96,11 +96,12 @@ public class ApiExampleWithoutUsingSDK2 {
     headers.put("alg", "RS256");
     Algorithm algorithm = Algorithm.RSA256(null, (RSAPrivateKey) privateKey);
 
+    Instant now = Instant.now();
     //Create JWT
     String jwt = JWT.create()
         .withHeader(headers)
         .withAudience(loginEndpoint)
-        .withExpiresAt(Date.from(Instant.now().plus(jwtExpiryMinutes, ChronoUnit.MINUTES)))
+        .withExpiresAt(Date.from(now.plus(jwtExpiryMinutes, ChronoUnit.MINUTES)))
         .withIssuer(connectedAppId)
         .withSubject(userId)
         .sign(algorithm);
@@ -119,7 +120,8 @@ public class ApiExampleWithoutUsingSDK2 {
     HttpEntity<Map> oAuthHttpRequest = new HttpEntity<>(formData, httpHeaders);
 
     // Post Request to OAuth Endpoint
-    ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_URL, oAuthHttpRequest, String.class);
+    ResponseEntity<String> response = restTemplate
+        .postForEntity(OAUTH_URL, oAuthHttpRequest, String.class);
 
     //Parse Response to get access_token
     ObjectNode node = new ObjectMapper().readValue(response.getBody(), ObjectNode.class);
@@ -135,6 +137,8 @@ public class ApiExampleWithoutUsingSDK2 {
 
     // Create Request Body
     String message = "Hello";
+
+    // Create payload in TextMessage format defined in Schema.
     String requestBody =
         "{\n"
           + "  \"externalSessionKey\": \"" + newRandomUUID() + "\",\n"
@@ -147,24 +151,26 @@ public class ApiExampleWithoutUsingSDK2 {
           + "  }\n"
         + "}";
 
-    //Create HTTP Request
+    // Create HTTP Request
     HttpEntity<String> httpRequest = new HttpEntity<>(requestBody, requestHeaders);
 
-    //Send Start Chat Session Request
+    // Create URL with URI format v5.0.0/bots/{botId}/sessions
     String url = UriComponentsBuilder
         .fromHttpUrl(RUNTIME_URL)
         .path(START_SESSION_URI)
         .buildAndExpand(botId).toString();
 
-    ResponseEntity<String> startSessionResponse = restTemplate.postForEntity(url, httpRequest , String.class);
+    //Send Start Chat Session Request
+    ResponseEntity<String> startSessionResponse = restTemplate
+        .postForEntity(url, httpRequest , String.class);
 
     // Print Response Body that has response from Chatbot.
     System.out.println("Bot Start Session Response : " + getPrettyPrintedJson(startSessionResponse.getBody()));
 
     // Get SessionId from Response to send message to existing Chat Session.
-    JsonNode responseNode = mapper.readValue(startSessionResponse.getBody(), JsonNode.class);
-    JsonNode sessionIdNode = responseNode.get("sessionId");
-    String sessionId = sessionIdNode.asText();
+    JsonNode responseNode = mapper
+        .readValue(startSessionResponse.getBody(), JsonNode.class);
+    String sessionId = responseNode.get("sessionId").asText();
   }
 
   private PrivateKey getPrivateKey(String filename) {
