@@ -94,8 +94,7 @@ public class BasicChatbotClientTest {
       .text(messageText);
 
   private final TextInitMessage initMessage = new TextInitMessage()
-      .sequenceId(sequenceId)
-      .text(messageText);
+      .text(messageText); //TODO merge
 
   private BasicChatbotClient client;
 
