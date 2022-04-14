@@ -51,7 +51,7 @@ public class ApiExampleForUserGuide {
   private final String basePath = "https://runtime-api-na-west.stg.chatbots.sfdc.sh";
 
   private final String orgId = "00DSB0000001ThY2AU";
-  private final String botId = "0XxSB00000006rp0AA";
+  private final String botId = "0XxSB00000007UX0AY";
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running.
@@ -93,9 +93,9 @@ public class ApiExampleForUserGuide {
     String sessionId = sendStartChatSession(client, config);
     sessionId = sendStartChatSessionWithOptionalFields(client, config);
 
-    sendTextMessage(client, config, sessionId);
+    sendTextMessageChoiceAlias(client, config, sessionId);
     sendChoiceMessageWithIndex(client, config, sessionId);
-    sendChoiceMessageWithId(client, config, sessionId);
+    sendTextMessage(client, config, sessionId);
     sendTransferSuccessMessage(client, config, sessionId);
     sendTransferFailureMessage(client, config, sessionId);
     sendEndSessionMessage(client, config, sessionId);
@@ -119,14 +119,28 @@ public class ApiExampleForUserGuide {
       throws JsonProcessingException {
     // Build Bot Send Message Request
     BotSendMessageRequest botSendMessageRequest =  BotRequest
-        .withMessage(RequestFactory.buildTextMessage("Order Status"))
+        .withMessage(RequestFactory.buildTextMessage("Transfer To Agent"))
         .build();
 
     // Send a message to existing Session
     BotResponse textMsgResponse = client
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
-    System.out.println("Text Message Response :" + convertObjectToJson(textMsgResponse));
+    System.out.println("Transfer To Agent Message Response :" + convertObjectToJson(textMsgResponse));
+  }
+
+  private void sendTextMessageChoiceAlias(BasicChatbotClient client, RequestConfig config, String sessionId)
+      throws JsonProcessingException {
+    // Build Bot Send Message Request
+    BotSendMessageRequest botSendMessageRequest =  BotRequest
+        .withMessage(RequestFactory.buildTextMessage("1"))
+        .build();
+
+    // Send a message to existing Session
+    BotResponse textMsgResponse = client
+        .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
+
+    System.out.println("Text Message With Choice Alias Response :" + convertObjectToJson(textMsgResponse));
   }
 
   private String sendStartChatSession(BasicChatbotClient client, RequestConfig config)
@@ -194,7 +208,8 @@ public class ApiExampleForUserGuide {
 
     // Build Bot Send Message Request
     BotSendMessageRequest botSendMessageRequest =  BotRequest
-        .withMessage(buildChoiceMessageWithId("todo"))
+        .withMessage(buildChoiceMessageWithId("da83a84f-1325-4d37-80df-5a4931284961"))
+        //ChoiceId of Frequently Asked Question Option from bot's response payload.
         .build();
 
     // Send a message to existing Session
