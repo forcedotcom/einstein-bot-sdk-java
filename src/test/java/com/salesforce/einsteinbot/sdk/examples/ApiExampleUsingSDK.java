@@ -25,9 +25,15 @@ import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.client.util.RequestFactory;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
+import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
+import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessage;
+import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoices;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
+import com.salesforce.einsteinbot.sdk.model.TextResponseMessage;
 import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
+import java.util.List;
 
 
 /**
@@ -42,7 +48,7 @@ public class ApiExampleUsingSDK {
   private final String basePath = "https://runtime-api-na-west.stg.chatbots.sfdc.sh";
 
   private final String orgId = "00DSB0000001ThY2AU";
-  private final String botId = "0XxSB00000006rp0AA";
+  private final String botId = "0XxSB00000007UX0AY";
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running.
@@ -96,6 +102,9 @@ public class ApiExampleUsingSDK {
 
     // Get SessionId from Response.
     String sessionId = resp.getResponseEnvelope().getSessionId();
+    String responseMessage = getResponseMessageAsText(resp.getResponseEnvelope().getMessages());
+
+    System.out.println("Init Response as Text : \n" + responseMessage);
 
     // Build Bot Send Message Request
     BotSendMessageRequest botSendMessageRequest =  BotRequest
@@ -118,6 +127,27 @@ public class ApiExampleUsingSDK {
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
 
+  }
+
+  private String getResponseMessageAsText(List<AnyResponseMessage> messages) {
+    StringBuilder sb = new StringBuilder();
+    for(AnyResponseMessage message : messages){
+      if (message instanceof TextResponseMessage){
+        sb.append(((TextResponseMessage) message).getText())
+            .append("\n");
+      }else if (message instanceof ChoicesResponseMessage){
+        List<ChoicesResponseMessageChoices> choices = ((ChoicesResponseMessage) message)
+            .getChoices();
+        for (ChoicesResponseMessageChoices choice : choices){
+          sb.append(choice.getAlias())
+              .append(".")
+              .append(choice.getLabel())
+              .append("\n");
+        }
+      }
+      //Similarly handle other Response Message Types.
+    }
+    return sb.toString();
   }
 
   private RequestConfig createRequestConfig() {

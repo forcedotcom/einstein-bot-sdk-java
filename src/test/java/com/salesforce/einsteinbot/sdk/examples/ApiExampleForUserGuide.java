@@ -26,9 +26,13 @@ import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.client.util.RequestFactory;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
+import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
+import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessage;
+import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoices;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.TextResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable.TypeEnum;
 import com.salesforce.einsteinbot.sdk.model.TransferFailedRequestMessage;
@@ -73,8 +77,8 @@ public class ApiExampleForUserGuide {
   }
 
   private void run() throws Exception{
-   // sendUsingBasicClient();
-    sendUsingSessionManagedClient();
+    sendUsingBasicClient();
+  //  sendUsingSessionManagedClient();
   }
 
   private void sendUsingBasicClient() throws Exception{
@@ -92,15 +96,16 @@ public class ApiExampleForUserGuide {
     //3. Create Request Config
     RequestConfig config = createRequestConfig();
 
-    String sessionId = sendStartChatSession(client, config);
-    sessionId = sendStartChatSessionWithOptionalFields(client, config);
+ //   String sessionId = sendStartChatSession(client, config);
+   String sessionId = sendStartChatSessionWithOptionalFields(client, config);
 
-    sendTextMessageChoiceAlias(client, config, sessionId);
+
+  /*  sendTextMessageChoiceAlias(client, config, sessionId);
     sendChoiceMessageWithIndex(client, config, sessionId);
     sendTextMessage(client, config, sessionId);
     sendTransferSuccessMessage(client, config, sessionId);
     sendTransferFailureMessage(client, config, sessionId);
-    sendEndSessionMessage(client, config, sessionId);
+    sendEndSessionMessage(client, config, sessionId);*/
 
   }
 
@@ -217,6 +222,7 @@ public class ApiExampleForUserGuide {
     BotResponse resp = client.startChatSession(config, externalSessionKey, botSendInitMessageRequest);
 
     System.out.println("Init Message Response :" + convertObjectToJson(resp));
+    System.out.println("Init Message Response as Text : \n" + getResponseMessageAsText(resp.getResponseEnvelope().getMessages()));
 
     return resp.getResponseEnvelope().getSessionId();
   }
@@ -228,9 +234,9 @@ public class ApiExampleForUserGuide {
 
     List<AnyVariable> variables = Collections
         .singletonList(new TextVariable()
-            .name("FirstName")
+            .name("CustomerName")
             .type(TypeEnum.TEXT)
-            .value("YourName")
+            .value("Raja") //TODO
         );
 
     BotSendMessageRequest botSendInitMessageRequest = BotRequest
@@ -244,6 +250,7 @@ public class ApiExampleForUserGuide {
     BotResponse resp = client.startChatSession(config, externalSessionKey, botSendInitMessageRequest);
 
     System.out.println("Init Message With Optional fields Response :" + convertObjectToJson(resp));
+    System.out.println("Init Message With Optional fields Response as Text : \n" + getResponseMessageAsText(resp.getResponseEnvelope().getMessages()));
 
     return resp.getResponseEnvelope().getSessionId();
   }
@@ -307,6 +314,27 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer Failure Message Response :" + convertObjectToJson(response));
+  }
+
+  private String getResponseMessageAsText(List<AnyResponseMessage> messages) {
+    StringBuilder sb = new StringBuilder();
+    for(AnyResponseMessage message : messages){
+      if (message instanceof TextResponseMessage){
+        sb.append(((TextResponseMessage) message).getText())
+            .append("\n");
+      }else if (message instanceof ChoicesResponseMessage){
+        List<ChoicesResponseMessageChoices> choices = ((ChoicesResponseMessage) message)
+            .getChoices();
+        for (ChoicesResponseMessageChoices choice : choices){
+          sb.append(choice.getAlias())
+              .append(".")
+              .append(choice.getLabel())
+              .append("\n");
+        }
+      }
+      //Similarly handle other Response Message Types.
+    }
+    return sb.toString();
   }
 
   private RequestConfig createRequestConfig() {

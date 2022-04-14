@@ -44,7 +44,7 @@ public class ApiExampleWithoutUsingSDK2 {
   private static final String RUNTIME_URL = "https://runtime-api-na-west.stg.chatbots.sfdc.sh";
 
   private final String orgId = "00DSB0000001ThY2AU";
-  private final String botId = "0XxSB00000006rp0AA";
+  private final String botId = "0XxSB00000007UX0AY";
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running.
@@ -143,7 +143,6 @@ public class ApiExampleWithoutUsingSDK2 {
         "{\n"
           + "  \"externalSessionKey\": \"" + newRandomUUID() + "\",\n"
           + "  \"message\": {\n"
-          + "    \"sequenceId\": " + System.currentTimeMillis() + ",\n"
           + "    \"text\": \"" + message + "\"\n"
           + "  },\n"
           + "  \"forceConfig\": {\n"
