@@ -16,6 +16,7 @@ import com.salesforce.einsteinbot.sdk.auth.JwtBearerOAuth;
 import com.salesforce.einsteinbot.sdk.cache.InMemoryCache;
 import com.salesforce.einsteinbot.sdk.client.BasicChatbotClient;
 import com.salesforce.einsteinbot.sdk.client.ChatbotClients;
+import com.salesforce.einsteinbot.sdk.client.SessionManagedChatbotClient;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
@@ -72,7 +73,8 @@ public class ApiExampleForUserGuide {
   }
 
   private void run() throws Exception{
-    sendUsingBasicClient();
+   // sendUsingBasicClient();
+    sendUsingSessionManagedClient();
   }
 
   private void sendUsingBasicClient() throws Exception{
@@ -102,6 +104,51 @@ public class ApiExampleForUserGuide {
 
   }
 
+  private void sendUsingSessionManagedClient() throws Exception {
+
+    //1. Create JwtBearer Auth Mechanism.
+    AuthMechanism oAuth = new JwtBearerOAuth(privateKeyFilePath,
+        loginEndpoint, connectedAppId, secret, userId, new InMemoryCache(300L));
+
+    //2. Create Session Managed Client
+    SessionManagedChatbotClient client = ChatbotClients
+        .sessionManaged()
+        .basicClient(ChatbotClients.basic()
+            .basePath(basePath)
+            .authMechanism(oAuth)
+            .build())
+        .cache(new InMemoryCache(600))
+        .build();
+
+    //3. Create Request Config
+    RequestConfig config = createRequestConfig();
+
+    ExternalSessionId externalSessionKey = new ExternalSessionId(UUID.randomUUID().toString());
+
+    //4. When you sent a message for first time with new externalSessionKey,
+    // a new chat session will be automatically started
+    sendMessageUsingSessionManagedClient(client, config, externalSessionKey, "Hello");
+
+    //5. When you sent a message with same externalSessionKey,
+    // it will send message to existing session associated with externalSessionKey.
+    sendMessageUsingSessionManagedClient(client, config, externalSessionKey, "Order Status");
+
+    //6. For Ending session, use same externalSessionKey
+    sendEndSessionMessageUsingSessionManagedClient(client, config, externalSessionKey);
+  }
+
+  private void sendMessageUsingSessionManagedClient(SessionManagedChatbotClient client, RequestConfig config,
+      ExternalSessionId externalSessionKey, String message) throws JsonProcessingException {
+    BotSendMessageRequest botSendFirstMessageRequest = BotRequest
+        .withMessage(buildTextMessage(message))
+        .build();
+
+    BotResponse firstMsgResp = client
+        .sendMessage(config, externalSessionKey, botSendFirstMessageRequest);
+
+    System.out.println("Response for message " + message + ": " + convertObjectToJson(firstMsgResp));
+  }
+
   private void sendEndSessionMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
       throws JsonProcessingException {
     // Build Bot End Session Message Request
@@ -111,6 +158,19 @@ public class ApiExampleForUserGuide {
     // Send Request to End Chat session
     BotResponse endSessionResponse = client
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
+
+    System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
+  }
+
+  private void sendEndSessionMessageUsingSessionManagedClient(SessionManagedChatbotClient client, RequestConfig config, ExternalSessionId externalSessionId)
+      throws JsonProcessingException {
+    // Build Bot End Session Message Request
+    BotEndSessionRequest botEndSessionRequest = BotRequest
+        .withEndSession(EndSessionReason.USERREQUEST).build();
+
+    // Send Request to End Chat session
+    BotResponse endSessionResponse = client
+        .endChatSession(config, externalSessionId, botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
   }
