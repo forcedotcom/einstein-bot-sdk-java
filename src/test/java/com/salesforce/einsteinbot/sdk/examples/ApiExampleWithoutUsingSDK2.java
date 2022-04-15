@@ -154,10 +154,9 @@ public class ApiExampleWithoutUsingSDK2 {
     HttpEntity<String> httpRequest = new HttpEntity<>(requestBody, requestHeaders);
 
     // Create URL with URI format v5.0.0/bots/{botId}/sessions
-    String url = UriComponentsBuilder
-        .fromHttpUrl(RUNTIME_URL)
-        .path(START_SESSION_URI)
-        .buildAndExpand(botId).toString();
+
+    String url = RUNTIME_URL
+        + "/v5.0.0/bots/" + botId + "/sessions";
 
     //Send Start Chat Session Request
     ResponseEntity<String> startSessionResponse = restTemplate
