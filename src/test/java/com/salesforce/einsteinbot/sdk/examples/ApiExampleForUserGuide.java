@@ -33,6 +33,8 @@ import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoices;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.Status;
+import com.salesforce.einsteinbot.sdk.model.Status.StatusEnum;
 import com.salesforce.einsteinbot.sdk.model.TextResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable.TypeEnum;
@@ -78,8 +80,9 @@ public class ApiExampleForUserGuide {
   }
 
   private void run() throws Exception{
-    sendUsingBasicClient();
-    sendUsingSessionManagedClient();
+    //sendUsingBasicClient();
+   // sendUsingSessionManagedClient();
+    getHealthStatus();
   }
 
   private void sendUsingBasicClient() throws Exception{
@@ -334,6 +337,23 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer Failure Message Response :" + convertObjectToJson(response));
+  }
+
+  private void getHealthStatus() throws Exception {
+
+    //1. Create JwtBearer Auth Mechanism.
+    AuthMechanism oAuth = new JwtBearerOAuth(privateKeyFilePath,
+        loginEndpoint, connectedAppId, secret, userId, new InMemoryCache(300L));
+
+    //2. Create Chatbot Client
+    BasicChatbotClient client = ChatbotClients.basic()
+        .basePath(basePath)
+        .authMechanism(oAuth)
+        .build();
+
+    Status status = client.getHealthStatus();
+    boolean isRuntimeUp = status.equals(StatusEnum.UP);
+    System.out.println("Health Status: " + convertObjectToJson(client.getHealthStatus()));
   }
 
   private String getResponseMessageAsText(List<AnyResponseMessage> messages) {
