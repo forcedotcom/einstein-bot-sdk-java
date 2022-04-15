@@ -25,6 +25,7 @@ import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.client.util.RequestFactory;
+import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
@@ -78,7 +79,7 @@ public class ApiExampleForUserGuide {
 
   private void run() throws Exception{
     sendUsingBasicClient();
-  //  sendUsingSessionManagedClient();
+    sendUsingSessionManagedClient();
   }
 
   private void sendUsingBasicClient() throws Exception{
@@ -96,17 +97,16 @@ public class ApiExampleForUserGuide {
     //3. Create Request Config
     RequestConfig config = createRequestConfig();
 
- //   String sessionId = sendStartChatSession(client, config);
-   String sessionId = sendStartChatSessionWithOptionalFields(client, config);
+    String sessionId = sendStartChatSession(client, config);
+    sessionId = sendStartChatSessionWithOptionalFields(client, config);
 
-
-  /*  sendTextMessageChoiceAlias(client, config, sessionId);
+    sendTextMessageChoiceAlias(client, config, sessionId);
     sendChoiceMessageWithIndex(client, config, sessionId);
     sendTextMessage(client, config, sessionId);
     sendTransferSuccessMessage(client, config, sessionId);
     sendTransferFailureMessage(client, config, sessionId);
-    sendEndSessionMessage(client, config, sessionId);*/
-
+    sendEndSessionMessage(client, config, sessionId);
+    sendMessageWithErrorHandling(client, config, sessionId);
   }
 
   private void sendUsingSessionManagedClient() throws Exception {
@@ -136,14 +136,15 @@ public class ApiExampleForUserGuide {
 
     //5. When you sent a message with same externalSessionKey,
     // it will send message to existing session associated with externalSessionKey.
-    sendMessageUsingSessionManagedClient(client, config, externalSessionKey, "Order Status");
+   // sendMessageUsingSessionManagedClient(client, config, externalSessionKey, "Order Status");
 
     //6. For Ending session, use same externalSessionKey
-    sendEndSessionMessageUsingSessionManagedClient(client, config, externalSessionKey);
+   // sendEndSessionMessageUsingSessionManagedClient(client, config, externalSessionKey);
   }
 
   private void sendMessageUsingSessionManagedClient(SessionManagedChatbotClient client, RequestConfig config,
       ExternalSessionId externalSessionKey, String message) throws JsonProcessingException {
+
     BotSendMessageRequest botSendFirstMessageRequest = BotRequest
         .withMessage(buildTextMessage(message))
         .build();
@@ -165,6 +166,25 @@ public class ApiExampleForUserGuide {
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
+  }
+
+  private void sendMessageWithErrorHandling(BasicChatbotClient client, RequestConfig config, String sessionId) throws JsonProcessingException{
+    // Build Bot End Session Message Request
+    BotEndSessionRequest botEndSessionRequest = BotRequest
+        .withEndSession(EndSessionReason.USERREQUEST).build();
+
+    // Send Request to End Chat session with invalid session Id and handle error.
+    RuntimeSessionId invalidSessionId = new RuntimeSessionId("invalid session id");
+    try{
+      BotResponse endSessionResponse = client
+          .endChatSession(config, invalidSessionId , botEndSessionRequest);
+      System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
+    }catch (Exception e){
+      //Actual Error is wrapped in RuntimeException and ExecutionException
+      ChatbotResponseException chatbotResponseException = ((ChatbotResponseException)e.getCause().getCause());
+      System.out.println("Error Http Status Code : " + chatbotResponseException.getStatus());
+      System.out.println("Error Payload : " + chatbotResponseException.getErrorResponse());
+    }
   }
 
   private void sendEndSessionMessageUsingSessionManagedClient(SessionManagedChatbotClient client, RequestConfig config, ExternalSessionId externalSessionId)
@@ -236,7 +256,7 @@ public class ApiExampleForUserGuide {
         .singletonList(new TextVariable()
             .name("CustomerName")
             .type(TypeEnum.TEXT)
-            .value("Raja") //TODO
+            .value("YourName") //TODO
         );
 
     BotSendMessageRequest botSendInitMessageRequest = BotRequest
