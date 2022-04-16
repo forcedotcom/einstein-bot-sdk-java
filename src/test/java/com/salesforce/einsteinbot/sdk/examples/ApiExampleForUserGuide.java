@@ -28,11 +28,20 @@ import com.salesforce.einsteinbot.sdk.client.util.RequestFactory;
 import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
+import com.salesforce.einsteinbot.sdk.model.AnyStaticContentMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
+import com.salesforce.einsteinbot.sdk.model.Attachment;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoices;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessage;
+import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessageTargets;
+import com.salesforce.einsteinbot.sdk.model.SessionEndedResponseMessage;
+import com.salesforce.einsteinbot.sdk.model.SessionEndedResponseMessage.ReasonEnum;
+import com.salesforce.einsteinbot.sdk.model.StaticContentAttachments;
+import com.salesforce.einsteinbot.sdk.model.StaticContentMessage;
+import com.salesforce.einsteinbot.sdk.model.StaticContentText;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.Status.StatusEnum;
 import com.salesforce.einsteinbot.sdk.model.TextResponseMessage;
@@ -80,8 +89,8 @@ public class ApiExampleForUserGuide {
   }
 
   private void run() throws Exception{
-    //sendUsingBasicClient();
-   // sendUsingSessionManagedClient();
+    sendUsingBasicClient();
+    sendUsingSessionManagedClient();
     getHealthStatus();
   }
 
@@ -156,6 +165,7 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, externalSessionKey, botSendFirstMessageRequest);
 
     System.out.println("Response for message " + message + ": " + convertObjectToJson(firstMsgResp));
+    System.out.println("Response for message as Text : \n" + getResponseMessageAsText(firstMsgResp.getResponseEnvelope().getMessages()));
   }
 
   private void sendEndSessionMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
@@ -169,6 +179,7 @@ public class ApiExampleForUserGuide {
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
+    System.out.println("End Session Response as Text : \n" + getResponseMessageAsText(endSessionResponse.getResponseEnvelope().getMessages()));
   }
 
   private void sendMessageWithErrorHandling(BasicChatbotClient client, RequestConfig config, String sessionId) throws JsonProcessingException{
@@ -201,6 +212,7 @@ public class ApiExampleForUserGuide {
         .endChatSession(config, externalSessionId, botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
+    System.out.println("End Session Response as Text : \n" + getResponseMessageAsText(endSessionResponse.getResponseEnvelope().getMessages()));
   }
 
   private void sendTextMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
@@ -215,6 +227,8 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer To Agent Message Response :" + convertObjectToJson(textMsgResponse));
+    System.out.println("Transfer To Agent Message Response as Text : \n" + getResponseMessageAsText(textMsgResponse.getResponseEnvelope().getMessages()));
+
   }
 
   private void sendTextMessageChoiceAlias(BasicChatbotClient client, RequestConfig config, String sessionId)
@@ -229,6 +243,7 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Text Message With Choice Alias Response :" + convertObjectToJson(textMsgResponse));
+    System.out.println("Text Message With Choice Alias Response as Text : \n" + getResponseMessageAsText(textMsgResponse.getResponseEnvelope().getMessages()));
   }
 
   private String sendStartChatSession(BasicChatbotClient client, RequestConfig config)
@@ -291,6 +306,7 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Choice With Index Message Response :" + convertObjectToJson(response));
+    System.out.println("Choice With Index Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
   }
 
   private void sendChoiceMessageWithId(BasicChatbotClient client, RequestConfig config, String sessionId)
@@ -307,6 +323,7 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Choice With Id Message Response :" + convertObjectToJson(response));
+    System.out.println("Choice With Id Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
   }
 
   private void sendTransferSuccessMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
@@ -322,6 +339,7 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer Success Message Response :" + convertObjectToJson(response));
+    System.out.println("Transfer Success Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
   }
 
   private void sendTransferFailureMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
@@ -337,6 +355,7 @@ public class ApiExampleForUserGuide {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer Failure Message Response :" + convertObjectToJson(response));
+    System.out.println("Transfer Failure Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
   }
 
   private void getHealthStatus() throws Exception {
@@ -371,8 +390,33 @@ public class ApiExampleForUserGuide {
               .append(choice.getLabel())
               .append("\n");
         }
+      }else if (message instanceof EscalateResponseMessage){
+        List<EscalateResponseMessageTargets> targets = ((EscalateResponseMessage) message)
+            .getTargets();
+        //Implement your code to actually do the transfer.
+        sb.append("Transferring you to Agent in Target : " + targets);
+
+      }else if (message instanceof SessionEndedResponseMessage){
+        ReasonEnum reason = ((SessionEndedResponseMessage) message)
+            .getReason();
+        //Implement logic to do any clean on the channel.
+        sb.append("The Chat session ended with Reason : " + reason);
+
+      }else if (message instanceof StaticContentMessage){
+        AnyStaticContentMessage staticContentMessage = ((StaticContentMessage) message)
+            .getStaticContent();
+        if (staticContentMessage instanceof StaticContentText){
+          String richContentText = ((StaticContentText) staticContentMessage).getText();
+          //Display Rich Content text depending on your channel.
+          sb.append("Received Rich Content Text: " + richContentText);
+
+        }else if (staticContentMessage instanceof StaticContentAttachments){
+          List<Attachment> attachments = ((StaticContentAttachments) staticContentMessage)
+              .getAttachments();
+          //Display Attachments depending on your channel.
+          sb.append("Received Attachment : " + attachments);
+        }
       }
-      //Similarly handle other Response Message Types.
     }
     return sb.toString();
   }
