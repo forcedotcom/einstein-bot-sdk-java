@@ -57,19 +57,19 @@ public class JwtBearerOAuth implements AuthMechanism {
   private String userId;
   private PrivateKey privateKey;
   private WebClient webClient;
-  private Cache cache;
+  private Optional<Cache> cache;
   private Introspector introspector;
 
-  public JwtBearerOAuth(String privateKeyFilePath, String loginEndpoint, String connectedAppId,
+ /* TODO public JwtBearerOAuth(String privateKeyFilePath, String loginEndpoint, String connectedAppId,
       String connectedAppSecret,
-      String userId, Cache cache) {
+      String userId, Optional<Cache> cache) {
     this(getPrivateKey(privateKeyFilePath), loginEndpoint, connectedAppId, connectedAppSecret,
         userId, cache);
-  }
+  }*/
 
-  public JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connectedAppId,
+  private JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connectedAppId,
       String connectedAppSecret,
-      String userId, Cache cache) {
+      String userId, Optional<Cache> cache) {
     this.privateKey = privateKey;
     this.userId = userId;
     this.connectedAppId = connectedAppId;
@@ -98,9 +98,13 @@ public class JwtBearerOAuth implements AuthMechanism {
     this.introspector = introspector;
   }
 
+  public static PrivateKeyBuilder with(){
+    return new FluentBuilder();
+  }
+
   @Override
   public String getToken() {
-    Optional<String> token = cache.get(getCacheKey());
+    Optional<String> token = cache.flatMap(c -> c.get(getCacheKey()));
     if (token.isPresent()) {
       logger.debug("Found cached OAuth token.");
       return token.get();
@@ -155,7 +159,9 @@ public class JwtBearerOAuth implements AuthMechanism {
     Instant expiry = Instant.ofEpochSecond(iResult.getExp());
     long ttl = Math.max(0, Instant.now().until(expiry, ChronoUnit.SECONDS) - 300);
 
-    cache.set(getCacheKey(), oAuthToken, ttl);
+    if (cache.isPresent()){
+      cache.get().set(getCacheKey(), oAuthToken, ttl);
+    }
     return oAuthToken;
   }
 
@@ -183,5 +189,90 @@ public class JwtBearerOAuth implements AuthMechanism {
 
   private String getCacheKey() {
     return cacheKeyPrefix + connectedAppId;
+  }
+
+  public static class FluentBuilder implements PrivateKeyBuilder,
+      LoginEndpointBuilder,
+      ConnectedAppIdBuilder,
+      ConnectedAppSecretBuilder,
+      UserIdBuilder,
+      FinalBuilder {
+    PrivateKey privateKey;
+    String loginEndpoint;
+    String connectedAppId;
+    String connectedAppSecret;
+    String userId;
+    Optional<Cache> cache;
+
+    @Override
+    public LoginEndpointBuilder privateKey(PrivateKey privateKey) {
+      this.privateKey = privateKey;
+      return this;
+    }
+
+    @Override
+    public LoginEndpointBuilder privateKeyFilePath(String privateKeyFilePath) {
+      this.privateKey = getPrivateKey(privateKeyFilePath);
+      return this;
+    }
+
+    @Override
+    public ConnectedAppIdBuilder loginEndpoint(String loginEndpoint) {
+      this.loginEndpoint = loginEndpoint;
+      return this;
+    }
+
+    @Override
+    public ConnectedAppSecretBuilder connectedAppId(String connectedAppId) {
+      this.connectedAppId = connectedAppId;
+      return this;
+    }
+
+    @Override
+    public UserIdBuilder connectedAppSecret(String connectedAppSecret) {
+      this.connectedAppSecret = connectedAppSecret;
+      return this;
+    }
+
+    @Override
+    public FinalBuilder userId(String userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    @Override
+    public FinalBuilder cache(Cache cache) {
+      this.cache = Optional.of(cache);
+      return this;
+    }
+
+    @Override
+    public JwtBearerOAuth build() {
+      return new JwtBearerOAuth(privateKey,loginEndpoint, connectedAppId, connectedAppSecret, userId, cache);
+    }
+  }
+
+  public interface PrivateKeyBuilder {
+    LoginEndpointBuilder privateKey(PrivateKey privateKey);
+    LoginEndpointBuilder privateKeyFilePath(String privateKeyFilePath);
+  }
+
+  public interface LoginEndpointBuilder {
+    ConnectedAppIdBuilder loginEndpoint(String loginEndpoint);
+  }
+  public interface ConnectedAppIdBuilder {
+    ConnectedAppSecretBuilder connectedAppId(String connectedAppId);
+  }
+  public interface ConnectedAppSecretBuilder {
+    UserIdBuilder connectedAppSecret(String connectedAppSecret);
+  }
+
+  public interface UserIdBuilder {
+    FinalBuilder userId(String userId);
+  }
+
+  public interface FinalBuilder {
+    FinalBuilder cache(Cache cache);
+    AuthMechanism build();
   }
 }

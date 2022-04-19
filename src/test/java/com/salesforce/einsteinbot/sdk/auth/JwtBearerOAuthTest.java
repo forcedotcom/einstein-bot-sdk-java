@@ -88,9 +88,15 @@ public class JwtBearerOAuthTest {
 
   @Test
   public void getOAuthToken() throws InterruptedException {
-    JwtBearerOAuth oAuth = new JwtBearerOAuth(privateKey, loginEndpoint, connectedAppId,
-        connectedAppSecret, userId, mockCache);
-    oAuth.setIntrospector(mockIntrospector);
+    AuthMechanism oAuth = JwtBearerOAuth.with()
+        .privateKey(privateKey)
+        .loginEndpoint(loginEndpoint)
+        .connectedAppId(connectedAppId)
+        .connectedAppSecret(connectedAppSecret)
+        .userId(userId).cache(mockCache)
+        .build();
+
+    ((JwtBearerOAuth) oAuth).setIntrospector(mockIntrospector);
 
     MockResponse mockResponse = new MockResponse()
         .setBody(tokenResponse)
@@ -125,8 +131,13 @@ public class JwtBearerOAuthTest {
 
   @Test
   public void getOAuthTokenFromCache() throws InterruptedException {
-    JwtBearerOAuth oAuth = new JwtBearerOAuth(privateKey, loginEndpoint, connectedAppId,
-        connectedAppSecret, userId, mockCache);
+    AuthMechanism oAuth = JwtBearerOAuth.with()
+        .privateKey(privateKey)
+        .loginEndpoint(loginEndpoint)
+        .connectedAppId(connectedAppId)
+        .connectedAppSecret(connectedAppSecret)
+        .userId(userId).cache(mockCache)
+        .build();
     when(mockCache.get(getCacheKey())).thenReturn(Optional.of(token));
 
     assertEquals(token, oAuth.getToken());

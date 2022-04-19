@@ -46,8 +46,13 @@ public class ChatbotClientExamples {
   private final String secret = "YOUR_CONNECTED_APP_SECRET";
   private final String userId = "SALESFORCE_LOGIN_USER";
 
-  private AuthMechanism oAuth = new JwtBearerOAuth("src/test/resources/YourConnectedAppPrivateKey.der",
-      loginEndpoint, connectedAppId, secret, userId, new InMemoryCache(300L));
+  private AuthMechanism oAuth = JwtBearerOAuth.with()
+      .privateKeyFilePath("src/test/resources/YourConnectedAppPrivateKey.der")
+      .loginEndpoint(loginEndpoint)
+      .connectedAppId(connectedAppId)
+      .connectedAppSecret(secret)
+      .userId(userId).cache(new InMemoryCache(300L))
+      .build();
 
   public static void main(String[] args) throws Exception {
     new ChatbotClientExamples().run();
