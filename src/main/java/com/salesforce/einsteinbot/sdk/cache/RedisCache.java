@@ -77,4 +77,11 @@ public class RedisCache implements Cache {
       jedis.setex(key, ttlInSeconds, val);
     }
   }
+
+  @Override
+  public void remove(String key){
+    try (Jedis jedis = this.jedisPool.getResource()) {
+      jedis.del(key);
+    }
+  }
 }

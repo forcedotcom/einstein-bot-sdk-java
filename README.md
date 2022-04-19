@@ -119,14 +119,14 @@ private void sendUsingBasicClient(){
 
 private void sendUsingSessionManagedClient() {
 
-    RequestEnvelopeMessagesOneOf textMessage = buildTextMessage("Initial message");
+    AnyRequestMessage textMessage = buildTextMessage("Initial message");
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId, forceConfigEndPoint, Arrays.asList(textMessage));
 
     RequestHeaders headers = buildRequestHeaders();
     ResponseEnvelope resp = client.sendChatbotRequest(envelope, headers); // 'client' created in Step 3B.
   }
 
-public static RequestEnvelopeMessagesOneOf buildTextMessage(String msg) {
+public static AnyRequestMessage buildTextMessage(String msg) {
     return new TextMessage()
       .text(msg)
       .type(TextMessage.TypeEnum.TEXT)
