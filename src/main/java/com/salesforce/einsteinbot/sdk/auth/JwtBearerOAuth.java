@@ -29,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
@@ -60,16 +61,15 @@ public class JwtBearerOAuth implements AuthMechanism {
   private Optional<Cache> cache;
   private Introspector introspector;
 
- /* TODO public JwtBearerOAuth(String privateKeyFilePath, String loginEndpoint, String connectedAppId,
-      String connectedAppSecret,
-      String userId, Optional<Cache> cache) {
-    this(getPrivateKey(privateKeyFilePath), loginEndpoint, connectedAppId, connectedAppSecret,
-        userId, cache);
-  }*/
-
   private JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connectedAppId,
       String connectedAppSecret,
       String userId, Optional<Cache> cache) {
+    Objects.nonNull(privateKey);
+    Objects.nonNull(loginEndpoint);
+    Objects.nonNull(connectedAppId);
+    Objects.nonNull(connectedAppSecret);
+    Objects.nonNull(userId);
+    Objects.nonNull(cache);
     this.privateKey = privateKey;
     this.userId = userId;
     this.connectedAppId = connectedAppId;
@@ -202,7 +202,7 @@ public class JwtBearerOAuth implements AuthMechanism {
     String connectedAppId;
     String connectedAppSecret;
     String userId;
-    Optional<Cache> cache;
+    Optional<Cache> cache = Optional.empty();
 
     @Override
     public LoginEndpointBuilder privateKey(PrivateKey privateKey) {

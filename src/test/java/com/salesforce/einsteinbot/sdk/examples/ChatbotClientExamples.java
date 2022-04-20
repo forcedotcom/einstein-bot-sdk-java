@@ -51,7 +51,8 @@ public class ChatbotClientExamples {
       .loginEndpoint(loginEndpoint)
       .connectedAppId(connectedAppId)
       .connectedAppSecret(secret)
-      .userId(userId).cache(new InMemoryCache(300L))
+      .userId(userId)
+      .cache(new InMemoryCache(300L))
       .build();
 
   public static void main(String[] args) throws Exception {
