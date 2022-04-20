@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -97,7 +96,6 @@ public class SessionManagedChatbotClientTest {
   private SessionManagedChatbotClient sessionManagedClient;
   private BotSendMessageRequest botSendMessageRequest;
   private BotEndSessionRequest botEndSessionRequest;
-
 
   @BeforeEach
   public void setup() {
@@ -203,6 +201,9 @@ public class SessionManagedChatbotClientTest {
 
     BotEndSessionRequest sentRequest = endSessionRequestCaptor.getValue();
     assertEquals(endSessionReason, sentRequest.getEndSessionReason());
+
+    verify(cache)
+        .remove(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey));
   }
 
   private void verifyRequestConfigAndRuntimeSessionId() {

@@ -66,6 +66,7 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
     } else {
       botResponse = continueExistingSession(config, botSendMessageRequest, runtimeSessionIdOptional);
     }
+
     //TODO: Also cache runtimeCRC and send it in subsequent request for both v5 and v4.
     cacheSessionId(botId, externalSessionIdValue, botResponse.getResponseEnvelope(), orgId);
     return botResponse;
@@ -104,9 +105,12 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
         .orElseThrow(() ->
             new IllegalStateException("No session found for given cacheKey : " + cacheKey));
 
-    return basicClient
+    BotResponse botResonse = basicClient
         .endChatSession(config, new RuntimeSessionId(sessionId),
             botEndSessionRequest);
+
+    removeFromCache(cacheKey);
+    return botResonse;
   }
 
   private BotSendMessageRequest updateContextVariables(BotSendMessageRequest botSendMessageRequest) {
@@ -128,6 +132,10 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
       String orgId) {
     cache.set(getCacheKey(orgId, botId, externalSessionId),
         responseEnvelope.getSessionId());
+  }
+
+  private void removeFromCache(String cacheKey) {
+    cache.remove(cacheKey);
   }
 
   @Override

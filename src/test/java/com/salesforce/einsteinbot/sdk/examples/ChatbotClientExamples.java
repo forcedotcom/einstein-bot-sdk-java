@@ -51,12 +51,13 @@ public class ChatbotClientExamples {
   private final String userId = "admin1@esw5.sdb3";
 
   private AuthMechanism oAuth = JwtBearerOAuth.with()
-      .privateKeyFilePath("src/test/resources/YourConnectedAppPrivateKey.der")
+      .privateKeyFilePath("src/test/resources/PrivateKeyFalconTest1.der")
       .loginEndpoint(loginEndpoint)
       .connectedAppId(connectedAppId)
       .connectedAppSecret(secret)
       .userId(userId)
       .cache(new InMemoryCache(300L))
+      .build();
 
   private RequestConfig config = RequestConfig.with()
       .botId(botId)
@@ -69,9 +70,9 @@ public class ChatbotClientExamples {
   }
 
   private void run() throws Exception{
-    sendUsingBasicClient();
-  //  sendUsingSessionManagedClient();
- //   getHealthStatus();
+   // sendUsingBasicClient();
+ //   sendUsingSessionManagedClient();
+    getHealthStatus();
   }
 
   private void sendUsingBasicClient() throws Exception{
