@@ -36,7 +36,8 @@ public class OAuthExamples {
         .loginEndpoint(loginEndpoint)
         .connectedAppId(connectedAppId)
         .connectedAppSecret(secret)
-        .userId(userId).cache(new InMemoryCache(300L))
+        .userId(userId)
+        .cache(new InMemoryCache(300L))
         .build();
 
     String token = oAuth.getToken();

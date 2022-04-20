@@ -56,6 +56,14 @@
 
     <developers>
         <developer>
+            <name>Salesforce</name>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <email>osscore@salesforce.com</email>
+            <organization>Salesforce</organization>
+        </developer>
+        <developer>
             <name>Rajasekar Elango</name>
             <roles>
                 <role>Developer</role>
