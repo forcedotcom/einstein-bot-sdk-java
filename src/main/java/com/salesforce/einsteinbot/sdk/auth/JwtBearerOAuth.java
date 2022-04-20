@@ -242,7 +242,13 @@ public class JwtBearerOAuth implements AuthMechanism {
 
     @Override
     public FinalBuilder cache(Cache cache) {
-      this.cache = Optional.of(cache);
+      this.cache = Optional.ofNullable(cache);
+      return this;
+    }
+
+    @Override
+    public FinalBuilder cache(Optional<Cache> cache) {
+      this.cache = cache;
       return this;
     }
 
@@ -273,6 +279,7 @@ public class JwtBearerOAuth implements AuthMechanism {
 
   public interface FinalBuilder {
     FinalBuilder cache(Cache cache);
+    FinalBuilder cache(Optional<Cache> cache);
     AuthMechanism build();
   }
 }
