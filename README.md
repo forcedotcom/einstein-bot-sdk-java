@@ -53,16 +53,24 @@ the external session ID could be a combination of Slack app ID, Slack user ID an
     private final String secret = "<your connected app secret>"; //can be found in App Manager page
     private final String userId = "<userId associated with certificate used for connected app>";
     
-    JwtBearerOAuth oAuth = new JwtBearerOAuth(pvtKeyFile,
-        loginEndpoint, connectedAppId, secret, userId, 
-        cache); // 'cache' created in Step 1
+    JwtBearerOAuth oAuth = JwtBearerOAuth.with()
+    .privateKeyFilePath(pvtKeyFile)
+    .loginEndpoint(loginEndpoint)
+    .connectedAppId(connectedAppId)
+    .connectedAppSecret(secret)
+    .userId(userId)
+    .cache(cache) // 'cache' (Optional) created in Step 1. 
+    // Provide cache if you want to cache oAuth tokens to avoid network requests
+    .build(); 
 ```
 
 You are also able to use a different constructor and pass in a `java.security.PrivateKey` instead of a private key file.
 
 ```java
-public JwtBearerOAuth(PrivateKey privateKey, String loginEndpoint, String connectedAppId, String connectedAppSecret,
-      String userId, Cache cache)
+ JwtBearerOAuth.with()
+    .privateKey(privateKey)
+    .loginEndpoint(loginEndpoint)
+    ...
 ```
 ### 3. Setup Chatbot Client
 
@@ -119,14 +127,14 @@ private void sendUsingBasicClient(){
 
 private void sendUsingSessionManagedClient() {
 
-    RequestEnvelopeMessagesOneOf textMessage = buildTextMessage("Initial message");
+    AnyRequestMessage textMessage = buildTextMessage("Initial message");
     RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId, forceConfigEndPoint, Arrays.asList(textMessage));
 
     RequestHeaders headers = buildRequestHeaders();
     ResponseEnvelope resp = client.sendChatbotRequest(envelope, headers); // 'client' created in Step 3B.
   }
 
-public static RequestEnvelopeMessagesOneOf buildTextMessage(String msg) {
+public static AnyRequestMessage buildTextMessage(String msg) {
     return new TextMessage()
       .text(msg)
       .type(TextMessage.TypeEnum.TEXT)

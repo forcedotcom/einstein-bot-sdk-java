@@ -7,6 +7,7 @@
 
 package com.salesforce.einsteinbot.sdk.examples;
 
+import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.auth.IntrospectionResult;
 import com.salesforce.einsteinbot.sdk.auth.Introspector;
 import com.salesforce.einsteinbot.sdk.auth.JwtBearerOAuth;
@@ -29,8 +30,16 @@ public class OAuthExamples {
      * Command to convert private key to DER format
      * openssl pkcs8 -topk8 -inform PEM -outform DER -in server.key -out src/test/resources/YourPrivateKey.der -nocrypt
      * */
-    JwtBearerOAuth oAuth = new JwtBearerOAuth("src/test/resources/YourPrivateKey.der",
-        loginEndpoint, connectedAppId, secret, userId, new InMemoryCache(300L));
+
+    AuthMechanism oAuth = JwtBearerOAuth.with()
+        .privateKeyFilePath("src/test/resources/YourPrivateKey.der")
+        .loginEndpoint(loginEndpoint)
+        .connectedAppId(connectedAppId)
+        .connectedAppSecret(secret)
+        .userId(userId)
+        .cache(new InMemoryCache(300L))
+        .build();
+
     String token = oAuth.getToken();
 
     Introspector is = new Introspector(connectedAppId, secret, loginEndpoint);

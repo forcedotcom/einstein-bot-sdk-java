@@ -21,4 +21,6 @@ public interface Cache {
   void set(String key, String val);
 
   void set(String key, String val, long ttlSeconds);
+
+  public void remove(String key);
 }

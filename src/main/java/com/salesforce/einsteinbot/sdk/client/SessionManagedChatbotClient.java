@@ -59,7 +59,12 @@ public class SessionManagedChatbotClient implements ChatbotClient {
     }
     addSequenceIds(requestEnvelope);
     ResponseEnvelope response = basicClient.sendChatbotRequest(requestEnvelope, requestHeaders);
-    cacheSessionId(requestEnvelope.getExternalSessionKey(), response, requestHeaders.getOrgId());
+
+    if (hasEndSessionMessage(requestEnvelope)){
+      removeFromCache(requestEnvelope.getExternalSessionKey(), response, requestHeaders.getOrgId());
+    }else {
+      cacheSessionId(requestEnvelope.getExternalSessionKey(), response, requestHeaders.getOrgId());
+    }
 
     return response;
   }
@@ -98,6 +103,13 @@ public class SessionManagedChatbotClient implements ChatbotClient {
       }
       sequenceId++;
     }
+  }
+
+  private boolean hasEndSessionMessage(RequestEnvelope requestEnvelope){
+    return requestEnvelope.getMessages()
+        .stream().filter(m -> m instanceof EndSessionMessage)
+        .findFirst()
+        .isPresent();
   }
 
   private void setSessionIdOrAddInitMessage(RequestEnvelope requestEnvelope,
@@ -153,6 +165,11 @@ public class SessionManagedChatbotClient implements ChatbotClient {
       String orgId) {
     cache.set(getCacheKey(externalSessionId, orgId, responseEnvelope.getBotId()),
         responseEnvelope.getSessionId());
+  }
+
+  private void removeFromCache(String externalSessionId, ResponseEnvelope responseEnvelope,
+      String orgId) {
+    cache.remove(getCacheKey(externalSessionId, orgId, responseEnvelope.getBotId()));
   }
 
   public static BasicClientBuilder builder() {

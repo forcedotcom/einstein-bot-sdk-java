@@ -87,9 +87,40 @@ public class JwtBearerOAuthTest {
   }
 
   @Test
-  public void getOAuthToken() throws InterruptedException {
-    JwtBearerOAuth oAuth = new JwtBearerOAuth(privateKey, loginEndpoint, connectedAppId,
-        connectedAppSecret, userId, mockCache);
+  public void getOAuthTokenWithCacheMiss() throws InterruptedException {
+    AuthMechanism oAuth = JwtBearerOAuth.with()
+        .privateKey(privateKey)
+        .loginEndpoint(loginEndpoint)
+        .connectedAppId(connectedAppId)
+        .connectedAppSecret(connectedAppSecret)
+        .userId(userId)
+        .cache(mockCache)
+        .build();
+
+    setupMocks((JwtBearerOAuth) oAuth);
+    verifyToken(oAuth);
+
+    // verify token is cached
+    ArgumentCaptor<Long> ttlCaptor = ArgumentCaptor.forClass(Long.class);
+    verify(mockCache, times(2)).set(eq(getCacheKey()), eq(token), ttlCaptor.capture());
+    assertTrue(ttlCaptor.getValue() > 6500,
+        "ttl is too short"); // ttl should be just under two hours
+    assertTrue(ttlCaptor.getValue() < 7200, "ttl is too long");
+ }
+
+  private void verifyToken(AuthMechanism oAuth) throws InterruptedException {
+    // get token
+    String resultToken = oAuth.getToken();
+    assertEquals(token, resultToken);
+    assertEquals(JwtBearerOAuth.JWT_AUTH_TOKEN_PREFIX + token, oAuth.getAuthorizationHeader());
+
+    // verify request sent to server
+    RecordedRequest recordedRequest = mockBackEnd.takeRequest();
+    assertEquals("POST", recordedRequest.getMethod());
+    assertEquals("/services/oauth2/token", recordedRequest.getPath());
+  }
+
+  private void setupMocks(JwtBearerOAuth oAuth) {
     oAuth.setIntrospector(mockIntrospector);
 
     MockResponse mockResponse = new MockResponse()
@@ -103,30 +134,32 @@ public class JwtBearerOAuthTest {
 
     when(mockIntrospector.introspect(token)).thenReturn(introspectionResult)
         .thenReturn(introspectionResult);
+  }
 
+  @Test
+  public void getOAuthTokenWithNoCache() throws InterruptedException {
+    AuthMechanism oAuth = JwtBearerOAuth.with()
+        .privateKey(privateKey)
+        .loginEndpoint(loginEndpoint)
+        .connectedAppId(connectedAppId)
+        .connectedAppSecret(connectedAppSecret)
+        .userId(userId)
+        .build();
+
+    setupMocks((JwtBearerOAuth) oAuth);
     // get token
-    String resultToken = oAuth.getToken();
-    assertEquals(token, resultToken);
-    assertEquals(JwtBearerOAuth.JWT_AUTH_TOKEN_PREFIX + token, oAuth.getAuthorizationHeader());
-
-    // verify request sent to server
-    RecordedRequest recordedRequest = mockBackEnd.takeRequest();
-    assertEquals("POST", recordedRequest.getMethod());
-    assertEquals("/services/oauth2/token", recordedRequest.getPath());
-
-    // verify token is cached
-    ArgumentCaptor<Long> ttlCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockCache, times(2)).set(eq(getCacheKey()), eq(token), ttlCaptor.capture());
-    assertTrue(ttlCaptor.getValue() > 6500,
-        "ttl is too short"); // ttl should be just under two hours
-    assertTrue(ttlCaptor.getValue() < 7200, "ttl is too long");
-
+    verifyToken(oAuth);
   }
 
   @Test
   public void getOAuthTokenFromCache() throws InterruptedException {
-    JwtBearerOAuth oAuth = new JwtBearerOAuth(privateKey, loginEndpoint, connectedAppId,
-        connectedAppSecret, userId, mockCache);
+    AuthMechanism oAuth = JwtBearerOAuth.with()
+        .privateKey(privateKey)
+        .loginEndpoint(loginEndpoint)
+        .connectedAppId(connectedAppId)
+        .connectedAppSecret(connectedAppSecret)
+        .userId(userId).cache(mockCache)
+        .build();
     when(mockCache.get(getCacheKey())).thenReturn(Optional.of(token));
 
     assertEquals(token, oAuth.getToken());

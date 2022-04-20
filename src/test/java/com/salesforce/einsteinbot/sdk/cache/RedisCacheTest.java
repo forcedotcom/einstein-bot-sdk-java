@@ -90,4 +90,18 @@ public class RedisCacheTest {
 
     assertEquals(Optional.empty(), cut.get(key));
   }
+
+  @Test
+  public void remove() {
+    long ttl = 5L;
+    String key = "key";
+    String value = "Value";
+
+    RedisCache cut = new RedisCache(ttl, redisUrl);
+    cut.setJedisPool(jedisPool);
+    cut.set(key, value);
+    cut.remove(key);
+
+    verify(jedis).del(key);
+  }
 }

@@ -41,4 +41,9 @@ public class InMemoryCache implements Cache {
   public void set(String key, String val, long ttlSeconds) {
     cache.put(key, val);
   }
+
+  @Override
+  public void remove(String key) {
+    cache.invalidate(key);
+  }
 }
