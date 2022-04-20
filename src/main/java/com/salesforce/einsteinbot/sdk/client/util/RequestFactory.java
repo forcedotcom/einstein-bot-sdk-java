@@ -48,11 +48,7 @@ public class RequestFactory {
   public static TextInitMessage buildInitMessage(AnyRequestMessage message){
     if (message instanceof TextMessage){
       return new TextInitMessage()
-          .text(((TextMessage) message).getText())
-          .sequenceId(Optional.ofNullable(((TextMessage) message)
-              .getSequenceId())
-              .orElse(System.currentTimeMillis())
-          );
+          .text(((TextMessage) message).getText());
     }else {
       throw new IllegalArgumentException(
           "Message needs to be of type TextMessage to create a new session. But received : "
