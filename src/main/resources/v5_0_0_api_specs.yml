@@ -336,6 +336,8 @@ components:
             - $ref: '#/components/schemas/TransferSucceededRequestMessage'
             - $ref: '#/components/schemas/TransferFailedRequestMessage'
             - $ref: '#/components/schemas/RedirectMessage'
+        responseOptions:
+          $ref: '#/components/schemas/ResponseOptions'
       required:
         - "message"
       additionalProperties: false
@@ -371,6 +373,10 @@ components:
           description: "Session metrics"
           type: "object"
           additionalProperties: false
+        intents:
+          $ref: '#/components/schemas/Intents'
+        entities:
+          $ref: '#/components/schemas/Entities'
         _links:
           $ref: '#/components/schemas/Links'
       required:
@@ -398,7 +404,7 @@ components:
           type: "array"
           minimum: 0
           items:
-            anyOf:
+            oneOf:
               - $ref: "#/components/schemas/SessionEndedResponseMessage"
               - $ref: "#/components/schemas/TextResponseMessage"
               - $ref: "#/components/schemas/ChoicesResponseMessage"
@@ -410,6 +416,10 @@ components:
           description: "Session metrics"
           type: "object"
           additionalProperties: false
+        intents:
+          $ref: '#/components/schemas/Intents'
+        entities:
+          $ref: '#/components/schemas/Entities'
         _links:
           $ref: '#/components/schemas/Links'
       required:
@@ -535,7 +545,6 @@ components:
         - "recordId"
       additionalProperties: false
 
-
     MessageId:
       description: "UUID that references this message"
       type: "string"
@@ -546,6 +555,84 @@ components:
       format: "int64"
       type: "integer"
       example: 1
+
+    Intents:
+      description: "All intents detected when processing the current request"
+      type: "array"
+      minimum: 0
+      items:
+        $ref: "#/components/schemas/NormalizedIntent"
+
+    Entities:
+      description: "All detected entities"
+      type: "array"
+      minimum: 0
+      items:
+        $ref: "#/components/schemas/NormalizedEntity"
+
+    NormalizedIntent:
+      type: "object"
+      description: "Intent detected during the request"
+      properties:
+        label:
+          description: "Intent id/name"
+          type: "string"
+        confidenceScore:
+          description: "Probability of the intent"
+          type: "number"
+        intentSource:
+          $ref: "#/components/schemas/IntentSource"
+      required:
+        - "label"
+        - "confidenceScore"
+        - "intentSource"
+      additionalProperties: false
+
+    NormalizedEntity:
+      type: "object"
+      description: "Entity detected during the request"
+      properties:
+        confidenceScore:
+          description: "Probability of the entity"
+          type: "number"
+        value:
+          description: "Entity value"
+          type: "string"
+        type:
+          $ref: "#/components/schemas/EntityType"
+      required:
+        - "confidenceScore"
+        - "value"
+        - "type"
+      additionalProperties: false
+
+    EntityType:
+      description: "Entity Type"
+      type: string
+      enum:
+        - "BOOLEAN"
+        - "DATE"
+        - "DATETIME"
+        - "DATE_TIME"
+        - "MONEY"
+        - "CURRENCY"
+        - "NUMBER"
+        - "OBJECT"
+        - "TEXT"
+        - "PERSON"
+        - "ORGANIZATION"
+        - "LOCATION"
+        - "PERCENT"
+        - "EMAIL"
+        - "PHONE"
+
+    IntentSource:
+      description: "Source of the Intent Prediction"
+      type: "string"
+      enum:
+        - "DIRECT"
+        - "CORE_NLP"
+        - "EINSTEIN_NLP"
 
     Links:
       description: "Links object in the response body for HATEOAS compliant response"
@@ -560,7 +647,6 @@ components:
       required:
         - "self"
       additionalProperties: false
-
 
     HyperLink:
       description: "Hyperlink object included in the Links schema"
@@ -866,8 +952,6 @@ components:
       type: "object"
       description: "Initial message that begins a conversation session"
       properties:
-        sequenceId:
-          $ref: '#/components/schemas/SequenceId'
         text:
           description: "(Optional) Initial text from the user"
           type: "string"
@@ -1144,6 +1228,12 @@ components:
         metrics:
           type: "boolean"
           description: "Whether or not to include metrics in the response"
+        intents:
+          type: "boolean"
+          description: "Whether or not to include all detected intents in the response"
+        entities:
+          type: "boolean"
+          description: "Whether or not to include all detected entities in the response"
       additionalProperties: false
 
     ResponseOptionsVariables:
