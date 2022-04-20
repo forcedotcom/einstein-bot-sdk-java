@@ -36,6 +36,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * Unit tests for JwtBearerOAuth
+ *
+ * @author relango
+ */
 @ExtendWith(MockitoExtension.class)
 public class JwtBearerOAuthTest {
 

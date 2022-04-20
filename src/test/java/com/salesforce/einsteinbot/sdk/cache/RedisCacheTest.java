@@ -21,6 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Unit tests for RedisCache
+ *
+ * @author relango
+ */
 @ExtendWith(MockitoExtension.class)
 public class RedisCacheTest {
 
