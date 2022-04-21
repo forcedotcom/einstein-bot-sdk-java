@@ -70,8 +70,8 @@ public class ChatbotClientExamples {
   }
 
   private void run() throws Exception{
-   // sendUsingBasicClient();
- //   sendUsingSessionManagedClient();
+    sendUsingBasicClient();
+    sendUsingSessionManagedClient();
     getHealthStatus();
   }
 
