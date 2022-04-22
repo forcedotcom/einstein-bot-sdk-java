@@ -122,6 +122,11 @@ paths:
           required: true
           schema:
             type: "string"
+        - in: "header"
+          name: "X-Runtime-CRC"
+          description: "X-Runtime-CRC value from previous response"
+          schema:
+            type: "string"
       requestBody:
         description: "Continue chat request payload"
         required: true
@@ -188,6 +193,11 @@ paths:
           description: "Client supplied unique id to identify request for distributed tracing"
           example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
           required: true
+          schema:
+            type: "string"
+        - in: "header"
+          name: "X-Runtime-CRC"
+          description: "X-Runtime-CRC value from previous response"
           schema:
             type: "string"
       responses:

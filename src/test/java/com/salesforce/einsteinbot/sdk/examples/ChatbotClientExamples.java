@@ -44,14 +44,15 @@ public class ChatbotClientExamples {
   private final String botId = "0XxSB00000006rp0AA";
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
-  //Replace following variables with real values before running. //TODO
-  private final String loginEndpoint = "https://login.test1.pc-rnd.salesforce.com/";
-  private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
-  private final String secret = "1B57EFD4F6D22302A6D4FA9077430191CFFDFAEA22C6ABDA6FCB45993A8AD421";
-  private final String userId = "admin1@esw5.sdb3";
+  //Replace following variables with real values before running.
+  private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
+  private final String connectedAppId = "YOUR_CONNECTED_APP_ID";
+  private final String secret = "YOUR_CONNECTED_APP_SECRET";
+  private final String userId = "SALESFORCE_LOGIN_USER";
+  private final String privateKeyFilePath = "src/test/resources/YourConnectedAppPrivateKey.der";
 
   private AuthMechanism oAuth = JwtBearerOAuth.with()
-      .privateKeyFilePath("src/test/resources/PrivateKeyFalconTest1.der")
+      .privateKeyFilePath(privateKeyFilePath)
       .loginEndpoint(loginEndpoint)
       .connectedAppId(connectedAppId)
       .connectedAppSecret(secret)

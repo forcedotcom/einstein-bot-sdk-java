@@ -71,6 +71,7 @@ public class BasicChatbotClientTest {
   private final String basePath = "http://runtime-api-na-west.stg.chatbots.sfdc.sh";
   private final String botVersion = "TestBotVersion";
   private final String requestId = "TestRequestId";
+  private final String runtimeCRC = null;
 
   private final RequestConfig config = RequestConfig
       .with()
@@ -169,7 +170,7 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId), eq(chatMessageEnvelope)))
+    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId), eq(chatMessageEnvelope), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId), buildBotSendMessageRequest(message, Optional.of(requestId)));
@@ -184,7 +185,7 @@ public class BasicChatbotClientTest {
         .createResponseEntity(endSessionResponseEnvelope, httpHeaders, httpStatus);
 
 
-    when(mockBotApi.endChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId)))
+    when(mockBotApi.endChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotResponse response = client.endChatSession(config, new RuntimeSessionId(sessionId), buildEndSessionRequestEnvelope());

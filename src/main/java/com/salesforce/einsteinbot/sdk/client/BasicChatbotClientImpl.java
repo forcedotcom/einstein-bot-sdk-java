@@ -156,8 +156,11 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId, EndSessionReason endSessionReason, BotRequest botRequest) {
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
-        .endChatSessionWithHttpInfo(sessionId, orgId, endSessionReason,
-            botRequest.getOrCreateRequestId())
+        .endChatSessionWithHttpInfo(sessionId,
+            orgId,
+            endSessionReason,
+            botRequest.getOrCreateRequestId(),
+            botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
         .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity, sessionId));
 
@@ -183,7 +186,11 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       BotRequest botRequest) {
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
-        .continueChatSessionWithHttpInfo(sessionId, orgId, botRequest.getOrCreateRequestId(), messageEnvelope)
+        .continueChatSessionWithHttpInfo(sessionId,
+            orgId,
+            botRequest.getOrCreateRequestId(),
+            messageEnvelope,
+            botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
         .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity, sessionId));
 

@@ -72,17 +72,11 @@ public class ApiExampleUsingSDK {
   private final String forceConfigEndPoint = "https://esw5.test1.my.pc-rnd.salesforce.com";
 
   //Replace following variables with real values before running.
-  /*private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
+  private final String loginEndpoint = "SALESFORCE_LOGIN_END_POINT";
   private final String connectedAppId = "YOUR_CONNECTED_APP_ID";
   private final String secret = "YOUR_CONNECTED_APP_SECRET";
   private final String userId = "SALESFORCE_LOGIN_USER";
-  private final String privateKeyFilePath = "src/test/resources/YourConnectedAppPrivateKey.der"; */ //TODO
-
-  private final String loginEndpoint = "https://login.test1.pc-rnd.salesforce.com/";
-  private final String connectedAppId = "3MVG9l3R9F9mHOGZUZs8TSRIINrHRklsp6OjPsKLQTUznlbLRyH_KMLfPG8SdPJugUtFa2UArLzpvtS74qDQ.";
-  private final String userId = "admin1@esw5.sdb3";
-  private final String secret = "1B57EFD4F6D22302A6D4FA9077430191CFFDFAEA22C6ABDA6FCB45993A8AD421";
-  private final String privateKeyFilePath = "src/test/resources/PrivateKeyFalconTest1.der";
+  private final String privateKeyFilePath = "src/test/resources/YourConnectedAppPrivateKey.der";
 
   public static void main(String[] args) throws Exception {
     new ApiExampleUsingSDK().run();
@@ -98,7 +92,7 @@ public class ApiExampleUsingSDK {
 
     //1. Create JwtBearer Auth Mechanism.
     AuthMechanism oAuth = JwtBearerOAuth.with()
-        .privateKeyFilePath("src/test/resources/PrivateKeyFalconTest1.der")//TODO
+        .privateKeyFilePath(privateKeyFilePath)
         .loginEndpoint(loginEndpoint)
         .connectedAppId(connectedAppId)
         .connectedAppSecret(secret)
@@ -130,7 +124,7 @@ public class ApiExampleUsingSDK {
 
     //1. Create JwtBearer Auth Mechanism.
     AuthMechanism oAuth = JwtBearerOAuth.with()
-        .privateKeyFilePath("src/test/resources/PrivateKeyFalconTest1.der")//TODO
+        .privateKeyFilePath(privateKeyFilePath)//TODO
         .loginEndpoint(loginEndpoint)
         .connectedAppId(connectedAppId)
         .connectedAppSecret(secret)
@@ -372,7 +366,7 @@ public class ApiExampleUsingSDK {
 
     //1. Create JwtBearer Auth Mechanism.
     AuthMechanism oAuth = JwtBearerOAuth.with()
-        .privateKeyFilePath("src/test/resources/PrivateKeyFalconTest1.der")//todo
+        .privateKeyFilePath(privateKeyFilePath)//todo
         .loginEndpoint(loginEndpoint)
         .connectedAppId(connectedAppId)
         .connectedAppSecret(secret)
