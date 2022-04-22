@@ -147,7 +147,6 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
-  //TODO : Update unit tests
   private void notifyRequestEnvelopeInterceptor(BotRequest botRequest, Object requestEnvelope){
     botRequest.getRequestEnvelopeInterceptor()
         .accept(requestEnvelope);

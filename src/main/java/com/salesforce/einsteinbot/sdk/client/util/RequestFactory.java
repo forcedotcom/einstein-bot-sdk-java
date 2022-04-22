@@ -44,7 +44,6 @@ public class RequestFactory {
     return buildInitMessageEnvelope(externalSessionKey, forceConfigEndPoint, buildInitMessage(message), variables);
   }
 
-  //TODO document in user guide
   public static TextInitMessage buildInitMessage(AnyRequestMessage message){
     if (message instanceof TextMessage){
       return new TextInitMessage()

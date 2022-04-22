@@ -16,12 +16,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.api.BotApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
+import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
+import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
@@ -48,6 +51,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -118,6 +123,12 @@ public class BasicChatbotClientTest {
   private Status healthStatus;
 
   @Mock
+  private RequestEnvelopeInterceptor requestEnvelopeInterceptor;
+
+  @Captor
+  private ArgumentCaptor<Object> requestEnvelopeInterceptorArgCaptor;
+
+  @Mock
   private AuthMechanism mockAuthMechanism;
   private EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
 
@@ -175,6 +186,36 @@ public class BasicChatbotClientTest {
 
     BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId), buildBotSendMessageRequest(message, Optional.of(requestId)));
     verifyResponse(sendMessageResponseEnvelope, response);
+  }
+
+  @Test
+  public void testSendMessageWithRequestInterceptor() {
+
+    ChatMessageResponseEnvelope sendMessageResponseEnvelope = buildChatMessageResponseEnvelope();
+    ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
+        .createResponseEntity(sendMessageResponseEnvelope, httpHeaders, httpStatus);
+
+    ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
+
+    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId), eq(chatMessageEnvelope), eq(runtimeCRC)))
+        .thenReturn(createMonoApiResponse(responseEntity));
+
+
+    BotSendMessageRequest botSendMessageReq = BotRequest
+        .withMessage(message)
+        .requestId(requestId)
+        .requestEnvelopeInterceptor(requestEnvelopeInterceptor)
+        .build();
+    BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageReq );
+    verifyResponse(sendMessageResponseEnvelope, response);
+    verifyRequestEnvelopInterceptorInvocation(chatMessageEnvelope);
+  }
+
+  private void verifyRequestEnvelopInterceptorInvocation(ChatMessageEnvelope chatMessageEnvelope) {
+    verify(requestEnvelopeInterceptor).accept(requestEnvelopeInterceptorArgCaptor.capture());
+    Object requestEnvelope = requestEnvelopeInterceptorArgCaptor.getValue();
+    assertTrue(requestEnvelope instanceof ChatMessageEnvelope);
+    assertEquals(chatMessageEnvelope, requestEnvelope);
   }
 
   @Test
