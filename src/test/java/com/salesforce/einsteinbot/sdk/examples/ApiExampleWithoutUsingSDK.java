@@ -6,6 +6,7 @@
  */
 
 package com.salesforce.einsteinbot.sdk.examples;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,10 +40,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * ApiExampleWithoutUsingSDK - Example code for directly using Einstein Bot's API
- * without using SDK. This is fully working example for code snippets used
- * in SDK announcement blog.
- *
+ * ApiExampleWithoutUsingSDK - Example code for directly using Einstein Bot's API without using SDK.
+ * This is fully working example for code snippets used in SDK announcement blog.
+ * <p>
  * This is not supposed to be run as unit test. This class can be run using main method.
  *
  * @author relango
@@ -86,7 +86,8 @@ public class ApiExampleWithoutUsingSDK {
     String token = getOAuthToken(jwt);
 
     String startChatSessionResponse = startChatSession(token, "hello");
-    System.out.println("Bot Start Session Response : " + getPrettyPrintedJson(startChatSessionResponse));
+    System.out
+        .println("Bot Start Session Response : " + getPrettyPrintedJson(startChatSessionResponse));
 
     String sessionId = getSessionIdFromResponse(startChatSessionResponse);
     System.out.println(sessionId);
@@ -115,7 +116,7 @@ public class ApiExampleWithoutUsingSDK {
     }
   }
 
-  private String createJwt(PrivateKey privateKey){
+  private String createJwt(PrivateKey privateKey) {
 
     Map<String, Object> headers = new HashMap<String, Object>();
     headers.put("alg", "RS256");
@@ -129,8 +130,8 @@ public class ApiExampleWithoutUsingSDK {
         .sign(algorithm);
   }
 
-  private String getOAuthToken(String jwt) throws Exception{
-    MultiValueMap<String, String> formData= new LinkedMultiValueMap<>();
+  private String getOAuthToken(String jwt) throws Exception {
+    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
     formData.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
     formData.add("assertion", jwt);
 
@@ -138,42 +139,44 @@ public class ApiExampleWithoutUsingSDK {
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     HttpEntity<Map> httpRequest = new HttpEntity<>(formData, httpHeaders);
 
-    ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_URL, httpRequest, String.class);
+    ResponseEntity<String> response = restTemplate
+        .postForEntity(OAUTH_URL, httpRequest, String.class);
     System.out.println(response.getStatusCode());
     return getTokenFromOAuthResponse(response.getBody());
   }
 
-  private String startChatSession(String token, String initMessage){
+  private String startChatSession(String token, String initMessage) {
     String url = createStartSessionUrl();
     HttpHeaders requestHeaders = createHttpHeaders(token);
     String requestBody = createInitRequestBody(newRandomUUID(), initMessage);
 
     HttpEntity<String> httpRequest = createHttpEntityForRequest(requestHeaders, requestBody);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, httpRequest , String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, httpRequest, String.class);
 
     System.out.println(response.getStatusCode());
     return response.getBody();
   }
 
-  private String sendTextMessage(String token, String sessionId, String message){
+  private String sendTextMessage(String token, String sessionId, String message) {
     String url = createContinueSessionUrl(sessionId);
     HttpHeaders requestHeaders = createHttpHeaders(token);
     String requestBody = createTextMessageRequestBody(message);
 
     HttpEntity<String> httpRequest = createHttpEntityForRequest(requestHeaders, requestBody);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, httpRequest , String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, httpRequest, String.class);
 
     System.out.println(response.getStatusCode());
     return response.getBody();
   }
 
-  private String endChatConversation(String token, String sessionId, String reason){
+  private String endChatConversation(String token, String sessionId, String reason) {
     String url = createEndSessionUrl(sessionId);
     HttpHeaders requestHeaders = createHttpHeaders(token);
     requestHeaders.add("X-Session-End-Reason", reason);
 
     HttpEntity<String> httpRequest = new HttpEntity<>(requestHeaders);
-    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, httpRequest, String.class);
+    ResponseEntity<String> response = restTemplate
+        .exchange(url, HttpMethod.DELETE, httpRequest, String.class);
 
     System.out.println(response.getStatusCode());
     System.out.println(response.getBody());
@@ -187,8 +190,7 @@ public class ApiExampleWithoutUsingSDK {
   }
 
 
-
-  private String getTokenFromOAuthResponse(String response) throws Exception{
+  private String getTokenFromOAuthResponse(String response) throws Exception {
     ObjectNode node = new ObjectMapper().readValue(response, ObjectNode.class);
     return node.get("access_token").asText();
   }
@@ -197,7 +199,7 @@ public class ApiExampleWithoutUsingSDK {
     return UUID.randomUUID().toString();
   }
 
-  private HttpHeaders createHttpHeaders(String token){
+  private HttpHeaders createHttpHeaders(String token) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.setBearerAuth(token);
@@ -205,32 +207,33 @@ public class ApiExampleWithoutUsingSDK {
     return headers;
   }
 
-  private HttpEntity<String> createHttpEntityForRequest(HttpHeaders requestHeaders, String requestBody){
+  private HttpEntity<String> createHttpEntityForRequest(HttpHeaders requestHeaders,
+      String requestBody) {
     return new HttpEntity<>(requestBody, requestHeaders);
   }
 
-  private String createStartSessionUrl(){
+  private String createStartSessionUrl() {
     return UriComponentsBuilder
         .fromHttpUrl(RUNTIME_URL)
         .path(START_SESSION_URI)
         .buildAndExpand(botId).toString();
   }
 
-  private String createContinueSessionUrl(String sessionId){
+  private String createContinueSessionUrl(String sessionId) {
     return UriComponentsBuilder
         .fromHttpUrl(RUNTIME_URL)
         .path(SEND_MESSAGE_URI)
         .buildAndExpand(sessionId).toString();
   }
 
-  private String createEndSessionUrl(String sessionId){
+  private String createEndSessionUrl(String sessionId) {
     return UriComponentsBuilder
         .fromHttpUrl(RUNTIME_URL)
         .path(END_SESSION_URI)
         .buildAndExpand(sessionId).toString();
   }
 
-  private String createInitRequestBody(String externalSessionId, String message){
+  private String createInitRequestBody(String externalSessionId, String message) {
     return
         "{\n"
             + "  \"externalSessionKey\": \"" + externalSessionId + "\",\n"
@@ -243,7 +246,7 @@ public class ApiExampleWithoutUsingSDK {
             + "}";
   }
 
-  private String createTextMessageRequestBody(String message){
+  private String createTextMessageRequestBody(String message) {
     return
         "{\n"
             + "  \"message\" : {\n"

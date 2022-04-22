@@ -7,40 +7,38 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
-import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildBotSendMessageRequest;
 import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromResponseEnvelopeResponseEntity;
+import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildBotSendMessageRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.api.BotApi;
+import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
+import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
+import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
+import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
+import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
+import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
+import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
-import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
-import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
-import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
+import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
-import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
-import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
-import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
-import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
@@ -133,7 +131,7 @@ public class BasicChatbotClientTest {
   private EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
 
   @BeforeEach
-  public void setup(){
+  public void setup() {
     lenient().when(mockAuthMechanism.getToken()).thenReturn(authToken);
     client = ChatbotClients.basic()
         .basePath(basePath)
@@ -151,10 +149,12 @@ public class BasicChatbotClientTest {
 
     InitMessageEnvelope initMessageEnvelope = buildInitMessageEnvelope();
 
-    when(mockBotApi.establishChatSessionWithHttpInfo(eq(botId), eq(orgId), eq(requestId), eq(initMessageEnvelope)))
+    when(mockBotApi.establishChatSessionWithHttpInfo(eq(botId), eq(orgId), eq(requestId),
+        eq(initMessageEnvelope)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
-    BotResponse response = client.startChatSession(config, new ExternalSessionId(externalSessionId), buildBotSendMessageRequest(message, Optional.of(requestId)));
+    BotResponse response = client.startChatSession(config, new ExternalSessionId(externalSessionId),
+        buildBotSendMessageRequest(message, Optional.of(requestId)));
 
     verifyResponseHeaders(response.getHttpHeaders());
     assertEquals(httpStatus.value(), response.getHttpStatusCode());
@@ -167,9 +167,11 @@ public class BasicChatbotClientTest {
     AnyRequestMessage invalidFirstMessageType = buildChoiceMessage();
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () ->
-      client.startChatSession(config, new ExternalSessionId(externalSessionId), buildBotSendMessageRequest(invalidFirstMessageType, Optional.of(requestId))));
+        client.startChatSession(config, new ExternalSessionId(externalSessionId),
+            buildBotSendMessageRequest(invalidFirstMessageType, Optional.of(requestId))));
 
-    assertTrue(exception.getMessage().contains("Message needs to be of type TextMessage to create a new session"));
+    assertTrue(exception.getMessage()
+        .contains("Message needs to be of type TextMessage to create a new session"));
   }
 
   @Test
@@ -181,10 +183,12 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId), eq(chatMessageEnvelope), eq(runtimeCRC)))
+    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId),
+        eq(chatMessageEnvelope), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
-    BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId), buildBotSendMessageRequest(message, Optional.of(requestId)));
+    BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId),
+        buildBotSendMessageRequest(message, Optional.of(requestId)));
     verifyResponse(sendMessageResponseEnvelope, response);
   }
 
@@ -197,16 +201,17 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId), eq(chatMessageEnvelope), eq(runtimeCRC)))
+    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId),
+        eq(chatMessageEnvelope), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
-
 
     BotSendMessageRequest botSendMessageReq = BotRequest
         .withMessage(message)
         .requestId(requestId)
         .requestEnvelopeInterceptor(requestEnvelopeInterceptor)
         .build();
-    BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageReq );
+    BotResponse response = client
+        .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageReq);
     verifyResponse(sendMessageResponseEnvelope, response);
     verifyRequestEnvelopInterceptorInvocation(chatMessageEnvelope);
   }
@@ -225,11 +230,13 @@ public class BasicChatbotClientTest {
     ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(endSessionResponseEnvelope, httpHeaders, httpStatus);
 
-
-    when(mockBotApi.endChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId), eq(runtimeCRC)))
+    when(mockBotApi
+        .endChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId),
+            eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
-    BotResponse response = client.endChatSession(config, new RuntimeSessionId(sessionId), buildEndSessionRequestEnvelope());
+    BotResponse response = client
+        .endChatSession(config, new RuntimeSessionId(sessionId), buildEndSessionRequestEnvelope());
     verifyResponse(endSessionResponseEnvelope, response);
   }
 
@@ -284,20 +291,23 @@ public class BasicChatbotClientTest {
         .metrics(metrics);
   }
 
-  private void verifyResponse(ChatMessageResponseEnvelope expectedResponseEnvelope,  BotResponse actualResponse){
+  private void verifyResponse(ChatMessageResponseEnvelope expectedResponseEnvelope,
+      BotResponse actualResponse) {
     verifyResponseHeaders(actualResponse.getHttpHeaders());
     assertEquals(httpStatus.value(), actualResponse.getHttpStatusCode());
     ResponseEnvelope actualResponseEnvelope = actualResponse.getResponseEnvelope();
     assertEquals(sessionId, actualResponseEnvelope.getSessionId());
-    assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(), actualResponseEnvelope.getProcessedSequenceIds());
+    assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(),
+        actualResponseEnvelope.getProcessedSequenceIds());
     assertEquals(expectedResponseEnvelope.getMessages(), actualResponseEnvelope.getMessages());
-    assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(), actualResponseEnvelope.getProcessedSequenceIds());
+    assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(),
+        actualResponseEnvelope.getProcessedSequenceIds());
     assertEquals(expectedResponseEnvelope.getBotVersion(), actualResponseEnvelope.getBotVersion());
     assertEquals(expectedResponseEnvelope.getVariables(), actualResponseEnvelope.getVariables());
     assertEquals(expectedResponseEnvelope.getMetrics(), actualResponseEnvelope.getMetrics());
   }
 
-  private void verifyResponseHeaders(BotHttpHeaders actualHttpHeaders){
+  private void verifyResponseHeaders(BotHttpHeaders actualHttpHeaders) {
     assertEquals(Optional.empty(), actualHttpHeaders.getRuntimeCRCHeader());
     assertEquals(Optional.ofNullable(responseRequestId), actualHttpHeaders.getRequestIdHeader());
   }

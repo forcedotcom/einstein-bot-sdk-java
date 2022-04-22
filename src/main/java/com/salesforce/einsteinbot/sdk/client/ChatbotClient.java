@@ -9,13 +9,14 @@ package com.salesforce.einsteinbot.sdk.client;
 
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
-import com.salesforce.einsteinbot.sdk.client.model.BotSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
+import com.salesforce.einsteinbot.sdk.client.model.BotSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.model.Status;
 
 /**
- * Base interface for Chatbot client. It provides methods to interact with Bot and get Health status.
+ * Base interface for Chatbot client. It provides methods to interact with Bot and get Health
+ * status.
  */
 public interface ChatbotClient<T extends BotSessionId> {
 

@@ -71,6 +71,7 @@ public interface BasicChatbotClient extends ChatbotClient<RuntimeSessionId> {
           () -> String.format(errorMessageTemplate, "authMechanism"));
     }
   }
+
   interface BasePathBuilder {
 
     AuthMechanismBuilder basePath(String basePath);

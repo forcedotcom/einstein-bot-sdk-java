@@ -31,18 +31,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
-import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
-import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
-import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
-import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
+import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
-import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
 import de.mkammerer.wiremock.WireMockExtension;
 import java.net.URI;
 import java.util.Optional;
@@ -119,7 +118,7 @@ public class ClientApiWireMockTest {
     stubStartSessionResponse(responseBodyFile, HttpStatus.OK.value());
 
     BotResponse botResponse = client.startChatSession(requestConfig, externalSessionId,
-            botSendMessageRequest);
+        botSendMessageRequest);
 
     verifyRequestUriAndHeaders(START_SESSION_URI);
     verifyResponse(responseBodyFile, botResponse);
@@ -160,12 +159,14 @@ public class ClientApiWireMockTest {
   void testStartSessionRequestWithErrorResponse() throws Exception {
     String responseBodyFile = "errorResponse.json";
     int errorStatusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-    stubStartSessionResponse(responseBodyFile,errorStatusCode);
+    stubStartSessionResponse(responseBodyFile, errorStatusCode);
 
-    Throwable exceptionThrown = assertThrows(java.lang.RuntimeException.class, ()-> client.startChatSession(requestConfig, externalSessionId,
-        botSendMessageRequest));
+    Throwable exceptionThrown = assertThrows(java.lang.RuntimeException.class,
+        () -> client.startChatSession(requestConfig, externalSessionId,
+            botSendMessageRequest));
 
-    ChatbotResponseException chatbotResponseException = validateAndGetCause(exceptionThrown, ChatbotResponseException.class);
+    ChatbotResponseException chatbotResponseException = validateAndGetCause(exceptionThrown,
+        ChatbotResponseException.class);
     assertEquals(errorStatusCode, chatbotResponseException.getStatus());
     verifyResponseEnvelope(responseBodyFile, chatbotResponseException.getErrorResponse());
   }
@@ -178,20 +179,22 @@ public class ClientApiWireMockTest {
         .authMechanism(new TestAuthMechanism())
         .build();
 
-    Throwable exceptionThrown = assertThrows(java.lang.RuntimeException.class, ()-> clientForError.startChatSession(requestConfig, externalSessionId,
-        botSendMessageRequest));
+    Throwable exceptionThrown = assertThrows(java.lang.RuntimeException.class,
+        () -> clientForError.startChatSession(requestConfig, externalSessionId,
+            botSendMessageRequest));
 
-    WebClientRequestException cause = validateAndGetCause(exceptionThrown, WebClientRequestException.class);
+    WebClientRequestException cause = validateAndGetCause(exceptionThrown,
+        WebClientRequestException.class);
     assertTrue(cause.getMessage().contains("Connection"));
   }
 
-  private <T> T validateAndGetCause(Throwable throwable, Class<T> clazz){
+  private <T> T validateAndGetCause(Throwable throwable, Class<T> clazz) {
     Throwable cause = throwable.getCause().getCause();
     assertTrue(clazz.isInstance(cause));
     return clazz.cast(cause);
   }
 
-  private String replaceUriWithInvalidPort(URI currentUri){
+  private String replaceUriWithInvalidPort(URI currentUri) {
     int currentPort = currentUri.getPort();
     String invalidPort = String.valueOf(currentUri.getPort() + 1);
     return currentUri.toString().replace(String.valueOf(currentPort), invalidPort);
@@ -241,7 +244,8 @@ public class ClientApiWireMockTest {
         .isEqualTo(expected);
   }
 
-  private <T> void verifyResponseEnvelope(String responseBodyFile, T responseEnvelope) throws Exception{
+  private <T> void verifyResponseEnvelope(String responseBodyFile, T responseEnvelope)
+      throws Exception {
     String expected = readTestFileAsString(responseBodyFile);
 
     Optional<String> actual = toJsonString(responseEnvelope);

@@ -47,7 +47,7 @@ public class UtilFunctions {
   }
 
   public static String convertObjectToJson(Object data) throws JsonProcessingException {
-      return mapper.writer(prettyPrinter).writeValueAsString(data);
+    return mapper.writer(prettyPrinter).writeValueAsString(data);
   }
 
   public static TextVariable createTextVariable(String name, String value) {

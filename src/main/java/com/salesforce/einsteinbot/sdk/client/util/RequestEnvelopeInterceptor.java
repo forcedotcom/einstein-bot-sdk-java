@@ -12,4 +12,6 @@ import java.util.function.Consumer;
 /**
  * RequestEnvelopeInterceptor - Used to Intercept Bot Request Envelope
  */
-public interface RequestEnvelopeInterceptor extends Consumer<Object> { }
+public interface RequestEnvelopeInterceptor extends Consumer<Object> {
+
+}

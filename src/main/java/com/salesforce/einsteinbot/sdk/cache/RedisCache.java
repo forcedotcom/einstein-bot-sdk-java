@@ -79,7 +79,7 @@ public class RedisCache implements Cache {
   }
 
   @Override
-  public void remove(String key){
+  public void remove(String key) {
     try (Jedis jedis = this.jedisPool.getResource()) {
       jedis.del(key);
     }

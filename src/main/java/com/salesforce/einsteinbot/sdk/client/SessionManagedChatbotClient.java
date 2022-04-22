@@ -8,22 +8,24 @@
 package com.salesforce.einsteinbot.sdk.client;
 
 import com.salesforce.einsteinbot.sdk.cache.Cache;
-import com.salesforce.einsteinbot.sdk.client.util.IntegrationNameValidator;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
+import com.salesforce.einsteinbot.sdk.client.util.IntegrationNameValidator;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * SessionManagedChatbotClient - Interface for Session Managed chatbot client that provide simpler
- * sendMessage API and new session will automatically created based on user provided ExternalSessionId.
- * So user doesn't track if they need to start a new session or continue existing session.
+ * sendMessage API and new session will automatically created based on user provided
+ * ExternalSessionId. So user doesn't track if they need to start a new session or continue existing
+ * session.
  *
  * @author relango
  */
 public interface SessionManagedChatbotClient extends ChatbotClient<ExternalSessionId> {
 
   /**
-   * SessionManagedClientFluentBuilder provides Fluent API to create Session Managed Chatbot Client.
+   * SessionManagedClientFluentBuilder provides Fluent API to create Session Managed Chatbot
+   * Client.
    */
   class SessionManagedClientFluentBuilder implements BasicClientBuilder,
       CacheBuilder, SessionManagedClientFinalBuilder {
@@ -55,21 +57,26 @@ public interface SessionManagedChatbotClient extends ChatbotClient<ExternalSessi
       String errorMessageTemplate = "Please provide non-null value for %s ";
       Objects.requireNonNull(basicClient, () -> String.format(errorMessageTemplate, "basicClient"));
       Objects.requireNonNull(cache, () -> String.format(errorMessageTemplate, "cache"));
-      return new SessionManagedChatbotClientImpl(this.basicClient, this.integrationName, this.cache);
+      return new SessionManagedChatbotClientImpl(this.basicClient, this.integrationName,
+          this.cache);
     }
 
   }
 
   interface BasicClientBuilder {
+
     SessionManagedChatbotClientImpl.CacheBuilder basicClient(BasicChatbotClient basicClient);
   }
 
   interface CacheBuilder {
+
     SessionManagedClientFinalBuilder cache(Cache cache);
   }
 
   interface SessionManagedClientFinalBuilder {
+
     SessionManagedClientFinalBuilder integrationName(String integrationName);
+
     SessionManagedChatbotClient build();
   }
 }

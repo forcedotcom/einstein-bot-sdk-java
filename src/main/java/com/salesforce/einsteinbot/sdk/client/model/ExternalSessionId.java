@@ -13,13 +13,15 @@ import java.util.Objects;
  * ExternalSessionId - ExternalSessionId is a class to track client channel's external session id.
  *
  * <p>
- * An external session ID is the unique ID used to identify a session on the channel that is sending messages to Einstein Bots Runtime.
- * Using Slack as an example, the external session ID could be a combination of Slack app ID, Slack user ID and Slack channel ID (if present).
+ * An external session ID is the unique ID used to identify a session on the channel that is sending
+ * messages to Einstein Bots Runtime. Using Slack as an example, the external session ID could be a
+ * combination of Slack app ID, Slack user ID and Slack channel ID (if present).
  * </p>
  *
  * @author relango
  */
-public class ExternalSessionId implements BotSessionId{
+public class ExternalSessionId implements BotSessionId {
+
   private String value;
 
   public ExternalSessionId(String value) {
@@ -27,7 +29,7 @@ public class ExternalSessionId implements BotSessionId{
     this.value = value;
   }
 
-  public String getValue(){
+  public String getValue() {
     return value;
   }
 

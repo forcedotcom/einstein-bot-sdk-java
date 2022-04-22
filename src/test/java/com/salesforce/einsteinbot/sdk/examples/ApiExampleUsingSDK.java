@@ -56,9 +56,9 @@ import java.util.UUID;
 
 
 /**
- * ApiExampleUsingSDK - Contains example code showing how to use the SDK.
- * This is fully working example for code snippets used in SDK client user guide.
- *
+ * ApiExampleUsingSDK - Contains example code showing how to use the SDK. This is fully working
+ * example for code snippets used in SDK client user guide.
+ * <p>
  * This is not supposed to be run as unit test. This class can be run using main method.
  *
  * @author relango
@@ -82,13 +82,13 @@ public class ApiExampleUsingSDK {
     new ApiExampleUsingSDK().run();
   }
 
-  private void run() throws Exception{
+  private void run() throws Exception {
     sendUsingBasicClient();
     sendUsingSessionManagedClient();
     getHealthStatus();
   }
 
-  private void sendUsingBasicClient() throws Exception{
+  private void sendUsingBasicClient() throws Exception {
 
     //1. Create JwtBearer Auth Mechanism.
     AuthMechanism oAuth = JwtBearerOAuth.with()
@@ -152,13 +152,14 @@ public class ApiExampleUsingSDK {
 
     //5. When you sent a message with same externalSessionKey,
     // it will send message to existing session associated with externalSessionKey.
-     sendMessageUsingSessionManagedClient(client, config, externalSessionKey, "Order Status");
+    sendMessageUsingSessionManagedClient(client, config, externalSessionKey, "Order Status");
 
     //6. For Ending session, use same externalSessionKey
-     sendEndSessionMessageUsingSessionManagedClient(client, config, externalSessionKey);
+    sendEndSessionMessageUsingSessionManagedClient(client, config, externalSessionKey);
   }
 
-  private void sendMessageUsingSessionManagedClient(SessionManagedChatbotClient client, RequestConfig config,
+  private void sendMessageUsingSessionManagedClient(SessionManagedChatbotClient client,
+      RequestConfig config,
       ExternalSessionId externalSessionKey, String message) throws JsonProcessingException {
 
     BotSendMessageRequest botSendFirstMessageRequest = BotRequest
@@ -168,11 +169,14 @@ public class ApiExampleUsingSDK {
     BotResponse firstMsgResp = client
         .sendMessage(config, externalSessionKey, botSendFirstMessageRequest);
 
-    System.out.println("Response for message " + message + ": " + convertObjectToJson(firstMsgResp));
-    System.out.println("Response for message as Text : \n" + getResponseMessageAsText(firstMsgResp.getResponseEnvelope().getMessages()));
+    System.out
+        .println("Response for message " + message + ": " + convertObjectToJson(firstMsgResp));
+    System.out.println("Response for message as Text : \n" + getResponseMessageAsText(
+        firstMsgResp.getResponseEnvelope().getMessages()));
   }
 
-  private void sendEndSessionMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
+  private void sendEndSessionMessage(BasicChatbotClient client, RequestConfig config,
+      String sessionId)
       throws JsonProcessingException {
     // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
@@ -183,29 +187,33 @@ public class ApiExampleUsingSDK {
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
-    System.out.println("End Session Response as Text : \n" + getResponseMessageAsText(endSessionResponse.getResponseEnvelope().getMessages()));
+    System.out.println("End Session Response as Text : \n" + getResponseMessageAsText(
+        endSessionResponse.getResponseEnvelope().getMessages()));
   }
 
-  private void sendMessageWithErrorHandling(BasicChatbotClient client, RequestConfig config, String sessionId) throws JsonProcessingException{
+  private void sendMessageWithErrorHandling(BasicChatbotClient client, RequestConfig config,
+      String sessionId) throws JsonProcessingException {
     // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
         .withEndSession(EndSessionReason.USERREQUEST).build();
 
     // Send Request to End Chat session with invalid session Id and handle error.
     RuntimeSessionId invalidSessionId = new RuntimeSessionId("invalid session id");
-    try{
+    try {
       BotResponse endSessionResponse = client
-          .endChatSession(config, invalidSessionId , botEndSessionRequest);
+          .endChatSession(config, invalidSessionId, botEndSessionRequest);
       System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
-    }catch (Exception e){
+    } catch (Exception e) {
       //Actual Error is wrapped in RuntimeException and ExecutionException
-      ChatbotResponseException chatbotResponseException = ((ChatbotResponseException)e.getCause().getCause());
+      ChatbotResponseException chatbotResponseException = ((ChatbotResponseException) e.getCause()
+          .getCause());
       System.out.println("Error Http Status Code : " + chatbotResponseException.getStatus());
       System.out.println("Error Payload : " + chatbotResponseException.getErrorResponse());
     }
   }
 
-  private void sendEndSessionMessageUsingSessionManagedClient(SessionManagedChatbotClient client, RequestConfig config, ExternalSessionId externalSessionId)
+  private void sendEndSessionMessageUsingSessionManagedClient(SessionManagedChatbotClient client,
+      RequestConfig config, ExternalSessionId externalSessionId)
       throws JsonProcessingException {
     // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
@@ -216,13 +224,14 @@ public class ApiExampleUsingSDK {
         .endChatSession(config, externalSessionId, botEndSessionRequest);
 
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
-    System.out.println("End Session Response as Text : \n" + getResponseMessageAsText(endSessionResponse.getResponseEnvelope().getMessages()));
+    System.out.println("End Session Response as Text : \n" + getResponseMessageAsText(
+        endSessionResponse.getResponseEnvelope().getMessages()));
   }
 
   private void sendTextMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
       throws JsonProcessingException {
     // Build Bot Send Message Request
-    BotSendMessageRequest botSendMessageRequest =  BotRequest
+    BotSendMessageRequest botSendMessageRequest = BotRequest
         .withMessage(RequestFactory.buildTextMessage("Transfer To Agent"))
         .build();
 
@@ -230,15 +239,18 @@ public class ApiExampleUsingSDK {
     BotResponse textMsgResponse = client
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
-    System.out.println("Transfer To Agent Message Response :" + convertObjectToJson(textMsgResponse));
-    System.out.println("Transfer To Agent Message Response as Text : \n" + getResponseMessageAsText(textMsgResponse.getResponseEnvelope().getMessages()));
+    System.out
+        .println("Transfer To Agent Message Response :" + convertObjectToJson(textMsgResponse));
+    System.out.println("Transfer To Agent Message Response as Text : \n" + getResponseMessageAsText(
+        textMsgResponse.getResponseEnvelope().getMessages()));
 
   }
 
-  private void sendTextMessageChoiceAlias(BasicChatbotClient client, RequestConfig config, String sessionId)
+  private void sendTextMessageChoiceAlias(BasicChatbotClient client, RequestConfig config,
+      String sessionId)
       throws JsonProcessingException {
     // Build Bot Send Message Request
-    BotSendMessageRequest botSendMessageRequest =  BotRequest
+    BotSendMessageRequest botSendMessageRequest = BotRequest
         .withMessage(RequestFactory.buildTextMessage("1"))
         .build();
 
@@ -246,8 +258,11 @@ public class ApiExampleUsingSDK {
     BotResponse textMsgResponse = client
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
-    System.out.println("Text Message With Choice Alias Response :" + convertObjectToJson(textMsgResponse));
-    System.out.println("Text Message With Choice Alias Response as Text : \n" + getResponseMessageAsText(textMsgResponse.getResponseEnvelope().getMessages()));
+    System.out.println(
+        "Text Message With Choice Alias Response :" + convertObjectToJson(textMsgResponse));
+    System.out.println(
+        "Text Message With Choice Alias Response as Text : \n" + getResponseMessageAsText(
+            textMsgResponse.getResponseEnvelope().getMessages()));
   }
 
   private String sendStartChatSession(BasicChatbotClient client, RequestConfig config)
@@ -261,15 +276,18 @@ public class ApiExampleUsingSDK {
 
     //5. Send Request to Start Chat Session.
     ExternalSessionId externalSessionKey = new ExternalSessionId(UtilFunctions.newRandomUUID());
-    BotResponse resp = client.startChatSession(config, externalSessionKey, botSendInitMessageRequest);
+    BotResponse resp = client
+        .startChatSession(config, externalSessionKey, botSendInitMessageRequest);
 
     System.out.println("Init Message Response :" + convertObjectToJson(resp));
-    System.out.println("Init Message Response as Text : \n" + getResponseMessageAsText(resp.getResponseEnvelope().getMessages()));
+    System.out.println("Init Message Response as Text : \n" + getResponseMessageAsText(
+        resp.getResponseEnvelope().getMessages()));
 
     return resp.getResponseEnvelope().getSessionId();
   }
 
-  private String sendStartChatSessionWithOptionalFields(BasicChatbotClient client, RequestConfig config)
+  private String sendStartChatSessionWithOptionalFields(BasicChatbotClient client,
+      RequestConfig config)
       throws JsonProcessingException {
 
     AnyRequestMessage message = buildTextMessage("Hello");
@@ -289,19 +307,23 @@ public class ApiExampleUsingSDK {
 
     //5. Send Request to Start Chat Session.
     ExternalSessionId externalSessionKey = new ExternalSessionId(UtilFunctions.newRandomUUID());
-    BotResponse resp = client.startChatSession(config, externalSessionKey, botSendInitMessageRequest);
+    BotResponse resp = client
+        .startChatSession(config, externalSessionKey, botSendInitMessageRequest);
 
     System.out.println("Init Message With Optional fields Response :" + convertObjectToJson(resp));
-    System.out.println("Init Message With Optional fields Response as Text : \n" + getResponseMessageAsText(resp.getResponseEnvelope().getMessages()));
+    System.out.println(
+        "Init Message With Optional fields Response as Text : \n" + getResponseMessageAsText(
+            resp.getResponseEnvelope().getMessages()));
 
     return resp.getResponseEnvelope().getSessionId();
   }
 
-  private void sendChoiceMessageWithIndex(BasicChatbotClient client, RequestConfig config, String sessionId)
+  private void sendChoiceMessageWithIndex(BasicChatbotClient client, RequestConfig config,
+      String sessionId)
       throws JsonProcessingException {
 
     // Build Bot Send Message Request
-    BotSendMessageRequest botSendMessageRequest =  BotRequest
+    BotSendMessageRequest botSendMessageRequest = BotRequest
         .withMessage(buildChoiceMessageWithIndex(1))
         .build();
 
@@ -310,14 +332,16 @@ public class ApiExampleUsingSDK {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Choice With Index Message Response :" + convertObjectToJson(response));
-    System.out.println("Choice With Index Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
+    System.out.println("Choice With Index Message Response as Text : \n" + getResponseMessageAsText(
+        response.getResponseEnvelope().getMessages()));
   }
 
-  private void sendChoiceMessageWithId(BasicChatbotClient client, RequestConfig config, String sessionId)
+  private void sendChoiceMessageWithId(BasicChatbotClient client, RequestConfig config,
+      String sessionId)
       throws JsonProcessingException {
 
     // Build Bot Send Message Request
-    BotSendMessageRequest botSendMessageRequest =  BotRequest
+    BotSendMessageRequest botSendMessageRequest = BotRequest
         .withMessage(buildChoiceMessageWithId("da83a84f-1325-4d37-80df-5a4931284961"))
         //ChoiceId of Frequently Asked Question Option from bot's response payload.
         .build();
@@ -327,14 +351,16 @@ public class ApiExampleUsingSDK {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Choice With Id Message Response :" + convertObjectToJson(response));
-    System.out.println("Choice With Id Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
+    System.out.println("Choice With Id Message Response as Text : \n" + getResponseMessageAsText(
+        response.getResponseEnvelope().getMessages()));
   }
 
-  private void sendTransferSuccessMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
+  private void sendTransferSuccessMessage(BasicChatbotClient client, RequestConfig config,
+      String sessionId)
       throws JsonProcessingException {
 
     // Build Bot Send Message Request
-    BotSendMessageRequest botSendMessageRequest =  BotRequest
+    BotSendMessageRequest botSendMessageRequest = BotRequest
         .withMessage(buildTransferSuccessMessage())
         .build();
 
@@ -343,14 +369,16 @@ public class ApiExampleUsingSDK {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer Success Message Response :" + convertObjectToJson(response));
-    System.out.println("Transfer Success Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
+    System.out.println("Transfer Success Message Response as Text : \n" + getResponseMessageAsText(
+        response.getResponseEnvelope().getMessages()));
   }
 
-  private void sendTransferFailureMessage(BasicChatbotClient client, RequestConfig config, String sessionId)
+  private void sendTransferFailureMessage(BasicChatbotClient client, RequestConfig config,
+      String sessionId)
       throws JsonProcessingException {
 
     // Build Bot Send Message Request
-    BotSendMessageRequest botSendMessageRequest =  BotRequest
+    BotSendMessageRequest botSendMessageRequest = BotRequest
         .withMessage(buildTransferFailedMessage())
         .build();
 
@@ -359,7 +387,8 @@ public class ApiExampleUsingSDK {
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Transfer Failure Message Response :" + convertObjectToJson(response));
-    System.out.println("Transfer Failure Message Response as Text : \n" + getResponseMessageAsText(response.getResponseEnvelope().getMessages()));
+    System.out.println("Transfer Failure Message Response as Text : \n" + getResponseMessageAsText(
+        response.getResponseEnvelope().getMessages()));
   }
 
   private void getHealthStatus() throws Exception {
@@ -386,40 +415,40 @@ public class ApiExampleUsingSDK {
 
   private String getResponseMessageAsText(List<AnyResponseMessage> messages) {
     StringBuilder sb = new StringBuilder();
-    for(AnyResponseMessage message : messages){
-      if (message instanceof TextResponseMessage){
+    for (AnyResponseMessage message : messages) {
+      if (message instanceof TextResponseMessage) {
         sb.append(((TextResponseMessage) message).getText())
             .append("\n");
-      }else if (message instanceof ChoicesResponseMessage){
+      } else if (message instanceof ChoicesResponseMessage) {
         List<ChoicesResponseMessageChoices> choices = ((ChoicesResponseMessage) message)
             .getChoices();
-        for (ChoicesResponseMessageChoices choice : choices){
+        for (ChoicesResponseMessageChoices choice : choices) {
           sb.append(choice.getAlias())
               .append(".")
               .append(choice.getLabel())
               .append("\n");
         }
-      }else if (message instanceof EscalateResponseMessage){
+      } else if (message instanceof EscalateResponseMessage) {
         List<EscalateResponseMessageTargets> targets = ((EscalateResponseMessage) message)
             .getTargets();
         //Implement your code to actually do the transfer.
         sb.append("Transferring you to Agent in Target : " + targets);
 
-      }else if (message instanceof SessionEndedResponseMessage){
+      } else if (message instanceof SessionEndedResponseMessage) {
         ReasonEnum reason = ((SessionEndedResponseMessage) message)
             .getReason();
         //Implement logic to do any clean on the channel.
         sb.append("The Chat session ended with Reason : " + reason);
 
-      }else if (message instanceof StaticContentMessage){
+      } else if (message instanceof StaticContentMessage) {
         AnyStaticContentMessage staticContentMessage = ((StaticContentMessage) message)
             .getStaticContent();
-        if (staticContentMessage instanceof StaticContentText){
+        if (staticContentMessage instanceof StaticContentText) {
           String richContentText = ((StaticContentText) staticContentMessage).getText();
           //Display Rich Content text depending on your channel.
           sb.append("Received Rich Content Text: " + richContentText);
 
-        }else if (staticContentMessage instanceof StaticContentAttachments){
+        } else if (staticContentMessage instanceof StaticContentAttachments) {
           List<Attachment> attachments = ((StaticContentAttachments) staticContentMessage)
               .getAttachments();
           //Display Attachments depending on your channel.

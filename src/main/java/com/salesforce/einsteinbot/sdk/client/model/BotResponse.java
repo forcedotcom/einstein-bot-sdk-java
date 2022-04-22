@@ -43,7 +43,8 @@ public class BotResponse {
     return httpHeaders;
   }
 
-  public static BotResponse with(ResponseEnvelope responseEnvelope, int httpStatusCode, BotHttpHeaders httpHeaders){
+  public static BotResponse with(ResponseEnvelope responseEnvelope, int httpStatusCode,
+      BotHttpHeaders httpHeaders) {
     return new BotResponse(responseEnvelope, httpStatusCode, httpHeaders);
   }
 

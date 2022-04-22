@@ -46,18 +46,20 @@ public class RequestConfig {
     return forceConfigEndpoint;
   }
 
-  public static BotIdBuilder with(){
+  public static BotIdBuilder with() {
     return new FluentBuilder();
   }
 
-  public static RequestConfig with(String botId, String orgId, String forceConfigEndpoint){
+  public static RequestConfig with(String botId, String orgId, String forceConfigEndpoint) {
     return new RequestConfig(botId, orgId, forceConfigEndpoint);
   }
 
   /**
    * FluentBuilder provides Fluent API to create Request Config.
    */
-  public static class FluentBuilder implements BotIdBuilder, OrgIdBuilder, ForceConfigEndpointBuilder, FinalBuilder {
+  public static class FluentBuilder implements BotIdBuilder, OrgIdBuilder,
+      ForceConfigEndpointBuilder, FinalBuilder {
+
     private String botId;
     private String orgId;
     private String forceConfigEndpoint;
@@ -86,19 +88,23 @@ public class RequestConfig {
     }
   }
 
-  public interface BotIdBuilder{
+  public interface BotIdBuilder {
+
     OrgIdBuilder botId(String botId);
   }
 
-  public interface OrgIdBuilder{
+  public interface OrgIdBuilder {
+
     ForceConfigEndpointBuilder orgId(String orgId);
   }
 
-  public interface ForceConfigEndpointBuilder{
+  public interface ForceConfigEndpointBuilder {
+
     FinalBuilder forceConfigEndpoint(String forceConfigEndpoint);
   }
 
-  public interface FinalBuilder{
+  public interface FinalBuilder {
+
     RequestConfig build();
   }
 }

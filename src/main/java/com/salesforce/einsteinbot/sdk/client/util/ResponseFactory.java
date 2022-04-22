@@ -11,13 +11,15 @@ import com.salesforce.einsteinbot.sdk.model.ChatMessageResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 
 /**
- * ResponseFactory - ResponseFactory provides factor methods to create model classes used for Bots Response.
+ * ResponseFactory - ResponseFactory provides factor methods to create model classes used for Bots
+ * Response.
  *
  * @author relango
  */
 public class ResponseFactory {
 
-  public static ResponseEnvelope buildResponseEnvelope(String sessionId, ChatMessageResponseEnvelope chatMessageResponseEnvelope){
+  public static ResponseEnvelope buildResponseEnvelope(String sessionId,
+      ChatMessageResponseEnvelope chatMessageResponseEnvelope) {
     return new ResponseEnvelope()
         .sessionId(sessionId)
         .processedSequenceIds(chatMessageResponseEnvelope.getProcessedSequenceIds())

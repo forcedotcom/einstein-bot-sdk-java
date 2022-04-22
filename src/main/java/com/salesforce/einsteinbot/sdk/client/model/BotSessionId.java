@@ -13,5 +13,6 @@ package com.salesforce.einsteinbot.sdk.client.model;
  * @author relango
  */
 public interface BotSessionId {
+
   String getValue();
 }

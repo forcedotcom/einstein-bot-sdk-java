@@ -98,7 +98,7 @@ public class JwtBearerOAuth implements AuthMechanism {
     this.introspector = introspector;
   }
 
-  public static PrivateKeyBuilder with(){
+  public static PrivateKeyBuilder with() {
     return new FluentBuilder();
   }
 
@@ -159,7 +159,7 @@ public class JwtBearerOAuth implements AuthMechanism {
     Instant expiry = Instant.ofEpochSecond(iResult.getExp());
     long ttl = Math.max(0, Instant.now().until(expiry, ChronoUnit.SECONDS) - 300);
 
-    if (cache.isPresent()){
+    if (cache.isPresent()) {
       cache.get().set(getCacheKey(), oAuthToken, ttl);
     }
     return oAuthToken;
@@ -197,6 +197,7 @@ public class JwtBearerOAuth implements AuthMechanism {
       ConnectedAppSecretBuilder,
       UserIdBuilder,
       FinalBuilder {
+
     PrivateKey privateKey;
     String loginEndpoint;
     String connectedAppId;
@@ -254,32 +255,44 @@ public class JwtBearerOAuth implements AuthMechanism {
 
     @Override
     public JwtBearerOAuth build() {
-      return new JwtBearerOAuth(privateKey,loginEndpoint, connectedAppId, connectedAppSecret, userId, cache);
+      return new JwtBearerOAuth(privateKey, loginEndpoint, connectedAppId, connectedAppSecret,
+          userId, cache);
     }
   }
 
   public interface PrivateKeyBuilder {
+
     LoginEndpointBuilder privateKey(PrivateKey privateKey);
+
     LoginEndpointBuilder privateKeyFilePath(String privateKeyFilePath);
   }
 
   public interface LoginEndpointBuilder {
+
     ConnectedAppIdBuilder loginEndpoint(String loginEndpoint);
   }
+
   public interface ConnectedAppIdBuilder {
+
     ConnectedAppSecretBuilder connectedAppId(String connectedAppId);
   }
+
   public interface ConnectedAppSecretBuilder {
+
     UserIdBuilder connectedAppSecret(String connectedAppSecret);
   }
 
   public interface UserIdBuilder {
+
     FinalBuilder userId(String userId);
   }
 
   public interface FinalBuilder {
+
     FinalBuilder cache(Cache cache);
+
     FinalBuilder cache(Optional<Cache> cache);
+
     AuthMechanism build();
   }
 }

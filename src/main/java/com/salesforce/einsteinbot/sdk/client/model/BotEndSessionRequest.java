@@ -14,14 +14,14 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * BotEndSessionRequest - BotEndSessionRequest implementation of {@link BotRequest}
- * that is used to end a chat session.
+ * BotEndSessionRequest - BotEndSessionRequest implementation of {@link BotRequest} that is used to
+ * end a chat session.
  */
 public class BotEndSessionRequest extends BotRequest {
 
   private EndSessionReason endSessionReason;
 
-  BotEndSessionRequest( Optional<String> requestId, Optional<String> runtimeCRC,
+  BotEndSessionRequest(Optional<String> requestId, Optional<String> runtimeCRC,
       RequestEnvelopeInterceptor requestEnvelopeInterceptor, EndSessionReason endSessionReason) {
     super(requestId, runtimeCRC, requestEnvelopeInterceptor);
     Objects.requireNonNull(endSessionReason);

@@ -8,7 +8,6 @@
 package com.salesforce.einsteinbot.sdk.client.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,9 +15,6 @@ import com.salesforce.einsteinbot.sdk.client.util.ResponseFactory;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.util.TestUtils;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +47,7 @@ public class BotResponseTest {
       .build();
 
   @Test
-  public void testBotResponseCreation(){
+  public void testBotResponseCreation() {
     BotResponse botResponse = BotResponse.with(responseEnvelope, httpStatusCode, botHttpHeaders);
     assertEquals(responseEnvelope, botResponse.getResponseEnvelope());
     assertEquals(httpStatusCode, botResponse.getHttpStatusCode());
@@ -63,13 +59,13 @@ public class BotResponseTest {
   }
 
   @Test
-  public void testBotResponseCreationInvalidValue(){
+  public void testBotResponseCreationInvalidValue() {
     assertThrows(NullPointerException.class, () -> BotResponse
         .with(responseEnvelope, httpStatusCode, null));
   }
 
   @Test
-  public void testBotResponseBuildFromResponseEnvelopeResponseEntity(){
+  public void testBotResponseBuildFromResponseEnvelopeResponseEntity() {
     ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(responseEnvelope, botHttpHeaders, httpStatus);
 
@@ -80,13 +76,15 @@ public class BotResponseTest {
   }
 
   @Test
-  public void testBotResponseBuildFromChatMessageResponseEnvelopeResponseEntity(){
+  public void testBotResponseBuildFromChatMessageResponseEnvelopeResponseEntity() {
     ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(chatMessageResponseEnvelope, botHttpHeaders, httpStatus);
 
     String sessionId = "TestSessionId";
-    BotResponse botResponse = BotResponseBuilder.fromChatMessageResponseEnvelopeResponseEntity(responseEntity, sessionId);
-    ResponseEnvelope expectedResponseEnvelop = ResponseFactory.buildResponseEnvelope(sessionId, chatMessageResponseEnvelope);
+    BotResponse botResponse = BotResponseBuilder
+        .fromChatMessageResponseEnvelopeResponseEntity(responseEntity, sessionId);
+    ResponseEnvelope expectedResponseEnvelop = ResponseFactory
+        .buildResponseEnvelope(sessionId, chatMessageResponseEnvelope);
 
     assertEquals(expectedResponseEnvelop, botResponse.getResponseEnvelope());
     assertEquals(httpStatusCode, botResponse.getHttpStatusCode());

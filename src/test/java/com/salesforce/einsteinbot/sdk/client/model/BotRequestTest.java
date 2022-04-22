@@ -14,9 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +45,7 @@ public class BotRequestTest {
         .build();
 
     assertTrue(botRequest instanceof BotSendMessageRequest);
-    assertEquals(requestMessage,((BotSendMessageRequest) botRequest).getMessage());
+    assertEquals(requestMessage, ((BotSendMessageRequest) botRequest).getMessage());
   }
 
   @Test
@@ -59,7 +56,7 @@ public class BotRequestTest {
         .build();
 
     assertTrue(botRequest instanceof BotEndSessionRequest);
-    assertEquals(endSessionReason,((BotEndSessionRequest) botRequest).getEndSessionReason());
+    assertEquals(endSessionReason, ((BotEndSessionRequest) botRequest).getEndSessionReason());
   }
 
   @Test
@@ -72,7 +69,7 @@ public class BotRequestTest {
         .build();
 
     assertTrue(botRequest instanceof BotSendMessageRequest);
-    assertEquals(requestMessage,((BotSendMessageRequest) botRequest).getMessage());
+    assertEquals(requestMessage, ((BotSendMessageRequest) botRequest).getMessage());
     assertEquals(Optional.of(requestId), botRequest.getRequestId());
     assertEquals(Optional.of(runtimeCRC), botRequest.getRuntimeCRC());
   }
@@ -85,7 +82,7 @@ public class BotRequestTest {
         .build();
 
     assertTrue(botRequest instanceof BotEndSessionRequest);
-    assertEquals(endSessionReason,((BotEndSessionRequest) botRequest).getEndSessionReason());
+    assertEquals(endSessionReason, ((BotEndSessionRequest) botRequest).getEndSessionReason());
     assertNotNull(botRequest.getOrCreateRequestId());
     assertFalse(botRequest.getRuntimeCRC().isPresent());
   }

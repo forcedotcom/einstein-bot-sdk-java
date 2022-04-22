@@ -64,7 +64,8 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
     if (!runtimeSessionIdOptional.isPresent()) {
       botResponse = startNewChatSession(config, externalSessionId, botSendMessageRequest);
     } else {
-      botResponse = continueExistingSession(config, botSendMessageRequest, runtimeSessionIdOptional);
+      botResponse = continueExistingSession(config, botSendMessageRequest,
+          runtimeSessionIdOptional);
     }
 
     //TODO: Also cache runtimeCRC and send it in subsequent request for both v5 and v4.
@@ -72,7 +73,8 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
     return botResponse;
   }
 
-  private BotResponse continueExistingSession(RequestConfig config, BotSendMessageRequest botSendMessageRequest,
+  private BotResponse continueExistingSession(RequestConfig config,
+      BotSendMessageRequest botSendMessageRequest,
       Optional<String> runtimeSessionIdOptional) {
 
     addSequenceIds(botSendMessageRequest);
@@ -113,7 +115,8 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
     return botResonse;
   }
 
-  private BotSendMessageRequest updateContextVariables(BotSendMessageRequest botSendMessageRequest) {
+  private BotSendMessageRequest updateContextVariables(
+      BotSendMessageRequest botSendMessageRequest) {
     List<AnyVariable> updatedVariables = addIntegrationTypeAndNameToContextVariables(
         botSendMessageRequest.getVariables(), integrationName);
 

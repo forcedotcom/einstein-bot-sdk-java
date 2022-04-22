@@ -15,20 +15,23 @@ import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import org.springframework.http.ResponseEntity;
 
 /**
- * BotResponseBuilder - BotResponseBuilder provides methods to build BotResponse from Spring's Response Entity.
+ * BotResponseBuilder - BotResponseBuilder provides methods to build BotResponse from Spring's
+ * Response Entity.
  *
  * @author relango
  */
 public class BotResponseBuilder {
 
-  public static BotResponse fromResponseEnvelopeResponseEntity(ResponseEntity<ResponseEnvelope> responseEntity){
+  public static BotResponse fromResponseEnvelopeResponseEntity(
+      ResponseEntity<ResponseEnvelope> responseEntity) {
     responseEntity.getHeaders();
     return BotResponse.with(responseEntity.getBody(),
         responseEntity.getStatusCodeValue(),
         fromSpringHttpHeaders(responseEntity.getHeaders()));
   }
 
-  public static BotResponse fromChatMessageResponseEnvelopeResponseEntity(ResponseEntity<ChatMessageResponseEnvelope> responseEntity, String sessionId){
+  public static BotResponse fromChatMessageResponseEnvelopeResponseEntity(
+      ResponseEntity<ChatMessageResponseEnvelope> responseEntity, String sessionId) {
     ResponseEnvelope responseEnvelope = buildResponseEnvelope(sessionId, responseEntity.getBody());
     return BotResponse.with(responseEnvelope,
         responseEntity.getStatusCodeValue(),

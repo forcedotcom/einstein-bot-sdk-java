@@ -111,7 +111,7 @@ public class JwtBearerOAuthTest {
     assertTrue(ttlCaptor.getValue() > 6500,
         "ttl is too short"); // ttl should be just under two hours
     assertTrue(ttlCaptor.getValue() < 7200, "ttl is too long");
- }
+  }
 
   private void verifyToken(AuthMechanism oAuth) throws InterruptedException {
     // get token

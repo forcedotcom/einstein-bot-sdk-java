@@ -7,10 +7,10 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildBotSendMessageRequest;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildSessionBotEndSessionRequest;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildTextMessage;
-import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_NAME;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_VALUE_API;
@@ -31,11 +31,11 @@ import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
-import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
-import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.util.Optional;
@@ -115,7 +115,8 @@ public class SessionManagedChatbotClientTest {
         .integrationName(integrationName)
         .build();
 
-    botSendMessageRequest = buildBotSendMessageRequest(buildTextMessage(messageText), Optional.empty());
+    botSendMessageRequest = buildBotSendMessageRequest(buildTextMessage(messageText),
+        Optional.empty());
 
     botEndSessionRequest = buildSessionBotEndSessionRequest(endSessionReason, Optional.empty());
   }
@@ -131,7 +132,8 @@ public class SessionManagedChatbotClientTest {
 
     // verify startChatSession is called
     verify(basicChatbotClient)
-        .startChatSession(configCaptor.capture(), externalSessionIdCaptor.capture(), messageRequestCaptor.capture());
+        .startChatSession(configCaptor.capture(), externalSessionIdCaptor.capture(),
+            messageRequestCaptor.capture());
 
     assertEquals(requestConfig, configCaptor.getValue());
     assertEquals(externalSessionId, externalSessionIdCaptor.getValue());
@@ -143,8 +145,10 @@ public class SessionManagedChatbotClientTest {
     verify(cache)
         .set(String.format("chatbot-%s-%s-%s", orgId, botId, externalSessionKey), chatbotSessionId);
 
-    TextVariable integrationType = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE, CONTEXT_VARIABLE_VALUE_API);
-    TextVariable integrationNameVar = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME, integrationName);
+    TextVariable integrationType = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE,
+        CONTEXT_VARIABLE_VALUE_API);
+    TextVariable integrationNameVar = createTextVariable(CONTEXT_VARIABLE_NAME_INTEGRATION_NAME,
+        integrationName);
 
     assertThat(sentRequest.getVariables(),
         contains(integrationType, integrationNameVar));
@@ -160,7 +164,8 @@ public class SessionManagedChatbotClientTest {
     sessionManagedClient.sendMessage(requestConfig, externalSessionId, botSendMessageRequest);
 
     // verify sendMessage is invoked (i.e not startChatSession invoked)
-    verify(basicChatbotClient).sendMessage(configCaptor.capture(), runtimeSessionIdCaptor.capture(), messageRequestCaptor.capture());
+    verify(basicChatbotClient).sendMessage(configCaptor.capture(), runtimeSessionIdCaptor.capture(),
+        messageRequestCaptor.capture());
 
     verifyRequestConfigAndRuntimeSessionId();
 
@@ -195,7 +200,9 @@ public class SessionManagedChatbotClientTest {
     sessionManagedClient.endChatSession(requestConfig, externalSessionId, botEndSessionRequest);
 
     // verify sendMessage is invoked (i.e not startChatSession invoked)
-    verify(basicChatbotClient).endChatSession(configCaptor.capture(), runtimeSessionIdCaptor.capture(), endSessionRequestCaptor.capture());
+    verify(basicChatbotClient)
+        .endChatSession(configCaptor.capture(), runtimeSessionIdCaptor.capture(),
+            endSessionRequestCaptor.capture());
 
     verifyRequestConfigAndRuntimeSessionId();
 

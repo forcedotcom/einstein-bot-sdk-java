@@ -28,5 +28,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = EndSessionMessage.class, name = "endSession"),
 })
 public interface AnyRequestMessage {
+
   void setSequenceId(Long sequenceId);
 }

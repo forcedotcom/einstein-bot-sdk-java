@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * BotSendMessageRequest - BotSendMessageRequest implementation of {@link BotRequest}
- * that is used to send a message to Bot.
+ * BotSendMessageRequest - BotSendMessageRequest implementation of {@link BotRequest} that is used
+ * to send a message to Bot.
  *
  * @author relango
  */
@@ -27,7 +27,7 @@ public class BotSendMessageRequest extends BotRequest {
   private List<AnyVariable> variables;
   private AnyRequestMessage message;
 
-  BotSendMessageRequest( Optional<String> requestId, Optional<String> runtimeCRC,
+  BotSendMessageRequest(Optional<String> requestId, Optional<String> runtimeCRC,
       RequestEnvelopeInterceptor requestEnvelopeInterceptor,
       List<AnyVariable> variables, AnyRequestMessage message) {
     super(requestId, runtimeCRC, requestEnvelopeInterceptor);

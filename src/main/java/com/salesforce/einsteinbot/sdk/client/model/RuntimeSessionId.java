@@ -13,13 +13,13 @@ import java.util.Objects;
  * RuntimeSessionId - RuntimeSessionId is a class to track Runtime's session id.
  *
  * <p>
- * An Runtime session Id is the unique ID used by Bot's runtime to track sessions.
- * A Runtime session Id need to be provided continue existing session or end session.
+ * An Runtime session Id is the unique ID used by Bot's runtime to track sessions. A Runtime session
+ * Id need to be provided continue existing session or end session.
  * </p>
  *
  * @author relango
  */
-public class RuntimeSessionId implements BotSessionId{
+public class RuntimeSessionId implements BotSessionId {
 
   private String value;
 
@@ -28,7 +28,7 @@ public class RuntimeSessionId implements BotSessionId{
     this.value = value;
   }
 
-  public String getValue(){
+  public String getValue() {
     return value;
   }
 

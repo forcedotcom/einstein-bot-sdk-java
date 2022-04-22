@@ -26,13 +26,16 @@ import java.util.StringJoiner;
  */
 public class BotRequest {
 
-  private enum Type { Message, EndSession };
+  private enum Type {Message, EndSession}
+
+  ;
 
   private Optional<String> requestId;
   private Optional<String> runtimeCRC;
   private RequestEnvelopeInterceptor requestEnvelopeInterceptor;
 
-  BotRequest(Optional<String> requestId, Optional<String> runtimeCRC, RequestEnvelopeInterceptor requestEnvelopeInterceptor) {
+  BotRequest(Optional<String> requestId, Optional<String> runtimeCRC,
+      RequestEnvelopeInterceptor requestEnvelopeInterceptor) {
     Objects.requireNonNull(requestId);
     Objects.requireNonNull(runtimeCRC);
     Objects.requireNonNull(requestEnvelopeInterceptor);
@@ -45,7 +48,7 @@ public class BotRequest {
     return requestId.orElse(newRandomUUID());
   }
 
-  public Optional getRequestId(){
+  public Optional getRequestId() {
     return this.requestId;
   }
 
@@ -65,21 +68,22 @@ public class BotRequest {
         .toString();
   }
 
-  public static VariablesBuilder<BotSendMessageRequest> withMessage(AnyRequestMessage message){
+  public static VariablesBuilder<BotSendMessageRequest> withMessage(AnyRequestMessage message) {
     return new FluentBuilder<>(message);
   }
 
-  public static FinalBuilder<BotEndSessionRequest> withEndSession(EndSessionReason endSessionReason){
+  public static FinalBuilder<BotEndSessionRequest> withEndSession(
+      EndSessionReason endSessionReason) {
     return new FluentBuilder<>(endSessionReason);
   }
 
   public static SendMessageRequestCloneBuilder<BotSendMessageRequest> from(
-      BotSendMessageRequest messageRequestEnvelope){
+      BotSendMessageRequest messageRequestEnvelope) {
     return new FluentBuilder(messageRequestEnvelope);
   }
 
   public static FinalCloneBuilder<BotEndSessionRequest> from(
-      BotEndSessionRequest endSessionRequestEnvelope){
+      BotEndSessionRequest endSessionRequestEnvelope) {
     return new FluentBuilder(endSessionRequestEnvelope);
   }
 
@@ -87,7 +91,7 @@ public class BotRequest {
    * FluentBuilder provides Fluent API to create BotRequest.
    */
   public static class FluentBuilder<T extends BotRequest> implements VariablesBuilder<T>,
-      FinalBuilder<T> , SendMessageRequestCloneBuilder<T>, FinalCloneBuilder<T>{
+      FinalBuilder<T>, SendMessageRequestCloneBuilder<T>, FinalCloneBuilder<T> {
 
     private Optional<String> requestId = Optional.empty();
     private Optional<String> runtimeCRC = Optional.empty();
@@ -107,7 +111,7 @@ public class BotRequest {
       this.endSessionReason = endSessionReason;
     }
 
-    private FluentBuilder(BotSendMessageRequest requestEnvelope){
+    private FluentBuilder(BotSendMessageRequest requestEnvelope) {
       this(requestEnvelope.getMessage());
       this.requestId = requestEnvelope.getRequestId();
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
@@ -115,7 +119,7 @@ public class BotRequest {
       this.requestEnvelopeInterceptor = requestEnvelope.getRequestEnvelopeInterceptor();
     }
 
-    private FluentBuilder(BotEndSessionRequest requestEnvelope){
+    private FluentBuilder(BotEndSessionRequest requestEnvelope) {
       this(requestEnvelope.getEndSessionReason());
       this.requestId = requestEnvelope.getRequestId();
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
@@ -198,21 +202,25 @@ public class BotRequest {
 
     @Override
     public T build() {
-      if (type == Type.Message){
-        return (T) new BotSendMessageRequest(requestId, runtimeCRC, requestEnvelopeInterceptor, variables, message);
-      }else if (type == Type.EndSession){
-        return (T) new BotEndSessionRequest(requestId, runtimeCRC, requestEnvelopeInterceptor, endSessionReason);
-      }else {
+      if (type == Type.Message) {
+        return (T) new BotSendMessageRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
+            variables, message);
+      } else if (type == Type.EndSession) {
+        return (T) new BotEndSessionRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
+            endSessionReason);
+      } else {
         throw new IllegalArgumentException("Invalid type : " + type);
       }
     }
   }
 
   public interface VariablesBuilder<T> extends FinalBuilder<T> {
+
     FinalBuilder<T> variables(List<AnyVariable> variables);
   }
 
   public interface SendMessageRequestCloneBuilder<T> extends FinalCloneBuilder<T> {
+
     FinalCloneBuilder<T> setVariables(List<AnyVariable> variables);
   }
 
@@ -226,7 +234,8 @@ public class BotRequest {
 
     FinalCloneBuilder<T> setRuntimeCRC(String runtimeCRC);
 
-    FinalCloneBuilder<T> setRequestEnvelopeInterceptor(RequestEnvelopeInterceptor requestEnvelopeInterceptor);
+    FinalCloneBuilder<T> setRequestEnvelopeInterceptor(
+        RequestEnvelopeInterceptor requestEnvelopeInterceptor);
 
     T build();
   }
@@ -241,7 +250,8 @@ public class BotRequest {
 
     FinalBuilder<T> runtimeCRC(String runtimeCRC);
 
-    FinalBuilder<T> requestEnvelopeInterceptor(RequestEnvelopeInterceptor requestEnvelopeInterceptor);
+    FinalBuilder<T> requestEnvelopeInterceptor(
+        RequestEnvelopeInterceptor requestEnvelopeInterceptor);
 
     T build();
   }

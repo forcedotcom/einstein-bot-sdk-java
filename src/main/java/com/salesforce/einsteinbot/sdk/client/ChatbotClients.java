@@ -14,7 +14,8 @@ import com.salesforce.einsteinbot.sdk.client.SessionManagedChatbotClient.BasicCl
 import com.salesforce.einsteinbot.sdk.client.SessionManagedChatbotClient.SessionManagedClientFluentBuilder;
 
 /**
- * ChatbotClients - Provide factory methods for creating different implementations of {@link ChatbotClient}
+ * ChatbotClients - Provide factory methods for creating different implementations of {@link
+ * ChatbotClient}
  *
  * @author relango
  */
@@ -22,6 +23,7 @@ public class ChatbotClients {
 
   /**
    * Return's builder to build {@link SessionManagedChatbotClient} implementation.
+   *
    * @return SessionManagedClient FluentBuilder
    */
   public static BasicClientBuilder sessionManaged() {
@@ -30,6 +32,7 @@ public class ChatbotClients {
 
   /**
    * Return's builder to build {@link BasicChatbotClient} implementation.
+   *
    * @return BasicClient FluentBuilder
    */
   public static BasePathBuilder basic() {

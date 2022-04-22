@@ -30,7 +30,7 @@ public class BotHttpHeaders {
   public static final String HEADER_NAME_REQUEST_ID = "X-Request-ID";
   public static final String HEADER_NAME_RUNTIME_CRC = "X-Runtime-CRC";
 
-  private Multimap<String,String> headerValues = ArrayListMultimap.create();
+  private Multimap<String, String> headerValues = ArrayListMultimap.create();
 
   private BotHttpHeaders(Multimap<String, String> headerValues) {
     Objects.requireNonNull(headerValues);
@@ -40,7 +40,7 @@ public class BotHttpHeaders {
   private BotHttpHeaders(Set<Entry<String, List<String>>> entries) {
     entries
         .stream()
-        .forEach( this::addToHeader );
+        .forEach(this::addToHeader);
 
   }
 
@@ -48,23 +48,23 @@ public class BotHttpHeaders {
     headerValues.putAll(entry.getKey(), entry.getValue());
   }
 
-  public static Builder with(){
+  public static Builder with() {
     return new Builder();
   }
 
-  public static BotHttpHeaders fromSpringHttpHeaders(HttpHeaders httpHeaders){
+  public static BotHttpHeaders fromSpringHttpHeaders(HttpHeaders httpHeaders) {
     return new BotHttpHeaders(httpHeaders.entrySet());
   }
 
-  public Optional<String> getRequestIdHeader(){
+  public Optional<String> getRequestIdHeader() {
     return getFirst(HEADER_NAME_REQUEST_ID);
   }
 
-  public Optional<String> getRuntimeCRCHeader(){
+  public Optional<String> getRuntimeCRCHeader() {
     return getFirst(HEADER_NAME_RUNTIME_CRC);
   }
 
-  public Optional<String> getFirst(String headerName){
+  public Optional<String> getFirst(String headerName) {
     return Optional
         .ofNullable(headerValues.get(headerName))
         .flatMap(this::findFirstItem);
@@ -74,11 +74,11 @@ public class BotHttpHeaders {
     return collection.stream().findFirst();
   }
 
-  public Map<String, Collection<String>> getAll(){
+  public Map<String, Collection<String>> getAll() {
     return headerValues.asMap();
   }
 
-  public Collection<String> get(String headerName){
+  public Collection<String> get(String headerName) {
     return headerValues.get(headerName);
   }
 
@@ -86,7 +86,7 @@ public class BotHttpHeaders {
     MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
     headerValues.entries()
         .stream()
-        .forEach( e -> headers.add(e.getKey(), e.getValue()) );
+        .forEach(e -> headers.add(e.getKey(), e.getValue()));
     return headers;
   }
 
@@ -113,24 +113,25 @@ public class BotHttpHeaders {
   }
 
   public static class Builder {
-    private Multimap<String,String> headerValues = ArrayListMultimap.create();
 
-    public Builder requestId(String requestId){
+    private Multimap<String, String> headerValues = ArrayListMultimap.create();
+
+    public Builder requestId(String requestId) {
       headerValues.put(HEADER_NAME_REQUEST_ID, requestId);
       return this;
     }
 
-    public Builder runtimeCRC(String runtimeCRC){
+    public Builder runtimeCRC(String runtimeCRC) {
       headerValues.put(HEADER_NAME_RUNTIME_CRC, runtimeCRC);
       return this;
     }
 
-    public Builder header(String headerName, String headerValue){
+    public Builder header(String headerName, String headerValue) {
       headerValues.put(headerName, headerValue);
       return this;
     }
 
-    public BotHttpHeaders build(){
+    public BotHttpHeaders build() {
       return new BotHttpHeaders(headerValues);
     }
   }

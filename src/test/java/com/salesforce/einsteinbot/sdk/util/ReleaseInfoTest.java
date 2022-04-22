@@ -12,19 +12,20 @@ import org.junit.Test;
 
 /**
  * ReleaseInfoTest : Unit Tests for ReleaseInfo
+ *
  * @author relango
  */
 public class ReleaseInfoTest {
 
   @Test
-  public void testReleaseInfoProperties(){
+  public void testReleaseInfoProperties() {
     ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
     Assert.assertEquals(TestUtils.EXPECTED_SDK_NAME, releaseInfo.getSdkName());
     Assert.assertNotNull(releaseInfo.getSdkVersion());
   }
 
   @Test
-  public void testUserAgent(){
+  public void testUserAgent() {
     ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
     String version = releaseInfo.getSdkVersion();
     Assert.assertEquals(TestUtils.EXPECTED_SDK_NAME + "/" + version, releaseInfo.getAsUserAgent());

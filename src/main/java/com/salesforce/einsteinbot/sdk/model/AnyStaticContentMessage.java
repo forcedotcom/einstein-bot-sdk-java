@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * AnyStaticContentMessage - Base type to support polymorphic anyOf for StaticContentMessage. Uses Jackson
- * annotations to resolve subclass type based on value of 'type' field.
+ * AnyStaticContentMessage - Base type to support polymorphic anyOf for StaticContentMessage. Uses
+ * Jackson annotations to resolve subclass type based on value of 'type' field.
  *
  * @author relango
  */
@@ -21,4 +21,5 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = StaticContentText.class, name = "Text"),
 })
 public interface AnyStaticContentMessage {
+
 }

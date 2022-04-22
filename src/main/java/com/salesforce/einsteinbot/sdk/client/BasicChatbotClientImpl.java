@@ -7,9 +7,9 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromChatMessageResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildChatMessageEnvelope;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildInitMessageEnvelope;
-import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromChatMessageResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createErrorResponseProcessor;
 import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createFilter;
 import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createLoggingRequestProcessor;
@@ -19,20 +19,20 @@ import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.einsteinbot.sdk.api.BotApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
-import com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder;
-import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
-import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
+import com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
+import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
+import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
+import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
+import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.Error;
-import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
-import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
-import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
 import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
@@ -48,9 +48,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
- * This is a basic implementation of {@link BasicChatbotClient}. It does not perform session management.
- * So user has to explicitly call methods to start a chat session, send a message to existing session and
- * end chat session.
+ * This is a basic implementation of {@link BasicChatbotClient}. It does not perform session
+ * management. So user has to explicitly call methods to start a chat session, send a message to
+ * existing session and end chat session.
  *
  * @author relango
  */
@@ -147,12 +147,13 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
-  private void notifyRequestEnvelopeInterceptor(BotRequest botRequest, Object requestEnvelope){
+  private void notifyRequestEnvelopeInterceptor(BotRequest botRequest, Object requestEnvelope) {
     botRequest.getRequestEnvelopeInterceptor()
         .accept(requestEnvelope);
   }
 
-  protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId, EndSessionReason endSessionReason, BotRequest botRequest) {
+  protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId,
+      EndSessionReason endSessionReason, BotRequest botRequest) {
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
         .endChatSessionWithHttpInfo(sessionId,
@@ -161,7 +162,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
             botRequest.getOrCreateRequestId(),
             botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
-        .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity, sessionId));
+        .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
+            sessionId));
 
     return futureResponse;
   }
@@ -173,7 +175,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     apiClient.setBearerToken(authMechanism.getToken());
 
     CompletableFuture<BotResponse> futureResponse = botApi
-        .establishChatSessionWithHttpInfo(config.getBotId(), config.getOrgId(), botRequest.getOrCreateRequestId(), initMessageEnvelope)
+        .establishChatSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
+            botRequest.getOrCreateRequestId(), initMessageEnvelope)
         .toFuture()
         .thenApply(BotResponseBuilder::fromResponseEnvelopeResponseEntity);
 
@@ -191,7 +194,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
             messageEnvelope,
             botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
-        .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity, sessionId));
+        .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
+            sessionId));
 
     return futureResponse;
   }

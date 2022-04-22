@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ReleaseInfo - Holds SDK Release info.
+ *
  * @author relango
  */
 public class ReleaseInfo {
@@ -29,6 +30,7 @@ public class ReleaseInfo {
 
   //Use static nested class for thread-safe Singleton.
   private static class InstanceHolder {
+
     private static ReleaseInfo instance = new ReleaseInfo();
   }
 
@@ -62,7 +64,8 @@ public class ReleaseInfo {
 
     if (inputStream == null) {
       throw new FileNotFoundException(
-          "Missing Release Info Properties file : " + RELEASE_INFO_PROPERTIES_FILE + " in classpath.") ;
+          "Missing Release Info Properties file : " + RELEASE_INFO_PROPERTIES_FILE
+              + " in classpath.");
     }
 
     return inputStream;
@@ -81,7 +84,7 @@ public class ReleaseInfo {
     return sdkVersion;
   }
 
-  public String getAsUserAgent(){
+  public String getAsUserAgent() {
     return String.format("%s/%s", sdkName, sdkVersion);
   }
 }

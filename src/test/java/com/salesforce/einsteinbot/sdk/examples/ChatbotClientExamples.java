@@ -17,13 +17,13 @@ import com.salesforce.einsteinbot.sdk.client.BasicChatbotClient;
 import com.salesforce.einsteinbot.sdk.client.ChatbotClients;
 import com.salesforce.einsteinbot.sdk.client.SessionManagedChatbotClient;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
+import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
-import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
-import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 
 
 /**
@@ -36,7 +36,8 @@ import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 public class ChatbotClientExamples {
 
   private final String basePath = "https://runtime-api-na-west.stg.chatbots.sfdc.sh";
-  private final ExternalSessionId externalSessionKey = new ExternalSessionId("c58677cc-76e6-4174-9770-aee33b08384n");
+  private final ExternalSessionId externalSessionKey = new ExternalSessionId(
+      "c58677cc-76e6-4174-9770-aee33b08384n");
 
   private final String integrationName = "ConnectorExample";
 
@@ -70,32 +71,36 @@ public class ChatbotClientExamples {
     new ChatbotClientExamples().run();
   }
 
-  private void run() throws Exception{
+  private void run() throws Exception {
     sendUsingBasicClient();
     sendUsingSessionManagedClient();
     getHealthStatus();
   }
 
-  private void sendUsingBasicClient() throws Exception{
+  private void sendUsingBasicClient() throws Exception {
     BasicChatbotClient client = ChatbotClients.basic()
         .basePath(basePath)
         .authMechanism(oAuth)
         .build();
 
-    BotSendMessageRequest botSendInitMessageRequest = BotRequest.withMessage(buildTextMessage("Initial Message")).build();
+    BotSendMessageRequest botSendInitMessageRequest = BotRequest
+        .withMessage(buildTextMessage("Initial Message")).build();
 
-    BotResponse resp = client.startChatSession(config, externalSessionKey, botSendInitMessageRequest);
+    BotResponse resp = client
+        .startChatSession(config, externalSessionKey, botSendInitMessageRequest);
 
     System.out.println("Init Message Response :" + convertObjectToJson(resp));
     String sessionId = resp.getResponseEnvelope().getSessionId();
-    BotSendMessageRequest botSendMessageRequest =  BotRequest.withMessage(buildTextMessage("Order Status")).build();
+    BotSendMessageRequest botSendMessageRequest = BotRequest
+        .withMessage(buildTextMessage("Order Status")).build();
 
     BotResponse textMsgResponse = client
         .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);
 
     System.out.println("Text Message Response :" + convertObjectToJson(textMsgResponse));
 
-    BotEndSessionRequest botEndSessionRequest = BotRequest.withEndSession(EndSessionReason.USERREQUEST).build();
+    BotEndSessionRequest botEndSessionRequest = BotRequest
+        .withEndSession(EndSessionReason.USERREQUEST).build();
 
     BotResponse endSessionResponse = client
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
@@ -116,19 +121,24 @@ public class ChatbotClientExamples {
         .integrationName(integrationName)
         .build();
 
-    BotSendMessageRequest botSendFirstMessageRequest = BotRequest.withMessage(buildTextMessage("Initial Message")).build();
+    BotSendMessageRequest botSendFirstMessageRequest = BotRequest
+        .withMessage(buildTextMessage("Initial Message")).build();
 
-    BotResponse firstMsgResp = client.sendMessage(config, externalSessionKey, botSendFirstMessageRequest);
+    BotResponse firstMsgResp = client
+        .sendMessage(config, externalSessionKey, botSendFirstMessageRequest);
 
     System.out.println("First Message Response: " + convertObjectToJson(firstMsgResp));
 
-    BotSendMessageRequest botSendSecondMessageRequest =  BotRequest.withMessage(buildTextMessage("Order Status")).build();
+    BotSendMessageRequest botSendSecondMessageRequest = BotRequest
+        .withMessage(buildTextMessage("Order Status")).build();
 
-    BotResponse secondMsgResp = client.sendMessage(config, externalSessionKey, botSendSecondMessageRequest);
+    BotResponse secondMsgResp = client
+        .sendMessage(config, externalSessionKey, botSendSecondMessageRequest);
 
     System.out.println("Second Message Response: " + convertObjectToJson(secondMsgResp));
 
-    BotEndSessionRequest botEndSessionRequest = BotRequest.withEndSession(EndSessionReason.USERREQUEST).build();
+    BotEndSessionRequest botEndSessionRequest = BotRequest
+        .withEndSession(EndSessionReason.USERREQUEST).build();
 
     BotResponse endSessionResponse = client
         .endChatSession(config, externalSessionKey, botEndSessionRequest);
@@ -136,7 +146,7 @@ public class ChatbotClientExamples {
     System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
   }
 
-  private void getHealthStatus() throws Exception{
+  private void getHealthStatus() throws Exception {
     BasicChatbotClient client = ChatbotClients.basic()
         .basePath(basePath)
         .authMechanism(oAuth)

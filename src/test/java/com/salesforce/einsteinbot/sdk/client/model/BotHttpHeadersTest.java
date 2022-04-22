@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 public class BotHttpHeadersTest {
 
   @Test
-  public void testHeaderValuesWriteAndRead(){
+  public void testHeaderValuesWriteAndRead() {
     String requestId = "requestId";
     String customHeaderName = "customName";
     String customHeaderValue1 = "customValue1";
