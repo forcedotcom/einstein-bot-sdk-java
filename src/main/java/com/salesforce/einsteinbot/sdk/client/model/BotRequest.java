@@ -26,10 +26,9 @@ import java.util.StringJoiner;
  */
 public class BotRequest {
 
-  private enum Type {Message, EndSession}
-
-  ;
-
+  private enum Type {
+    Message, EndSession
+  }
   private Optional<String> requestId;
   private Optional<String> runtimeCRC;
   private RequestEnvelopeInterceptor requestEnvelopeInterceptor;

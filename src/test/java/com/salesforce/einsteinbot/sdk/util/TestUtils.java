@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * TestUtils - Contains utility methods used by tests
@@ -40,6 +42,14 @@ public class TestUtils {
 
   public static <T> ResponseEntity<T> createResponseEntity(T responseEnvelope,
       BotHttpHeaders httpHeaders, HttpStatus httpStatus) {
-    return new ResponseEntity(responseEnvelope, httpHeaders.toMultiValueMap(), httpStatus);
+    return new ResponseEntity(responseEnvelope, headersToMultiValueMap(httpHeaders), httpStatus);
+  }
+
+  private static MultiValueMap<String, String> headersToMultiValueMap(BotHttpHeaders botHttpHeaders) {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    botHttpHeaders.getHeaderValues().entries()
+        .stream()
+        .forEach(e -> headers.add(e.getKey(), e.getValue()));
+    return headers;
   }
 }

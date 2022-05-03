@@ -9,7 +9,9 @@ package com.salesforce.einsteinbot.sdk.client.model;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,19 +77,15 @@ public class BotHttpHeaders {
   }
 
   public Map<String, Collection<String>> getAll() {
-    return headerValues.asMap();
+    return Collections.unmodifiableMap(headerValues.asMap());
   }
 
   public Collection<String> get(String headerName) {
     return headerValues.get(headerName);
   }
 
-  public MultiValueMap<String, String> toMultiValueMap() {
-    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-    headerValues.entries()
-        .stream()
-        .forEach(e -> headers.add(e.getKey(), e.getValue()));
-    return headers;
+  public Multimap<String, String> getHeaderValues() {
+    return Multimaps.unmodifiableMultimap(headerValues);
   }
 
   @Override
