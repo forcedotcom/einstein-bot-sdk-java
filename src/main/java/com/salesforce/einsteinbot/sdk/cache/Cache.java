@@ -10,17 +10,41 @@ package com.salesforce.einsteinbot.sdk.cache;
 import java.util.Optional;
 
 /**
- * Cache interface provides an abstraction for plugging in a cache mechanism for maintaining the
- * session cache. This interface is used by SessionManagedChatbotClient to manage the mapping
+ * Cache interface provides an abstraction for plugging in a cache mechanism.
+ * Cache is used by SessionManagedChatbotClient to manage the mapping
  * between client session id Einstein Bots session id.
+ *
+ * Cache is also used by JwtBearerOAuth to cache jwt tokens to avoid network requests to fetch tokens
+ *
+ * @author relango
  */
 public interface Cache {
 
+  /**
+   * Get value associated with given key.
+   * @param key
+   * @return
+   */
   Optional<String> get(String key);
 
+  /**
+   * Add or updates given key and value in Cache
+   * @param key
+   * @param val
+   */
   void set(String key, String val);
 
+  /**
+   * Add or updates given key and value in Cache and expires the entry after given ttlSeconds
+   * @param key
+   * @param val
+   * @param ttlSeconds
+   */
   void set(String key, String val, long ttlSeconds);
 
-  public void remove(String key);
+  /**
+   * Removes entry associated with given key from Cache.
+   * @param key
+   */
+  void remove(String key);
 }

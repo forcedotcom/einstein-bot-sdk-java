@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * AnyVariable - Base type to support polymorphic anyOf for Variables. Uses Jackson annotations
- * to resolve subclass type based on value of 'type' field.
+ * AnyVariable - Base type to support polymorphic anyOf for Variables. Uses Jackson annotations to
+ * resolve subclass type based on value of 'type' field.
  *
  * @author relango
  * @since 234
@@ -30,5 +30,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = RefVariable.class, name = "ref")
 })
 public interface AnyVariable {
+
   String getName();
 }

@@ -9,6 +9,7 @@ package com.salesforce.einsteinbot.sdk.util;
 
 /**
  * Constants - Contains global constant variabled used in SDK
+ *
  * @author relango
  */
 public class Constants {

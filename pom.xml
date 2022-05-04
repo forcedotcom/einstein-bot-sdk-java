@@ -11,7 +11,7 @@
 
     <groupId>com.salesforce.einsteinbot</groupId>
     <artifactId>einstein-bot-sdk-java</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>einstein-bot-sdk-java</name>
     <description>Java SDK to interact with Einstein Bots Runtime.
@@ -39,8 +39,8 @@
         <spring-reactor-test-version>3.2.3.RELEASE</spring-reactor-test-version>
         <spring-reactor-core-version>3.4.5</spring-reactor-core-version>
         <openapi-generator-version>5.4.0</openapi-generator-version>
-        <runtime-api-spec-url>https://runtime-api-na-east.prod.chatbots.sfdc.sh/docs/specs/${api-spec-yaml-file}</runtime-api-spec-url>
-        <api-spec-yaml-file>v4_0_0_api_specs.yml</api-spec-yaml-file>
+        <runtime-api-spec-url>https://runtime-api-na-west.prod.chatbots.sfdc.sh/docs/specs/${api-spec-yaml-file}</runtime-api-spec-url>
+        <api-spec-yaml-file>v5_0_0_api_specs.yml</api-spec-yaml-file>
     </properties>
 
     <licenses>
@@ -121,6 +121,7 @@
                 <configuration>
                     <url>${runtime-api-spec-url}</url>
                     <outputDirectory>src/main/resources/</outputDirectory>
+                    <skipCache>true</skipCache>
                     <outputFileName>${api-spec-yaml-file}</outputFileName>
                     <overwrite>true</overwrite>
                 </configuration>
@@ -171,10 +172,10 @@
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <typeMappings>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage=AnyRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage=AnyResponseMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage=AnyRequestMessage,AnyOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,AnyOfStaticContentAttachmentsStaticContentText=AnyStaticContentMessage
                             </typeMappings>
                             <languageSpecificPrimitives>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfInitMessageEndSessionMessageTextMessageChoiceMessageRedirectMessageTransferSucceededRequestMessageTransferFailedRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage,AnyOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,AnyOfStaticContentAttachmentsStaticContentText
                             </languageSpecificPrimitives>
                             <library>webclient</library>
                         </configuration>

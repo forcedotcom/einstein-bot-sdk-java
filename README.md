@@ -80,8 +80,8 @@ follow **step 3B** to use `SessionManagedChatbotClient` for sessions to be manag
 #### 3A. Setup Basic Chatbot Client
 
 ```java
-    ChatbotClient client = BasicChatbotClient.builder()
-            .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
+    ChatbotClient client = ChatbotClients.basic()
+            .basePath(basePath) // Einstein Bots Runtime basepath. Can be found in the setup page
             .authMechanism(oAuth) // 'oAuth' created in Step 2
             .build();
 ```
@@ -89,26 +89,15 @@ follow **step 3B** to use `SessionManagedChatbotClient` for sessions to be manag
 #### 3B. Setup Session Managed Chatbot Client
 
 ```java
-    SessionManagedChatbotClient client = SessionManagedChatbotClient
-        .builder()
+    SessionManagedChatbotClient client = ChatbotClients
+        .sessionManaged()
         .basicClient(BasicChatbotClient.builder()
-        .basePath(basePath) // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
+        .basePath(basePath) // Einstein Bots Runtime basepath. Can be found in the setup page
         .authMechanism(oAuth)  // 'oAuth' created in Step 2
         .build())
         .cache(cache)  // 'cache' created in Step 1
         .integrationName(integrationName) // Should match integrationName used when adding API Connection for connected app.
         .build();
-```
-
-### 3. Setup Session Managed Chatbot Client
-
-```java
-    SessionManagedChatbotClient client = SessionManagedChatbotClient.builder()
-          .basePath(basePath)   // Einstein Bots Runtime basepath (i.e. https://runtime-api-na-west.chatbots.sfdc.sh). Can be found in the setup page
-          .authMechanism(oAuth) // 'oAuth' created in Step 2
-          .integrationName(integName) // Should match integrationName used when adding API Connection for connected app.
-          .cache(cache) // 'cache' created in Step 1
-          .build();
 ```
 
 ### 4. Sending a Message
@@ -117,21 +106,74 @@ follow **step 3B** to use `SessionManagedChatbotClient` for sessions to be manag
 
 private void sendUsingBasicClient(){
 
-    AnyRequestMessage textMessage = buildInitMessage(Optional.of("Initial message"));
-    RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey,orgId,botId,
-      forceConfigEndPoint,Arrays.asList(textMessage));
+    RequestConfig config = createRequestConfig();
+
+    BotSendMessageRequest botSendInitMessageRequest = BotRequest
+      .withMessage(buildTextMessage("Initial Message"))
+      .build();
+
+    //Start a new chat session
+    BotResponse resp = client
+      .startChatSession(config, externalSessionKey, botSendInitMessageRequest);
+
+    System.out.println("Init Message Response :" + resp);
+
+    String sessionId = resp.getResponseEnvelope().getSessionId();
+    //Send a message to existing chat session
+    BotSendMessageRequest botSendMessageRequest =  BotRequest
+      .withMessage(buildTextMessage("Order Status"))
+      .build();
+
     
-    RequestHeaders headers = buildRequestHeaders();
-    ResponseEnvelope resp=client.sendChatbotRequest(envelope , headers); // 'client' created in Step 3A.
+    BotResponse textMsgResponse = client
+      .sendMessage(config, new RuntimeSessionId(sessionId), botSendMessageRequest);  // 'client' created in Step 3A.
+
+    System.out.println("Text Message Response :" + textMsgResponse);
+
+    //End a chat session
+    BotEndSessionRequest botEndSessionRequest = BotRequest
+      .withEndSession(EndSessionReason.USERREQUEST)
+      .build();
+
+    BotResponse endSessionResponse = client
+      .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
+
+    System.out.println("End Session Response :" + endSessionResponse);
+   
 }
 
 private void sendUsingSessionManagedClient() {
 
-    AnyRequestMessage textMessage = buildTextMessage("Initial message");
-    RequestEnvelope envelope = buildRequestEnvelop(externalSessionKey, orgId, botId, forceConfigEndPoint, Arrays.asList(textMessage));
+    RequestConfig config = createRequestConfig();
+    
+    BotSendMessageRequest botSendFirstMessageRequest = BotRequest
+      .withMessage(buildTextMessage("Initial Message"))
+      .build();
 
-    RequestHeaders headers = buildRequestHeaders();
-    ResponseEnvelope resp = client.sendChatbotRequest(envelope, headers); // 'client' created in Step 3B.
+    //Just send a message, new session will be automatically created.
+    BotResponse firstMsgResp = client
+      .sendMessage(config, externalSessionKey, botSendFirstMessageRequest); // 'client' created in Step 3B.
+    
+    System.out.println("First Message Response: " + firstMsgResp);
+
+    //Sending a another message with same externalSessionId will sendMessage to existing Session.
+    BotSendMessageRequest botSendSecondMessageRequest =  BotRequest
+      .withMessage(buildTextMessage("Order Status"))
+      .build();
+
+    BotResponse secondMsgResp = client.sendMessage(config, externalSessionKey, botSendSecondMessageRequest);
+
+    System.out.println("Second Message Response: " + secondMsgResp);
+
+    //End a chat session
+    BotEndSessionRequest botEndSessionRequest = BotRequest
+      .withEndSession(EndSessionReason.USERREQUEST)
+      .build();
+
+    BotResponse endSessionResponse = client
+      .endChatSession(config, externalSessionKey, botEndSessionRequest);
+
+    System.out.println("End Session Response :" + convertObjectToJson(endSessionResponse));
   }
 
 public static AnyRequestMessage buildTextMessage(String msg) {
@@ -139,30 +181,16 @@ public static AnyRequestMessage buildTextMessage(String msg) {
       .text(msg)
       .type(TextMessage.TypeEnum.TEXT)
       .sequenceId(System.currentTimeMillis());
-  }
-
-public static AnyRequestMessage buildInitMessage(Optional<String> msg) {
-    return new InitMessage()
-    .text(msg.orElse(""))
-    .type(InitMessage.TypeEnum.INIT)
-    .sequenceId(System.currentTimeMillis());
     }
-
-public static RequestEnvelope buildRequestEnvelop(String sessionId,
-                                                    String orgId, String botId,
-                                                    String forceConfigEndPoint,
-                                                    List<RequestEnvelopeMessagesOneOf> messages) {
-    return new RequestEnvelope()
-      .externalSessionKey(sessionId)
-      .orgId(orgId)
+    
+public static RequestConfig createRequestConfig(){
+    return RequestConfig.with()
       .botId(botId)
-      .forceConfig(new ForceConfig().endpoint(forceConfigEndPoint))
-      .messages(messages);
-  }
+      .orgId(orgId)
+      .forceConfigEndpoint(forceConfigEndPoint)
+      .build()
+    }    
 
-private RequestHeaders buildRequestHeaders() {
-    return RequestHeaders.withJustOrgId(orgId);
-    }
 ```
 
 ### 5. Getting Health Status

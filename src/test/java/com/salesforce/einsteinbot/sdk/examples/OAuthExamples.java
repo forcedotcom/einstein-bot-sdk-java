@@ -13,6 +13,11 @@ import com.salesforce.einsteinbot.sdk.auth.Introspector;
 import com.salesforce.einsteinbot.sdk.auth.JwtBearerOAuth;
 import com.salesforce.einsteinbot.sdk.cache.InMemoryCache;
 
+/**
+ * OAuthExamples - Example code for Testing OAuth
+ *
+ * @author relango
+ */
 public class OAuthExamples {
 
   //Replace folowing variables with real values before running.

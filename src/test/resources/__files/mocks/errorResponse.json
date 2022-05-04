@@ -1,0 +1,8 @@
+{
+  "status": 500,
+  "path": "/v5.0.0/bots/0Xxxx0000000001CAA/sessions",
+  "requestId": "19c056ab-d909-49df-b976-65e56b6ab214",
+  "error": "NullPointerException",
+  "message": "Something went wrong",
+  "timestamp": 1531245973799
+}

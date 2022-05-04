@@ -1,0 +1,71 @@
+{
+  "sessionId" : "85bce2f1-4596-4b96-9cd5-4b4efedb8c0a",
+  "botVersion" : "0X9SB00000006wf0AA",
+  "processedSequenceIds" : [
+    1649209595399
+  ],
+  "messages" : [
+    {
+      "type" : "text",
+      "id" : "a82959e8-f8b6-4fd3-808d-f846a4047afb",
+      "text" : "Hi, I’m SCRT2 Bot, a digital assistant.",
+      "schedule" : {
+        "responseDelayMilliseconds" : 1200
+      }
+    },
+    {
+      "type" : "text",
+      "id" : "17b78e95-fec4-420f-a2b2-c10e6a4a2138",
+      "text" : "Choose one of the options below",
+      "schedule" : {
+        "responseDelayMilliseconds" : 1200
+      }
+    },
+    {
+      "type" : "choices",
+      "id" : "d53674b7-da3c-467d-93ac-94e6e955432b",
+      "choices" : [
+        {
+          "label" : "Order Status",
+          "alias" : "1",
+          "id" : "b8a8e78e-2d28-446d-96b1-91673f98a00b"
+        },
+        {
+          "label" : "Account Issues",
+          "alias" : "2",
+          "id" : "f27501a6-0054-43fe-a898-b3d9b4555ed8"
+        },
+        {
+          "label" : "Frequently Asked Questions",
+          "alias" : "3",
+          "id" : "f78b435e-f965-41ea-82d2-af8d23bb1d90"
+        },
+        {
+          "label" : "End Chat",
+          "alias" : "4",
+          "id" : "d039c972-98be-40b8-8ea4-26ff05505ed7"
+        },
+        {
+          "label" : "Transfer To Agent",
+          "alias" : "5",
+          "id" : "f6662a5f-e2ef-402c-a2e3-a4c4b07014ea"
+        }
+      ],
+      "widget" : "menu",
+      "schedule" : {
+        "responseDelayMilliseconds" : 1200
+      }
+    }
+  ],
+  "_links" : {
+    "self" : {
+      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.0.0/bots/0XxSB00000006rp0AA/sessions"
+    },
+    "messages" : {
+      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.0.0/sessions/85bce2f1-4596-4b96-9cd5-4b4efedb8c0a/messages"
+    },
+    "session" : {
+      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.0.0/sessions/85bce2f1-4596-4b96-9cd5-4b4efedb8c0a"
+    }
+  }
+}

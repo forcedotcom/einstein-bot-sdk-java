@@ -23,16 +23,16 @@ import org.springframework.web.reactive.function.client.WebClientException;
  */
 public class ChatbotResponseException extends WebClientException {
 
-  private final HttpStatus status;
+  private final int status;
   private final Error errorResponse;
 
   public ChatbotResponseException(HttpStatus status, Error errorResponse) {
     super(status.getReasonPhrase());
-    this.status = status;
+    this.status = status.value();
     this.errorResponse = errorResponse;
   }
 
-  public HttpStatus getStatus() {
+  public int getStatus() {
     return status;
   }
 

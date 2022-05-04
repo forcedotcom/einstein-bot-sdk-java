@@ -7,18 +7,26 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
-import com.salesforce.einsteinbot.sdk.model.RequestEnvelope;
-import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
+import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
+import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
+import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
+import com.salesforce.einsteinbot.sdk.client.model.BotSessionId;
+import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.model.Status;
 
 /**
- * Base interface for Chatbot client. It provides a single method to send a chat request to Einstein
- * Bots and receive a response.
+ * Base interface for Chatbot client. It provides methods to interact with Bot and get Health
+ * status.
  */
-public interface ChatbotClient {
+public interface ChatbotClient<T extends BotSessionId> {
 
-  ResponseEnvelope sendChatbotRequest(RequestEnvelope requestEnvelope,
-      RequestHeaders requestHeaders);
+  BotResponse sendMessage(RequestConfig config,
+      T sessionId,
+      BotSendMessageRequest requestEnvelope);
+
+  BotResponse endChatSession(RequestConfig config,
+      T sessionId,
+      BotEndSessionRequest requestEnvelope);
 
   Status getHealthStatus();
 }

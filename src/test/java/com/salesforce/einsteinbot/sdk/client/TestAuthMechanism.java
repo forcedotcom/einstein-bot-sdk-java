@@ -11,6 +11,8 @@ import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 
 /**
  * TestAuthMechanism - Used for testing
+ *
+ * @author relango
  */
 public class TestAuthMechanism implements AuthMechanism {
 

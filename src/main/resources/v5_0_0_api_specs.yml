@@ -1,0 +1,1557 @@
+openapi: 3.0.0
+
+info:
+  title: Einstein Bots API (BETA)
+  version: "v5"
+
+servers:
+  - url: https://runtime-api-na-west.prod.chatbots.sfdc.sh
+    description: Einstein Bots API - NA West
+  - url: https://runtime-api-na-east.prod.chatbots.sfdc.sh
+    description: Einstein Bots API - NA East
+  - url: https://runtime-api-eu-west.prod.chatbots.sfdc.sh
+    description: Einstein Bots API - EU West
+  - url: https://runtime-api-eu-east.prod.chatbots.sfdc.sh
+    description: Einstein Bots API - EU East
+  - url: https://runtime-api-ap-west.prod.chatbots.sfdc.sh
+    description: Einstein Bots API - AP West
+  - url: https://runtime-api-ap-east.prod.chatbots.sfdc.sh
+    description: Einstein Bots API - AP East
+
+paths:
+
+  /status:
+    get:
+      tags:
+        - "health"
+      summary: "Health status information for runtime"
+      responses:
+        200:
+          $ref: '#/components/responses/StatusResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /v5.0.0/bots/{bot-id}/sessions:
+    post:
+      tags:
+        - "bot"
+      summary: "Start a new chat session"
+      description: "Send a message to the bots api to establish a new chat session"
+      operationId: "establishChatSession"
+      security:
+        - chatbotAuth: ["chatbot_api"]
+        - jwtBearer: []
+      parameters:
+        - in: "path"
+          name: "bot-id"
+          required: true
+          schema:
+            type: "string"
+        - in: "header"
+          name: "X-Org-Id"
+          description: "Org id for the request"
+          example: "00Dx0000000ALskEAG"
+          required: true
+          schema:
+            type: "string"
+          allowEmptyValue: false
+        - in: "header"
+          name: "X-Request-ID"
+          description: "Client supplied unique id to identify request for distributed tracing"
+          example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        description: "Initial request payload."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitMessageEnvelope'
+      responses:
+        200:
+          $ref: '#/components/responses/SuccessfulResponse'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        422:
+          $ref: '#/components/responses/RequestProcessingException'
+        423:
+          $ref: '#/components/responses/ServerBusyError'
+        429:
+          $ref: '#/components/responses/TooManyRequestsError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /v5.0.0/sessions/{session-id}/messages:
+    post:
+      tags:
+        - "bot"
+      summary: "Continue an existing chat session"
+      description: "Send a message to the bots api on an existing chat session"
+      operationId: "continueChatSession"
+      security:
+        - chatbotAuth: ["chatbot_api"]
+        - jwtBearer: []
+      parameters:
+        - in: "path"
+          name: "session-id"
+          required: true
+          schema:
+            type: "string"
+        - in: "header"
+          name: "X-Org-Id"
+          description: "Org id for the request"
+          example: "00Dx0000000ALskEAG"
+          required: true
+          schema:
+            type: "string"
+          allowEmptyValue: false
+        - in: "header"
+          name: "X-Request-ID"
+          description: "Client supplied unique id to identify request for distributed tracing"
+          example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
+          required: true
+          schema:
+            type: "string"
+        - in: "header"
+          name: "X-Runtime-CRC"
+          description: "X-Runtime-CRC value from previous response"
+          schema:
+            type: "string"
+      requestBody:
+        description: "Continue chat request payload"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageEnvelope'
+      responses:
+        200:
+          $ref: '#/components/responses/SuccessfulChatMessageResponse'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        422:
+          $ref: '#/components/responses/RequestProcessingException'
+        423:
+          $ref: '#/components/responses/ServerBusyError'
+        429:
+          $ref: '#/components/responses/TooManyRequestsError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /v5.0.0/sessions/{session-id}:
+    delete:
+      tags:
+        - "bot"
+      summary: "End an existing chat session"
+      description: "Send a message to the bots api to end a chat session"
+      operationId: "endChatSession"
+      security:
+        - chatbotAuth: ["chatbot_api"]
+        - jwtBearer: []
+      parameters:
+        - in: "path"
+          name: "session-id"
+          required: true
+          schema:
+            type: "string"
+        - in: "header"
+          name: "X-Org-Id"
+          description: "Org id for the request"
+          example: "00Dx0000000ALskEAG"
+          required: true
+          schema:
+            type: "string"
+          allowEmptyValue: false
+        - in: "header"
+          name: "X-Session-End-Reason"
+          description: "Session end reason"
+          example: "Transfer"
+          required: true
+          schema:
+            $ref: '#/components/schemas/EndSessionReason'
+          allowEmptyValue: false
+        - in: "header"
+          name: "X-Request-ID"
+          description: "Client supplied unique id to identify request for distributed tracing"
+          example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
+          required: true
+          schema:
+            type: "string"
+        - in: "header"
+          name: "X-Runtime-CRC"
+          description: "X-Runtime-CRC value from previous response"
+          schema:
+            type: "string"
+      responses:
+        200:
+          $ref: '#/components/responses/SuccessfulChatMessageResponse'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        422:
+          $ref: '#/components/responses/RequestProcessingException'
+        423:
+          $ref: '#/components/responses/ServerBusyError'
+        429:
+          $ref: '#/components/responses/TooManyRequestsError'
+        503:
+          $ref: '#/components/responses/ServiceUnavailable'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+components:
+  securitySchemes:
+    chatbotAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.salesforce.com/services/oauth2/authorize
+          tokenUrl: https://login.salesforce.com/services/oauth2/token
+          scopes:
+            chatbot_api: "Access Chatbot Apis"
+        implicit:
+          authorizationUrl: https://login.salesforce.com/services/oauth2/authorize
+          scopes:
+            chatbot_api: "Access Chatbot Apis"
+    jwtBearer:
+      type: http
+      scheme: bearer
+      description: "Salesforce OAuth access token obtained using JWT Bearer flow. Needs chatbot_api scope"
+
+  schemas:
+    ResponseSessionId:
+      description: "Chatbot Runtime Session ID"
+      type: "string"
+      example: "57904eb6-5352-4c5e-adf6-5f100572cf5d"
+      nullable: false
+
+    ExternalSessionKey:
+      description: "Channel specific unique key for the conversation"
+      type: "string"
+      example: "57904eb6-5352-4c5e-adf6-5f100572cf5d"
+      nullable: false
+
+    BotVersion:
+      description: "Chatbot config version"
+      type: "string"
+      example: "0X9RM0000004CD00AM"
+      nullable: true
+
+    InitMessageEnvelope:
+      type: object
+      properties:
+        externalSessionKey:
+          $ref: "#/components/schemas/ExternalSessionKey"
+        message:
+          $ref: "#/components/schemas/TextInitMessage"
+        forceConfig:
+          $ref: '#/components/schemas/ForceConfig'
+        responseOptions:
+          $ref: '#/components/schemas/ResponseOptions'
+        tz:
+          description: "Client timezone"
+          type: "string"
+          nullable: true
+        variables:
+          $ref: '#/components/schemas/Variables'
+        referrers:
+          description: "Referrers (for bot to bot transfers)"
+          type: "array"
+          items:
+              $ref: '#/components/schemas/Referrer'
+          nullable: true
+        richContentCapabilities:
+          $ref: '#/components/schemas/RichContentCapability'
+      required:
+        - "forceConfig"
+        - "externalSessionKey"
+      additionalProperties: false
+
+    RichContentCapability:
+      description: "The capabilities of the consumer of the translated rich message"
+      type: object
+      properties:
+        messageTypes:
+          type: array
+          minimum: 1
+          items:
+            $ref: '#/components/schemas/MessageTypeCapability'
+      required:
+        - messageTypes
+
+    MessageTypeCapability:
+      type: object
+      properties:
+        messageType:
+          $ref: '#/components/schemas/MessageType'
+        formatTypes:
+          type: array
+          minimum: 1
+          items:
+            $ref: '#/components/schemas/FormatTypeCapability'
+      required:
+        - messageType
+        - formatTypes
+
+    FormatTypeCapability:
+      type: object
+      properties:
+        formatType:
+          $ref: '#/components/schemas/FormatType'
+      required:
+        - formatType
+
+    FormatType:
+      type: "string"
+      description: "The rendering format of a message. How it looks."
+      example: "Attachments"
+      enum: [ "Attachments", "Text" ]
+
+    MessageType:
+      type: "string"
+      description: "The semantic type of a message. What a message does."
+      example: "StaticContentMessage"
+      enum: [ "StaticContentMessage" ]
+
+    ChatMessageEnvelope:
+      type: object
+      properties:
+        message:
+          oneOf:
+            - $ref: '#/components/schemas/ChoiceMessage'
+            - $ref: '#/components/schemas/TextMessage'
+            - $ref: '#/components/schemas/TransferSucceededRequestMessage'
+            - $ref: '#/components/schemas/TransferFailedRequestMessage'
+            - $ref: '#/components/schemas/RedirectMessage'
+        responseOptions:
+          $ref: '#/components/schemas/ResponseOptions'
+      required:
+        - "message"
+      additionalProperties: false
+
+    ResponseEnvelope:
+      type: "object"
+      properties:
+        sessionId:
+          $ref: "#/components/schemas/ResponseSessionId"
+        botVersion:
+          $ref: "#/components/schemas/BotVersion"
+        processedSequenceIds:
+          description: "Sequence IDs of processed messages"
+          type: "array"
+          items:
+            format: "int64"
+            type: "integer"
+            example: 1
+        messages:
+          description: "Output messages"
+          type: "array"
+          minimum: 0
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/SessionEndedResponseMessage"
+              - $ref: "#/components/schemas/TextResponseMessage"
+              - $ref: "#/components/schemas/ChoicesResponseMessage"
+              - $ref: "#/components/schemas/EscalateResponseMessage"
+              - $ref: "#/components/schemas/StaticContentMessage"
+        variables:
+          $ref: '#/components/schemas/Variables'
+        metrics:
+          description: "Session metrics"
+          type: "object"
+          additionalProperties: false
+        intents:
+          $ref: '#/components/schemas/Intents'
+        entities:
+          $ref: '#/components/schemas/Entities'
+        _links:
+          $ref: '#/components/schemas/Links'
+      required:
+        - "sessionId"
+        - "botVersion"
+        - "processedSequenceIds"
+        - "messages"
+        - "_links"
+      additionalProperties: false
+
+    ChatMessageResponseEnvelope:
+      type: "object"
+      properties:
+        botVersion:
+          $ref: "#/components/schemas/BotVersion"
+        processedSequenceIds:
+          description: "Sequence IDs of processed messages"
+          type: "array"
+          items:
+            format: "int64"
+            type: "integer"
+            example: 1
+        messages:
+          description: "Output messages"
+          type: "array"
+          minimum: 0
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/SessionEndedResponseMessage"
+              - $ref: "#/components/schemas/TextResponseMessage"
+              - $ref: "#/components/schemas/ChoicesResponseMessage"
+              - $ref: "#/components/schemas/EscalateResponseMessage"
+              - $ref: "#/components/schemas/StaticContentMessage"
+        variables:
+          $ref: '#/components/schemas/Variables'
+        metrics:
+          description: "Session metrics"
+          type: "object"
+          additionalProperties: false
+        intents:
+          $ref: '#/components/schemas/Intents'
+        entities:
+          $ref: '#/components/schemas/Entities'
+        _links:
+          $ref: '#/components/schemas/Links'
+      required:
+        - "botVersion"
+        - "processedSequenceIds"
+        - "messages"
+        - "_links"
+      additionalProperties: false
+
+    StaticContentMessage:
+      description: "Non interactive MT or MO message with static content"
+      type: object
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: [ "messageDefinition" ]
+        id:
+          $ref: '#/components/schemas/MessageId'
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+        messageType:
+          $ref: '#/components/schemas/MessageType'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordReference'
+        staticContent:
+          anyOf:
+            - $ref: '#/components/schemas/StaticContentAttachments'
+            - $ref: '#/components/schemas/StaticContentText'
+      required:
+        - "id"
+        - "type"
+        - "messageType"
+        - "staticContent"
+
+    StaticContentText:
+      description: "Static text content"
+      type: object
+      properties:
+        formatType:
+          type: "string"
+          description: "The rendering format of a message. How it looks."
+          example: "Text"
+          enum: [ "Text" ]
+        text:
+          $ref: '#/components/schemas/Text'
+      required:
+        - "formatType"
+        - "text"
+
+    StaticContentAttachments:
+      description: "Attachments"
+      type: object
+      properties:
+        formatType:
+          type: "string"
+          description: "The rendering format of a message. How it looks."
+          example: "Attachments"
+          enum: [ "Attachments" ]
+        attachments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Attachment'
+      required:
+        - "formatType"
+        - "attachments"
+
+    Attachment:
+      description: "A file sent as an attachment with a message."
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueId'
+        name:
+          type: string
+        mimeType:
+          $ref: '#/components/schemas/MimeType'
+        url:
+          $ref: '#/components/schemas/Url'
+        referenceId:
+          $ref: '#/components/schemas/UniqueId'
+      required:
+        - id
+        - name
+        - mimeType
+        - url
+      additionalProperties: false
+
+    Text:
+      description: "Text content"
+      type: string
+
+    MimeType:
+      description: "A mime type"
+      type: string
+
+    Url:
+      description: "A url"
+      type: "string"
+
+    RecordId:
+      type: "string"
+      description: "An id of an application record"
+
+    UniqueId:
+      type: "string"
+      description: "A UUID that identifies objects or items uniquely per message instance"
+      example: "cbd4e3fe-f210-43b8-a4b7-dd77e39ee5e1"
+
+    RecordReference:
+      type: "object"
+      description: "A reference to a record."
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueId'
+        recordId:
+          $ref: '#/components/schemas/RecordId'
+      required:
+        - "id"
+        - "recordId"
+      additionalProperties: false
+
+    MessageId:
+      description: "UUID that references this message"
+      type: "string"
+      example: "a133c185-73a7-4adf-b6d9-b7fd62babb4e"
+
+    SequenceId:
+      description: "Client generated message number (must be ever increasing within the same session)"
+      format: "int64"
+      type: "integer"
+      example: 1
+
+    Intents:
+      description: "All intents detected when processing the current request"
+      type: "array"
+      minimum: 0
+      items:
+        $ref: "#/components/schemas/NormalizedIntent"
+
+    Entities:
+      description: "All detected entities"
+      type: "array"
+      minimum: 0
+      items:
+        $ref: "#/components/schemas/NormalizedEntity"
+
+    NormalizedIntent:
+      type: "object"
+      description: "Intent detected during the request"
+      properties:
+        label:
+          description: "Intent id/name"
+          type: "string"
+        confidenceScore:
+          description: "Probability of the intent"
+          type: "number"
+        intentSource:
+          $ref: "#/components/schemas/IntentSource"
+      required:
+        - "label"
+        - "confidenceScore"
+        - "intentSource"
+      additionalProperties: false
+
+    NormalizedEntity:
+      type: "object"
+      description: "Entity detected during the request"
+      properties:
+        confidenceScore:
+          description: "Probability of the entity"
+          type: "number"
+        value:
+          description: "Entity value"
+          type: "string"
+        type:
+          $ref: "#/components/schemas/EntityType"
+      required:
+        - "confidenceScore"
+        - "value"
+        - "type"
+      additionalProperties: false
+
+    EntityType:
+      description: "Entity Type"
+      type: string
+      enum:
+        - "BOOLEAN"
+        - "DATE"
+        - "DATETIME"
+        - "DATE_TIME"
+        - "MONEY"
+        - "CURRENCY"
+        - "NUMBER"
+        - "OBJECT"
+        - "TEXT"
+        - "PERSON"
+        - "ORGANIZATION"
+        - "LOCATION"
+        - "PERCENT"
+        - "EMAIL"
+        - "PHONE"
+
+    IntentSource:
+      description: "Source of the Intent Prediction"
+      type: "string"
+      enum:
+        - "DIRECT"
+        - "CORE_NLP"
+        - "EINSTEIN_NLP"
+
+    Links:
+      description: "Links object in the response body for HATEOAS compliant response"
+      type: "object"
+      properties:
+        self:
+          $ref: '#/components/schemas/HyperLink'
+        messages:
+          $ref: '#/components/schemas/HyperLink'
+        session:
+          $ref: '#/components/schemas/HyperLink'
+      required:
+        - "self"
+      additionalProperties: false
+
+    HyperLink:
+      description: "Hyperlink object included in the Links schema"
+      type: "object"
+      properties:
+        href:
+          description: "Link to the endpoint"
+          type: "string"
+          example: "https://runtime-api-ap-east.prod.chatbots.sfdc.sh/v5.0.0/sessions"
+
+    InReplyToMessageId:
+      description: "Message ID from the previous response you are replying to"
+      type: "string"
+      example: "a133c185-73a7-4adf-b6d9-b7fd62babb4e"
+
+    BooleanVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "isShipped"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["boolean"]
+          example: "boolean"
+        value:
+          description: "Variable value"
+          type: "boolean"
+          nullable: true
+          example: true
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    DateVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "orderDate"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["date"]
+          example: "date"
+        value:
+          description: "Variable value in format ISO_LOCAL_DATE 'YYYY-MM-DD'"
+          type: "string"
+          nullable: true
+          example: "2021-09-21"
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    DateTimeVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "orderDateTime"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["dateTime"]
+          example: "dateTime"
+        value:
+          description: "Variable value in format ISO_LOCAL_DATE_TIME 'YYYY-MM-DDTHH:MM:SS'"
+          type: "string"
+          nullable: true
+          example: "2018-09-21T14:30:00"
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    MoneyVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "orderAmount"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["money"]
+          example: "money"
+        value:
+          description: "Variable value in format '$currencyCode $amount"
+          type: "string"
+          nullable: true
+          example: "USD 10.40"
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    NumberVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "qty"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["number"]
+          example: "number"
+        value:
+          description: "Variable value"
+          type: "number"
+          nullable: true
+          example: 10
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    TextVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "note"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["text"]
+          example: "text"
+        value:
+          description: "Variable value"
+          type: "string"
+          nullable: true
+          example: "Thanks for your order!"
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    ObjectVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "contact"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["object"]
+          example: "object"
+        value:
+          description: "Variable value"
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Variables'
+          example: [ { "name": "fullName", "type": "text", "value": "Matt Smith"  } ]
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    RefVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "target"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["ref"]
+          example: "ref"
+        value:
+          description: "Variable value"
+          type: "string"
+          nullable: true
+          example: "1M5xx000000000BCAQ"
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    ListVariable:
+      type: "object"
+      properties:
+        name:
+          description: "Variable name"
+          type: "string"
+          example: "target"
+        type:
+          description: "Variable type"
+          type: "string"
+          enum: ["list"]
+          example: "list"
+        value:
+          items:
+            type: object
+          description: "Variable value"
+          type: array
+          nullable: true
+          example: [ { "type": "ref", "value": "1M5xx000000000BCAQ" } ]
+      required:
+        - "name"
+        - "type"
+        - "value"
+      additionalProperties: false
+
+    Variables:
+      type: "array"
+      items:
+        anyOf:
+          - $ref: "#/components/schemas/BooleanVariable"
+          - $ref: "#/components/schemas/DateVariable"
+          - $ref: "#/components/schemas/DateTimeVariable"
+          - $ref: "#/components/schemas/MoneyVariable"
+          - $ref: "#/components/schemas/NumberVariable"
+          - $ref: "#/components/schemas/TextVariable"
+          - $ref: "#/components/schemas/ObjectVariable"
+          - $ref: "#/components/schemas/RefVariable"
+          - $ref: "#/components/schemas/ListVariable"
+      nullable: true
+
+    Referrer:
+      type: "object"
+      description: "Referrer"
+      properties:
+        type:
+          description: "Referrer type"
+          type: "string"
+          enum: ["Salesforce:Core:Bot:Id", "Salesforce:BotRuntime:Session:Id"]
+          example: "Salesforce:Core:Bot:Id"
+        value:
+          type: "string"
+      required:
+        - "type"
+        - "value"
+
+    TransferFailedRequestMessage:
+      type: "object"
+      description: "Message informing chatbot runtime that a transfer failed"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["transferFailed"]
+          example: "transferFailed"
+        sequenceId:
+          $ref: '#/components/schemas/SequenceId'
+        inReplyToMessageId:
+          $ref: '#/components/schemas/InReplyToMessageId'
+        reason:
+          description: "Reason the transfer failed"
+          type: "string"
+          enum: ["NoAgentAvailable","Error"]
+          example: "NoAgentAvailable"
+        description:
+          description: "Optional human-readable description of why the transfer failed"
+          type: "string"
+          nullable: true
+      required:
+        - "type"
+        - "sequenceId"
+        - "reason"
+      additionalProperties: false
+
+    TransferSucceededRequestMessage:
+      type: "object"
+      description: "Message informing chatbot runtime that a transfer succeeded"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["transferSucceeded"]
+          example: "transferSucceeded"
+        sequenceId:
+          $ref: '#/components/schemas/SequenceId'
+        inReplyToMessageId:
+          $ref: '#/components/schemas/InReplyToMessageId'
+      required:
+        - "type"
+        - "sequenceId"
+      additionalProperties: false
+
+    TextInitMessage:
+      type: "object"
+      description: "Initial message that begins a conversation session"
+      properties:
+        text:
+          description: "(Optional) Initial text from the user"
+          type: "string"
+      additionalProperties: false
+
+    EndSessionMessage:
+      type: "object"
+      description: "Client request to end the session"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["endSession"]
+          example: "endSession"
+        sequenceId:
+          $ref: '#/components/schemas/SequenceId'
+        inReplyToMessageId:
+          $ref: '#/components/schemas/InReplyToMessageId'
+        reason:
+          $ref: '#/components/schemas/EndSessionReason'
+      required:
+        - "type"
+        - "sequenceId"
+        - "reason"
+      additionalProperties: false
+
+    EndSessionReason:
+      type: string
+      enum:
+        - "UserRequest"
+        - "Transfer"
+        - "Expiration"
+        - "Error"
+        - "Other"
+      example: "Transfer"
+      nullable: false
+
+    TextMessage:
+      type: "object"
+      description: "User text message"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["text"]
+          example: "text"
+        sequenceId:
+          $ref: '#/components/schemas/SequenceId'
+        inReplyToMessageId:
+          $ref: '#/components/schemas/InReplyToMessageId'
+        text:
+          description: "Text input from user"
+          type: "string"
+      required:
+        - "type"
+        - "sequenceId"
+        - "text"
+      additionalProperties: false
+
+    ChoiceMessage:
+      type: "object"
+      description: "Choice selection"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["choice"]
+          example: "choice"
+        sequenceId:
+          $ref: '#/components/schemas/SequenceId'
+        inReplyToMessageId:
+          $ref: '#/components/schemas/InReplyToMessageId'
+        choiceIndex:
+          description: "Zero-based index of the selected choice. Either choiceIndex or choiceId is required."
+          type: "integer"
+          example: 0
+          nullable: true
+        choiceId:
+          description: "Id of the selected choice. Either choiceIndex or choiceId is required."
+          type: "string"
+          example: "8a9a745f-0c09-4b13-955c-1ab9e06c7ad7"
+          nullable: true
+      required:
+        - "type"
+        - "sequenceId"
+      additionalProperties: false
+
+    RedirectMessage:
+      type: "object"
+      description: "Client redirect message"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["redirect"]
+          example: "redirect"
+        sequenceId:
+          $ref: '#/components/schemas/SequenceId'
+        dialogId:
+          description: "Dialog ID to redirect to"
+          type: "string"
+          example: "68f934fb-e022-37a7-612e-b74fc87191d9"
+      required:
+        - "type"
+        - "sequenceId"
+        - "dialogId"
+      additionalProperties: false
+
+    Schedule:
+      type: "object"
+      properties:
+        responseDelayMilliseconds:
+          description: "Delay in ms to wait before displaying the test to the user"
+          type: "integer"
+          format: "int32"
+          example: 1200
+      required:
+        - "responseDelayMilliseconds"
+      additionalProperties: false
+
+    SessionEndedResponseMessage:
+      type: "object"
+      description: "Message informing client session has ended"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["sessionEnded"]
+          example: "sessionEnded"
+        id:
+          $ref: '#/components/schemas/MessageId'
+        reason:
+          description: "Reason the session ended"
+          type: "string"
+          enum: ["ClientRequest","TransferFailedNotConfigured","Action","Error", "InfiniteLoopDetected"]
+          example: "ClientRequest"
+          nullable: false
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+      required:
+        - "type"
+        - "id"
+        - "reason"
+      additionalProperties: false
+
+    TextResponseMessage:
+      type: "object"
+      description: "Text message"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["text"]
+          example: "text"
+        id:
+          $ref: '#/components/schemas/MessageId'
+        text:
+          description: "Text to render"
+          type: "string"
+          example: "Hello world!"
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+      required:
+        - "type"
+        - "id"
+        - "text"
+      additionalProperties: false
+
+    ChoicesResponseMessage:
+      type: "object"
+      description: "Choices message response to be sent from the bot to the client"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["choices"]
+          example: "choices"
+        id:
+          $ref: '#/components/schemas/MessageId'
+        choices:
+          description: "Available choices"
+          type: "array"
+          minimum: 1
+          items:
+            type: "object"
+            description: "Choice"
+            properties:
+              label:
+                description: "Choice label"
+                type: "string"
+                example: "Order Status"
+              alias:
+                description: "Choice alias"
+                type: "string"
+                example: "1"
+                nullable: true
+              id:
+                description: "Choice id"
+                type: "string"
+                example: "8a9a745f-0c09-4b13-955c-1ab9e06c7ad7"
+            required:
+              - "label"
+              - "id"
+        widget:
+          description: "Preferred widget type"
+          type: "string"
+          enum: ["buttons", "menu"]
+          example: "buttons"
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+      required:
+        - "type"
+        - "id"
+        - "choices"
+        - "widget"
+      additionalProperties: false
+
+    EscalateResponseMessage:
+      type: "object"
+      description: "Escalation message"
+      properties:
+        type:
+          description: "Message type"
+          type: "string"
+          enum: ["escalate"]
+          example: "escalate"
+        id:
+          $ref: '#/components/schemas/MessageId'
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+        targets:
+          type: "array"
+          minimum: 0
+          items:
+            type: "object"
+            description: "escalation targets"
+            properties:
+              value:
+                type: "string"
+              type:
+                type: "string"
+                enum: ["Salesforce:Core:Bot:Id", "Salesforce:Core:Queue:Id", "Salesforce:Core:Skill:Id", "Salesforce:Core:Flow:Id"]
+                example: "Salesforce:Core:Bot:Id"
+            required:
+              - "value"
+              - "type"
+            nullable: false
+            additionalProperties: false
+          nullable: false
+      required:
+        - "type"
+        - "id"
+        - "targets"
+      additionalProperties: false
+
+    ForceConfig:
+      type: "object"
+      description: "Force API config"
+      properties:
+        endpoint:
+          description: "Client Org endpoint"
+          type: "string"
+          example: "https://d5e000009s7bceah-dev-ed.my.salesforce.com/"
+      required:
+        - "endpoint"
+      additionalProperties: false
+
+    ResponseOptions:
+      type: "object"
+      description: "Configuration values for response payload"
+      properties:
+        variables:
+          $ref: '#/components/schemas/ResponseOptionsVariables'
+        metrics:
+          type: "boolean"
+          description: "Whether or not to include metrics in the response"
+        intents:
+          type: "boolean"
+          description: "Whether or not to include all detected intents in the response"
+        entities:
+          type: "boolean"
+          description: "Whether or not to include all detected entities in the response"
+      additionalProperties: false
+
+    ResponseOptionsVariables:
+      type: "object"
+      description: "Configure what variables are returned in the response"
+      properties:
+        include:
+          type: "boolean"
+          example: true
+          description: "Whether or not to include variables in the response"
+        filter:
+          type: "array"
+          example: ["OrderQty", "OrderType"]
+          description: "Limit returned variables to those specified here. If missing, null, or empty no filtering will be applied."
+          items:
+            type: "string"
+          nullable: true
+        onlyChanged:
+          type: "boolean"
+          example: true
+          description: "Whether or not to limit the returned variables to only those that have changed as part of the request."
+      required:
+        - "include"
+        - "onlyChanged"
+      additionalProperties: false
+
+    Status:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          description: "the health check status"
+          enum: [ "UP", "DOWN" ]
+      required:
+        - "status"
+      additionalProperties: false
+
+    Error:
+      type: "object"
+      properties:
+        status:
+          type: "integer"
+          format: "int32"
+          example: 500
+          description: "HTTP status"
+        path:
+          description: "Request path"
+          type: "string"
+          example: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+        requestId:
+          description: "Request ID used for searching exception logs"
+          type: "string"
+          example: "19c056ab-d909-49df-b976-65e56b6ab214"
+        error:
+          description: "Error class name"
+          type: "string"
+          example: "NullPointerException"
+        message:
+          description: "Exception message"
+          type: "string"
+          example: "Something went wrong"
+        timestamp:
+          type: "integer"
+          format: "int64"
+          example: 1531245973799
+      required:
+        - "status"
+        - "path"
+        - "requestId"
+        - "error"
+        - "message"
+        - "timestamp"
+      additionalProperties: false
+
+  responses:
+
+    StatusResponse:
+      description: "Runtime health status check response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Status"
+
+    ErrorResponse:
+      description: "Something went wrong"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    SuccessfulResponse:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResponseEnvelope'
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+        "X-Runtime-CRC":
+          description: "Internal runtime CRC"
+          schema:
+            type: "string"
+        "X-Bot-Mode":
+          description: "Bot mode"
+          example: "default"
+          schema:
+            type: "string"
+
+    SuccessfulChatMessageResponse:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ChatMessageResponseEnvelope'
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+        "X-Runtime-CRC":
+          description: "Internal runtime CRC"
+          schema:
+            type: "string"
+
+    BadRequestError:
+      description: "Bad Request"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 400
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "BadRequestError"
+            message: "Bad Request"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    UnauthorizedError:
+      description: "Access bearer token is missing or invalid"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 401
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "UnauthorizedError"
+            message: "Access bearer token is missing or invalid"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    ForbiddenError:
+      description: "User Forbidden from accessing the resource"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 403
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "ForbiddenError"
+            message: "User Forbidden from accessing the resource"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    NotFoundError:
+      description: "Resource not found"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 404
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "NotFoundError"
+            message: "Resource not found"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    NotAvailableError:
+      description: "Resource not available at the time of the request"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 410
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "NotAvailableError"
+            message: "Resource not available at the time of the request"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    RequestProcessingException:
+      description: "Any (potentially retryable) exception that occurred during the request execution"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 422
+            path: "v4.0.0/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "RequestProcessingException"
+            message: "Cannot determine the active version for the bot"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    ServerBusyError:
+      description: "Server is busy and cannot process the request at this time"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 423
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "ServerBusyError"
+            message: "Server is busy and cannot process the request at this time"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    TooManyRequestsError:
+      description: "Too many requests for the server to handle"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 429
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "TooManyRequestsError"
+            message: "Too many requests for the server to handle"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
+
+    ServiceUnavailable:
+      description: "Service is unavailable possibly because Apex/Flow calls timed out"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            status: 503
+            path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
+            requestId: "19c056ab-d909-49df-b976-65e56b6ab214"
+            error: "ServiceUnavailable"
+            message: "Service is unavailable possibly because Apex/Flow calls timed out"
+            timestamp: 1531245973799
+            additionalProp1: { }
+      headers:
+        "X-Request-ID":
+          description: "Request ID"
+          schema:
+            type: "string"
