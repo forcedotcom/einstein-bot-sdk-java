@@ -619,22 +619,6 @@ components:
     EntityType:
       description: "Entity Type"
       type: string
-      enum:
-        - "BOOLEAN"
-        - "DATE"
-        - "DATETIME"
-        - "DATE_TIME"
-        - "MONEY"
-        - "CURRENCY"
-        - "NUMBER"
-        - "OBJECT"
-        - "TEXT"
-        - "PERSON"
-        - "ORGANIZATION"
-        - "LOCATION"
-        - "PERCENT"
-        - "EMAIL"
-        - "PHONE"
 
     IntentSource:
       description: "Source of the Intent Prediction"
