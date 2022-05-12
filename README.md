@@ -214,3 +214,48 @@ See [OAuthExamples](src/test/java/com/salesforce/chatbot/sdk/examples/OAuthExamp
 The project uses the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
 Format settings definition files for importing into IDEs are available for[Eclipse](https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml)
 and [IntelliJ IDEA](https://github.com/google/styleguide/blob/gh-pages/intellij-java-google-style.xml).
+
+### Publishing to Maven Central
+
+#### Publish Release Versions
+Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-release.yml) tab and select **Maven Release** action. Click *Run workflow* and provide good description. 
+Click **Run workflow** button.
+
+#### Publish Snapshot Versions
+Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-publish.yml) tab and select **Maven Publish Snapshot** action. Click *Run workflow* and provide good description. 
+Click **Run workflow** button.
+
+#### Choosing Release Versions
+
+The version of the artifact released is same as version defined in [pom.xml](https://github.com/forcedotcom/einstein-bot-sdk-java/blob/master/pom.xml#L14) with `-SNAPSHOT` removed. 
+After the release pom.xml will be automatically updated with next patch snapshot version.
+
+For eg. if `pom.xml` has version `2.0.1-SNAPSHOT` , then version `2.0.1` will be released and the pom.xml will be updated with version 2.0.2-SNAPSHOT
+
+If you want to release a minor or major version, just update version in pom.xml, For eg, if you want to release `3.0.0` , then set version as  `3.0.0-SNAPSHOT` in pom.xml.
+
+#### Version Numbering
+
+The **minor** and **patch** versions will be incremented for minor features and bug fixes.
+
+The **major** version will be incremented for 
+* Major changes made to SDK
+* New Runtime API version support is added.
+
+Here is the SDK version and corresponding Runtime API version supported by it.
+
+| SDK Version          | Supported Runtime API                     
+| -------------------- | --------------------------------------
+| 1.x.x                | /v4.0.0                        
+| 2.x.x                | /v5.0.0                         
+
+### Branching model to support development of multiple API versions
+
+We will maintain the SDK code for each Runtime API version separately in individual branches. 
+We will cut off release branch for each Runtime API version.
+
+For eg, Currently, the master branch is used to develop for Runtime API Version 5.0.0. 
+The [releases/api-4.x](https://github.com/forcedotcom/einstein-bot-sdk-java/tree/releases/api-4.x) branch is used to maintain support for API 4.0.0.
+
+So to make change for SDK 1.x.x that supports API v4.0.0, it should be committed to `releases/api-4.x` branch. 
+Also, choose `releases/api-4.x` when running Release action workflow.
