@@ -212,18 +212,16 @@ See [OAuthExamples](src/test/java/com/salesforce/chatbot/sdk/examples/OAuthExamp
 ### Code Style
 
 The project uses the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
-Format settings definition files for importing into IDEs are available for[Eclipse](https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml)
+Format settings definition files for importing into IDEs are available for [Eclipse](https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml)
 and [IntelliJ IDEA](https://github.com/google/styleguide/blob/gh-pages/intellij-java-google-style.xml).
 
 ### Publishing to Maven Central
 
 #### Publish Release Versions
-Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-release.yml) tab and select **Maven Release** action. Click *Run workflow* and provide good description. 
-Click **Run workflow** button.
+Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-release.yml) tab and select **Maven Release** action. Click *Run workflow* , provide good description and hit **Run workflow** button. 
 
 #### Publish Snapshot Versions
-Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-publish.yml) tab and select **Maven Publish Snapshot** action. Click *Run workflow* and provide good description. 
-Click **Run workflow** button.
+Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-publish.yml) tab and select **Maven Publish Snapshot** action. Click *Run workflow* , provide good description and hit **Run workflow** button. 
 
 #### Choosing Release Versions
 
@@ -239,7 +237,7 @@ If you want to release a minor or major version, just update version in pom.xml,
 The **minor** and **patch** versions will be incremented for minor features and bug fixes.
 
 The **major** version will be incremented for 
-* Major changes made to SDK
+* Major changes made to SDK OR 
 * New Runtime API version support is added.
 
 Here is the SDK version and corresponding Runtime API version supported by it.
