@@ -610,6 +610,8 @@ components:
           type: "string"
         type:
           $ref: "#/components/schemas/EntityType"
+        entitySource:
+          $ref: "#/components/schemas/EntitySource"
       required:
         - "confidenceScore"
         - "value"
@@ -625,6 +627,14 @@ components:
       type: "string"
       enum:
         - "DIRECT"
+        - "CORE_NLP"
+        - "EINSTEIN_NLP"
+
+    EntitySource:
+      description: "Source of the Entity Prediction"
+      type: "string"
+      enum:
+        - "BOT_SERVICE"
         - "CORE_NLP"
         - "EINSTEIN_NLP"
 
