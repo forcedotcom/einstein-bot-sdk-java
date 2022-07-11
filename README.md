@@ -1,6 +1,6 @@
 # Einstein Bots Runtime - Java SDK
 
-Java SDK to interact with Einstein Bots Runtime. This SDK is a wrapper around the [Einstein Bots Runtime API](https://git.soma.salesforce.com/chatbots/module-api-sdk-java/blob/master/src/main/resources/api4-0-0.yaml) that provides a few added features out of the box:
+Java SDK to interact with Einstein Bots Runtime. This SDK is a wrapper around the [Einstein Bots Runtime API](https://developer.salesforce.com/docs/service/einstein-bot-api/guide/get-started-overview.html) that provides a few added features out of the box:
 
 * Auth support
 * Session management
