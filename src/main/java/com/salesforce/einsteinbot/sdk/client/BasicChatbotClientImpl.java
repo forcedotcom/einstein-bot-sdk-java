@@ -146,6 +146,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       RuntimeSessionId sessionId,
       BotEndSessionRequest botEndSessionRequest) {
 
+    apiClient.setBearerToken(authMechanism.getToken());
     EndSessionReason endSessionReason = botEndSessionRequest.getEndSessionReason();
     notifyRequestEnvelopeInterceptor(botEndSessionRequest, "EndSessionReason: " + endSessionReason);
     CompletableFuture<BotResponse> futureResponse = invokeEndChatSession(config.getOrgId(),
@@ -166,7 +167,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId,
       EndSessionReason endSessionReason, BotRequest botRequest) {
-    apiClient.setBearerToken(authMechanism.getToken());
+
     CompletableFuture<BotResponse> futureResponse = botApi
         .endChatSessionWithHttpInfo(sessionId,
             orgId,
