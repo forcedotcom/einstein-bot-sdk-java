@@ -112,9 +112,9 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       RuntimeSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
 
-    ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope(botSendMessageRequest
-        .getMessage()
-    );
+    ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope(
+        botSendMessageRequest.getMessage(),
+        botSendMessageRequest.getResponseOptions());
 
     notifyRequestEnvelopeInterceptor(botSendMessageRequest, chatMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeContinueChatSession(config.getOrgId(),

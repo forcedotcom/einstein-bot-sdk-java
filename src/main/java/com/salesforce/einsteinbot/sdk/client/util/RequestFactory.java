@@ -16,6 +16,7 @@ import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
+import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import java.util.List;
@@ -74,8 +75,11 @@ public class RequestFactory {
         .sequenceId(System.currentTimeMillis());
   }
 
-  public static ChatMessageEnvelope buildChatMessageEnvelope(AnyRequestMessage message) {
-    return new ChatMessageEnvelope().message(message);
+  public static ChatMessageEnvelope buildChatMessageEnvelope(AnyRequestMessage message, Optional<ResponseOptions> responseOptions) {
+    ChatMessageEnvelope chatMessageEnvelope = new ChatMessageEnvelope()
+        .message(message);
+    responseOptions.ifPresent( v -> chatMessageEnvelope.setResponseOptions(v));
+    return chatMessageEnvelope;
   }
 
   public static BotSendMessageRequest buildBotSendMessageRequest(AnyRequestMessage message,
