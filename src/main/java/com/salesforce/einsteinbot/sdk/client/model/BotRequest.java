@@ -136,7 +136,7 @@ public class BotRequest {
 
     @Override
     public FinalBuilder<T> requestId(String requestId) {
-      return requestId(Optional.of(requestId));
+      return requestId(Optional.ofNullable(requestId));
     }
 
     @Override
@@ -153,7 +153,7 @@ public class BotRequest {
 
     @Override
     public FinalBuilder<T> runtimeCRC(String runtimeCRC) {
-      this.runtimeCRC = Optional.of(runtimeCRC);
+      this.runtimeCRC = Optional.ofNullable(runtimeCRC);
       return this;
     }
 
@@ -167,7 +167,7 @@ public class BotRequest {
 
     @Override
     public FinalCloneBuilder<T> setRequestId(String requestId) {
-      this.requestId = Optional.of(requestId);
+      this.requestId = Optional.ofNullable(requestId);
       return this;
     }
 
@@ -185,7 +185,7 @@ public class BotRequest {
 
     @Override
     public FinalCloneBuilder<T> setRuntimeCRC(String runtimeCRC) {
-      this.runtimeCRC = Optional.of(runtimeCRC);
+      this.runtimeCRC = Optional.ofNullable(runtimeCRC);
       return this;
     }
 
@@ -210,13 +210,13 @@ public class BotRequest {
 
     @Override
     public InitMessageOptionalFieldsBuilder<T> responseOptions(ResponseOptions responseOptions) {
-      this.responseOptions = Optional.of(responseOptions);
+      this.responseOptions = Optional.ofNullable(responseOptions);
       return this;
     }
 
     @Override
     public InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities) {
-      this.richContentCapabilities = Optional.of(richContentCapabilities);
+      this.richContentCapabilities = Optional.ofNullable(richContentCapabilities);
       return this;
     }
 
