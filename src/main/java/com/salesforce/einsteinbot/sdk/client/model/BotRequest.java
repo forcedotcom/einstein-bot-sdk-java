@@ -197,31 +197,31 @@ public class BotRequest {
     }
 
     @Override
-    public FinalBuilder<T> tz(String tz) {
+    public InitMessageOptionalFieldsBuilder<T> tz(String tz) {
       this.tz = Optional.of(tz);
       return this;
     }
 
     @Override
-    public FinalBuilder<T> referrers(List<Referrer> referrers) {
+    public InitMessageOptionalFieldsBuilder<T> referrers(List<Referrer> referrers) {
       this.referrers = referrers;
       return this;
     }
 
     @Override
-    public FinalBuilder<T> responseOptions(ResponseOptions responseOptions) {
+    public InitMessageOptionalFieldsBuilder<T> responseOptions(ResponseOptions responseOptions) {
       this.responseOptions = Optional.of(responseOptions);
       return this;
     }
 
     @Override
-    public FinalBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities) {
+    public InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities) {
       this.richContentCapabilities = Optional.of(richContentCapabilities);
       return this;
     }
 
     @Override
-    public FinalBuilder<T> variables(List<AnyVariable> variables) {
+    public InitMessageOptionalFieldsBuilder<T> variables(List<AnyVariable> variables) {
       this.variables = variables;
       return this;
     }
@@ -248,11 +248,11 @@ public class BotRequest {
 
   public interface InitMessageOptionalFieldsBuilder<T> extends FinalBuilder<T> {
 
-    FinalBuilder<T> tz(String tz);
-    FinalBuilder<T> referrers(List<Referrer> referrers);
-    FinalBuilder<T> responseOptions(ResponseOptions responseOptions);
-    FinalBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities);
-    FinalBuilder<T> variables(List<AnyVariable> variables);
+    InitMessageOptionalFieldsBuilder<T> tz(String tz);
+    InitMessageOptionalFieldsBuilder<T> referrers(List<Referrer> referrers);
+    InitMessageOptionalFieldsBuilder<T> responseOptions(ResponseOptions responseOptions);
+    InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities);
+    InitMessageOptionalFieldsBuilder<T> variables(List<AnyVariable> variables);
   }
 
   public interface SendMessageRequestCloneBuilder<T> extends FinalCloneBuilder<T> {
