@@ -13,6 +13,9 @@ import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.Referrer;
+import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
+import com.salesforce.einsteinbot.sdk.model.RichContentCapability;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -67,7 +70,7 @@ public class BotRequest {
         .toString();
   }
 
-  public static VariablesBuilder<BotSendMessageRequest> withMessage(AnyRequestMessage message) {
+  public static InitMessageOptionalFieldsBuilder<BotSendMessageRequest> withMessage(AnyRequestMessage message) {
     return new FluentBuilder<>(message);
   }
 
@@ -89,7 +92,8 @@ public class BotRequest {
   /**
    * FluentBuilder provides Fluent API to create BotRequest.
    */
-  public static class FluentBuilder<T extends BotRequest> implements VariablesBuilder<T>,
+  public static class FluentBuilder<T extends BotRequest> implements
+      InitMessageOptionalFieldsBuilder<T>,
       FinalBuilder<T>, SendMessageRequestCloneBuilder<T>, FinalCloneBuilder<T> {
 
     private Optional<String> requestId = Optional.empty();
@@ -97,6 +101,11 @@ public class BotRequest {
     private EndSessionReason endSessionReason;
     private AnyRequestMessage message;
     private List<AnyVariable> variables = Collections.emptyList();
+    private Optional<String> tz = Optional.empty();
+    private Optional<ResponseOptions> responseOptions = Optional.empty();
+    private List<Referrer> referrers = Collections.emptyList();
+    private Optional<RichContentCapability> richContentCapabilities = Optional.empty();
+
     private Type type;
     private RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
 
@@ -188,6 +197,30 @@ public class BotRequest {
     }
 
     @Override
+    public FinalBuilder<T> tz(String tz) {
+      this.tz = Optional.of(tz);
+      return this;
+    }
+
+    @Override
+    public FinalBuilder<T> referrers(List<Referrer> referrers) {
+      this.referrers = referrers;
+      return this;
+    }
+
+    @Override
+    public FinalBuilder<T> responseOptions(ResponseOptions responseOptions) {
+      this.responseOptions = Optional.of(responseOptions);
+      return this;
+    }
+
+    @Override
+    public FinalBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities) {
+      this.richContentCapabilities = Optional.of(richContentCapabilities);
+      return this;
+    }
+
+    @Override
     public FinalBuilder<T> variables(List<AnyVariable> variables) {
       this.variables = variables;
       return this;
@@ -203,7 +236,7 @@ public class BotRequest {
     public T build() {
       if (type == Type.Message) {
         return (T) new BotSendMessageRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
-            variables, message);
+            variables, message, tz, responseOptions, referrers, richContentCapabilities);
       } else if (type == Type.EndSession) {
         return (T) new BotEndSessionRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
             endSessionReason);
@@ -213,8 +246,12 @@ public class BotRequest {
     }
   }
 
-  public interface VariablesBuilder<T> extends FinalBuilder<T> {
+  public interface InitMessageOptionalFieldsBuilder<T> extends FinalBuilder<T> {
 
+    FinalBuilder<T> tz(String tz);
+    FinalBuilder<T> referrers(List<Referrer> referrers);
+    FinalBuilder<T> responseOptions(ResponseOptions responseOptions);
+    FinalBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities);
     FinalBuilder<T> variables(List<AnyVariable> variables);
   }
 
