@@ -34,7 +34,7 @@ public class BotSendMessageRequest extends BotRequest {
   private List<Referrer> referrers;
   private Optional<RichContentCapability> richContentCapabilities;
 
-  BotSendMessageRequest(Optional<String> requestId, Optional<String> runtimeCRC,
+  protected BotSendMessageRequest(Optional<String> requestId, Optional<String> runtimeCRC,
       RequestEnvelopeInterceptor requestEnvelopeInterceptor,
       List<AnyVariable> variables,
       AnyRequestMessage message,

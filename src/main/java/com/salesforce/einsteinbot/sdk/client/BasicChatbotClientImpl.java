@@ -166,7 +166,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   }
 
   protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId,
-      EndSessionReason endSessionReason, BotRequest botRequest) {
+      EndSessionReason endSessionReason, BotEndSessionRequest botRequest) {
 
     CompletableFuture<BotResponse> futureResponse = botApi
         .endChatSessionWithHttpInfo(sessionId,
@@ -183,7 +183,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeEstablishChatSession(RequestConfig config,
       InitMessageEnvelope initMessageEnvelope,
-      BotRequest botRequest) {
+      BotSendMessageRequest botRequest) {
 
     CompletableFuture<BotResponse> futureResponse = botApi
         .establishChatSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
@@ -196,7 +196,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeContinueChatSession(String orgId, String sessionId,
       ChatMessageEnvelope messageEnvelope,
-      BotRequest botRequest) {
+      BotSendMessageRequest botRequest) {
 
     CompletableFuture<BotResponse> futureResponse = botApi
         .continueChatSessionWithHttpInfo(sessionId,
