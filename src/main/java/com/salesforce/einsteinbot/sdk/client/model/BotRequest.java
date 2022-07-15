@@ -29,7 +29,7 @@ import java.util.StringJoiner;
  */
 public class BotRequest {
 
-  private enum Type {
+  public enum Type {
     Message, EndSession
   }
   private Optional<String> requestId;
@@ -96,25 +96,25 @@ public class BotRequest {
       InitMessageOptionalFieldsBuilder<T>,
       FinalBuilder<T>, SendMessageRequestCloneBuilder<T>, FinalCloneBuilder<T> {
 
-    private Optional<String> requestId = Optional.empty();
-    private Optional<String> runtimeCRC = Optional.empty();
-    private EndSessionReason endSessionReason;
-    private AnyRequestMessage message;
-    private List<AnyVariable> variables = Collections.emptyList();
-    private Optional<String> tz = Optional.empty();
-    private Optional<ResponseOptions> responseOptions = Optional.empty();
-    private List<Referrer> referrers = Collections.emptyList();
-    private Optional<RichContentCapability> richContentCapabilities = Optional.empty();
+    protected Optional<String> requestId = Optional.empty();
+    protected Optional<String> runtimeCRC = Optional.empty();
+    protected EndSessionReason endSessionReason;
+    protected AnyRequestMessage message;
+    protected List<AnyVariable> variables = Collections.emptyList();
+    protected Optional<String> tz = Optional.empty();
+    protected Optional<ResponseOptions> responseOptions = Optional.empty();
+    protected List<Referrer> referrers = Collections.emptyList();
+    protected Optional<RichContentCapability> richContentCapabilities = Optional.empty();
 
-    private Type type;
-    private RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
+    protected Type type;
+    protected RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
 
-    private FluentBuilder(AnyRequestMessage message) {
+    protected FluentBuilder(AnyRequestMessage message) {
       this.type = Type.Message;
       this.message = message;
     }
 
-    private FluentBuilder(EndSessionReason endSessionReason) {
+    protected FluentBuilder(EndSessionReason endSessionReason) {
       this.type = Type.EndSession;
       this.endSessionReason = endSessionReason;
     }
