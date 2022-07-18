@@ -9,6 +9,7 @@ package com.salesforce.einsteinbot.sdk.client.model;
 
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.newRandomUUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
@@ -46,6 +47,7 @@ public class BotRequest {
     this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
   }
 
+  @JsonIgnore
   public String getOrCreateRequestId() {
     return requestId.orElse(newRandomUUID());
   }
