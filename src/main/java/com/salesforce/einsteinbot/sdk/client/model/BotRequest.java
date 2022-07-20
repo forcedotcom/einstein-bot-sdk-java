@@ -117,6 +117,10 @@ public class BotRequest {
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
       this.variables = requestEnvelope.getVariables();
       this.requestEnvelopeInterceptor = requestEnvelope.getRequestEnvelopeInterceptor();
+      this.tz = requestEnvelope.getTz();
+      this.responseOptions = requestEnvelope.getResponseOptions();
+      this.referrers = requestEnvelope.getReferrers();
+      this.richContentCapabilities = requestEnvelope.getRichContentCapabilities();
     }
 
     private FluentBuilder(BotEndSessionRequest requestEnvelope) {
