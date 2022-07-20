@@ -81,6 +81,10 @@ public class BotSendMessageRequest extends BotRequest {
     return richContentCapabilities;
   }
 
+  public SendMessageRequestCloneBuilder<BotSendMessageRequest> clone(){
+    return new FluentBuilder(this);
+  }
+
   @Override
   public String toString() {
     return new StringJoiner(", ", BotSendMessageRequest.class.getSimpleName() + "{", "}")

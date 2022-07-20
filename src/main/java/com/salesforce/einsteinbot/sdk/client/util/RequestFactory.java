@@ -34,9 +34,18 @@ public class RequestFactory {
       String forceConfigEndPoint,
       TextInitMessage message,
       BotSendMessageRequest sendMessageRequest) {
+
+    return buildInitMessageEnvelope(externalSessionKey, new ForceConfig().endpoint(forceConfigEndPoint), message, sendMessageRequest);
+
+  }
+
+  public static InitMessageEnvelope buildInitMessageEnvelope(String externalSessionKey,
+      ForceConfig forceConfig,
+      TextInitMessage message,
+      BotSendMessageRequest sendMessageRequest) {
     InitMessageEnvelope initMessageEnvelope = new InitMessageEnvelope()
         .externalSessionKey(externalSessionKey)
-        .forceConfig(new ForceConfig().endpoint(forceConfigEndPoint))
+        .forceConfig(forceConfig)
         .message(message)
         .variables(sendMessageRequest.getVariables())
         .referrers(sendMessageRequest.getReferrers());
@@ -54,6 +63,14 @@ public class RequestFactory {
       AnyRequestMessage message,
       BotSendMessageRequest sendMessageRequest) {
     return buildInitMessageEnvelope(externalSessionKey, forceConfigEndPoint,
+        buildInitMessage(message), sendMessageRequest);
+  }
+
+  public static InitMessageEnvelope buildInitMessageEnvelope(String externalSessionKey,
+      ForceConfig forceConfig,
+      AnyRequestMessage message,
+      BotSendMessageRequest sendMessageRequest) {
+    return buildInitMessageEnvelope(externalSessionKey, forceConfig,
         buildInitMessage(message), sendMessageRequest);
   }
 

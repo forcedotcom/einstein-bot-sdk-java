@@ -81,16 +81,6 @@ public class BotRequest {
     return new FluentBuilder<>(endSessionReason);
   }
 
-  public static SendMessageRequestCloneBuilder<BotSendMessageRequest> from(
-      BotSendMessageRequest messageRequestEnvelope) {
-    return new FluentBuilder(messageRequestEnvelope);
-  }
-
-  public static FinalCloneBuilder<BotEndSessionRequest> from(
-      BotEndSessionRequest endSessionRequestEnvelope) {
-    return new FluentBuilder(endSessionRequestEnvelope);
-  }
-
   /**
    * FluentBuilder provides Fluent API to create BotRequest.
    */
@@ -121,7 +111,7 @@ public class BotRequest {
       this.endSessionReason = endSessionReason;
     }
 
-    private FluentBuilder(BotSendMessageRequest requestEnvelope) {
+    public FluentBuilder(BotSendMessageRequest requestEnvelope) {
       this(requestEnvelope.getMessage());
       this.requestId = requestEnvelope.getRequestId();
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
@@ -258,7 +248,6 @@ public class BotRequest {
   }
 
   public interface SendMessageRequestCloneBuilder<T> extends FinalCloneBuilder<T> {
-
     FinalCloneBuilder<T> setVariables(List<AnyVariable> variables);
   }
 
