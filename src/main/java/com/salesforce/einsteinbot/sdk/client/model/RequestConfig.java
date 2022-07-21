@@ -25,7 +25,7 @@ public class RequestConfig {
   private String orgId;
   private String forceConfigEndpoint;
 
-  private RequestConfig(String botId, String orgId, String forceConfigEndpoint) {
+  protected RequestConfig(String botId, String orgId, String forceConfigEndpoint) {
     Objects.requireNonNull(botId);
     Objects.requireNonNull(orgId);
     Objects.requireNonNull(forceConfigEndpoint);
@@ -60,9 +60,9 @@ public class RequestConfig {
   public static class FluentBuilder implements BotIdBuilder, OrgIdBuilder,
       ForceConfigEndpointBuilder, FinalBuilder {
 
-    private String botId;
-    private String orgId;
-    private String forceConfigEndpoint;
+    protected String botId;
+    protected String orgId;
+    protected String forceConfigEndpoint;
 
     @Override
     public OrgIdBuilder botId(String botId) {

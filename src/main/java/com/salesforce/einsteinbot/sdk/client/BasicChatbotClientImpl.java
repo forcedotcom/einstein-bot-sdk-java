@@ -91,10 +91,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       ExternalSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
 
-    InitMessageEnvelope initMessageEnvelope = buildInitMessageEnvelope(sessionId.getValue(),
-        config.getForceConfigEndpoint(),
-        botSendMessageRequest.getMessage(),
-        botSendMessageRequest.getVariables());
+    InitMessageEnvelope initMessageEnvelope = createInitMessageEnvelope(config, sessionId,
+        botSendMessageRequest);
 
     notifyRequestEnvelopeInterceptor(botSendMessageRequest, initMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeEstablishChatSession(config,
@@ -107,14 +105,20 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
+  protected InitMessageEnvelope createInitMessageEnvelope(RequestConfig config,
+      ExternalSessionId sessionId, BotSendMessageRequest botSendMessageRequest) {
+    return buildInitMessageEnvelope(sessionId.getValue(),
+        config.getForceConfigEndpoint(),
+        botSendMessageRequest.getMessage(),
+        botSendMessageRequest);
+  }
+
   @Override
   public BotResponse sendMessage(RequestConfig config,
       RuntimeSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
 
-    ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope(botSendMessageRequest
-        .getMessage()
-    );
+    ChatMessageEnvelope chatMessageEnvelope = createChatMessageEnvelope(botSendMessageRequest);
 
     notifyRequestEnvelopeInterceptor(botSendMessageRequest, chatMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeContinueChatSession(config.getOrgId(),
@@ -127,6 +131,12 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  protected ChatMessageEnvelope createChatMessageEnvelope(BotSendMessageRequest botSendMessageRequest) {
+    return buildChatMessageEnvelope(
+        botSendMessageRequest.getMessage(),
+        botSendMessageRequest.getResponseOptions());
   }
 
   @Override
@@ -153,7 +163,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   }
 
   protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId,
-      EndSessionReason endSessionReason, BotRequest botRequest) {
+      EndSessionReason endSessionReason, BotEndSessionRequest botRequest) {
+
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
         .endChatSessionWithHttpInfo(sessionId,
@@ -170,10 +181,9 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeEstablishChatSession(RequestConfig config,
       InitMessageEnvelope initMessageEnvelope,
-      BotRequest botRequest) {
+      BotSendMessageRequest botRequest) {
 
     apiClient.setBearerToken(authMechanism.getToken());
-
     CompletableFuture<BotResponse> futureResponse = botApi
         .establishChatSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
             botRequest.getOrCreateRequestId(), initMessageEnvelope)
@@ -185,7 +195,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeContinueChatSession(String orgId, String sessionId,
       ChatMessageEnvelope messageEnvelope,
-      BotRequest botRequest) {
+      BotSendMessageRequest botRequest) {
+
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
         .continueChatSessionWithHttpInfo(sessionId,

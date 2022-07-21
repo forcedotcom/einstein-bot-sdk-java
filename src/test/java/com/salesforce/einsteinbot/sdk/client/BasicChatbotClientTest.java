@@ -262,7 +262,8 @@ public class BasicChatbotClientTest {
         )
         .externalSessionKey(externalSessionId)
         .message(initMessage)
-        .variables(Collections.emptyList());
+        .variables(Collections.emptyList())
+        .referrers(Collections.emptyList());
   }
 
   private BotEndSessionRequest buildEndSessionRequestEnvelope() {
