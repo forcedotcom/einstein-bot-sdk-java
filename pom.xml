@@ -172,10 +172,10 @@
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <typeMappings>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage=AnyRequestMessage,AnyOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,AnyOfStaticContentAttachmentsStaticContentText=AnyStaticContentMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage=AnyRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,AnyOfStaticContentAttachmentsStaticContentText=AnyStaticContentMessage
                             </typeMappings>
                             <languageSpecificPrimitives>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage,AnyOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,AnyOfStaticContentAttachmentsStaticContentText
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,AnyOfStaticContentAttachmentsStaticContentText
                             </languageSpecificPrimitives>
                             <library>webclient</library>
                         </configuration>
