@@ -16,6 +16,7 @@ import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
+import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import java.util.List;
@@ -32,20 +33,45 @@ public class RequestFactory {
   public static InitMessageEnvelope buildInitMessageEnvelope(String externalSessionKey,
       String forceConfigEndPoint,
       TextInitMessage message,
-      List<AnyVariable> variables) {
-    return new InitMessageEnvelope()
+      BotSendMessageRequest sendMessageRequest) {
+
+    return buildInitMessageEnvelope(externalSessionKey, new ForceConfig().endpoint(forceConfigEndPoint), message, sendMessageRequest);
+
+  }
+
+  public static InitMessageEnvelope buildInitMessageEnvelope(String externalSessionKey,
+      ForceConfig forceConfig,
+      TextInitMessage message,
+      BotSendMessageRequest sendMessageRequest) {
+    InitMessageEnvelope initMessageEnvelope = new InitMessageEnvelope()
         .externalSessionKey(externalSessionKey)
-        .forceConfig(new ForceConfig().endpoint(forceConfigEndPoint))
+        .forceConfig(forceConfig)
         .message(message)
-        .variables(variables);
+        .variables(sendMessageRequest.getVariables())
+        .referrers(sendMessageRequest.getReferrers());
+
+    sendMessageRequest.getTz().ifPresent( v -> initMessageEnvelope.setTz(v));
+    sendMessageRequest.getResponseOptions().ifPresent( v -> initMessageEnvelope.setResponseOptions(v));
+    sendMessageRequest.getRichContentCapabilities().ifPresent( v -> initMessageEnvelope.setRichContentCapabilities(v));
+
+    return initMessageEnvelope;
+
   }
 
   public static InitMessageEnvelope buildInitMessageEnvelope(String externalSessionKey,
       String forceConfigEndPoint,
       AnyRequestMessage message,
-      List<AnyVariable> variables) {
+      BotSendMessageRequest sendMessageRequest) {
     return buildInitMessageEnvelope(externalSessionKey, forceConfigEndPoint,
-        buildInitMessage(message), variables);
+        buildInitMessage(message), sendMessageRequest);
+  }
+
+  public static InitMessageEnvelope buildInitMessageEnvelope(String externalSessionKey,
+      ForceConfig forceConfig,
+      AnyRequestMessage message,
+      BotSendMessageRequest sendMessageRequest) {
+    return buildInitMessageEnvelope(externalSessionKey, forceConfig,
+        buildInitMessage(message), sendMessageRequest);
   }
 
   public static TextInitMessage buildInitMessage(AnyRequestMessage message) {
@@ -66,8 +92,11 @@ public class RequestFactory {
         .sequenceId(System.currentTimeMillis());
   }
 
-  public static ChatMessageEnvelope buildChatMessageEnvelope(AnyRequestMessage message) {
-    return new ChatMessageEnvelope().message(message);
+  public static ChatMessageEnvelope buildChatMessageEnvelope(AnyRequestMessage message, Optional<ResponseOptions> responseOptions) {
+    ChatMessageEnvelope chatMessageEnvelope = new ChatMessageEnvelope()
+        .message(message);
+    responseOptions.ifPresent( v -> chatMessageEnvelope.setResponseOptions(v));
+    return chatMessageEnvelope;
   }
 
   public static BotSendMessageRequest buildBotSendMessageRequest(AnyRequestMessage message,

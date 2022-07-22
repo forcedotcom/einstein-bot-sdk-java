@@ -9,10 +9,14 @@ package com.salesforce.einsteinbot.sdk.client.model;
 
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.newRandomUUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
+import com.salesforce.einsteinbot.sdk.model.Referrer;
+import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
+import com.salesforce.einsteinbot.sdk.model.RichContentCapability;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +30,7 @@ import java.util.StringJoiner;
  */
 public class BotRequest {
 
-  private enum Type {
+  public enum Type {
     Message, EndSession
   }
   private Optional<String> requestId;
@@ -43,6 +47,7 @@ public class BotRequest {
     this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
   }
 
+  @JsonIgnore
   public String getOrCreateRequestId() {
     return requestId.orElse(newRandomUUID());
   }
@@ -67,7 +72,7 @@ public class BotRequest {
         .toString();
   }
 
-  public static VariablesBuilder<BotSendMessageRequest> withMessage(AnyRequestMessage message) {
+  public static InitMessageOptionalFieldsBuilder<BotSendMessageRequest> withMessage(AnyRequestMessage message) {
     return new FluentBuilder<>(message);
   }
 
@@ -76,46 +81,46 @@ public class BotRequest {
     return new FluentBuilder<>(endSessionReason);
   }
 
-  public static SendMessageRequestCloneBuilder<BotSendMessageRequest> from(
-      BotSendMessageRequest messageRequestEnvelope) {
-    return new FluentBuilder(messageRequestEnvelope);
-  }
-
-  public static FinalCloneBuilder<BotEndSessionRequest> from(
-      BotEndSessionRequest endSessionRequestEnvelope) {
-    return new FluentBuilder(endSessionRequestEnvelope);
-  }
-
   /**
    * FluentBuilder provides Fluent API to create BotRequest.
    */
-  public static class FluentBuilder<T extends BotRequest> implements VariablesBuilder<T>,
+  public static class FluentBuilder<T extends BotRequest> implements
+      InitMessageOptionalFieldsBuilder<T>,
       FinalBuilder<T>, SendMessageRequestCloneBuilder<T>, FinalCloneBuilder<T> {
 
-    private Optional<String> requestId = Optional.empty();
-    private Optional<String> runtimeCRC = Optional.empty();
-    private EndSessionReason endSessionReason;
-    private AnyRequestMessage message;
-    private List<AnyVariable> variables = Collections.emptyList();
-    private Type type;
-    private RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
+    protected Optional<String> requestId = Optional.empty();
+    protected Optional<String> runtimeCRC = Optional.empty();
+    protected EndSessionReason endSessionReason;
+    protected AnyRequestMessage message;
+    protected List<AnyVariable> variables = Collections.emptyList();
+    protected Optional<String> tz = Optional.empty();
+    protected Optional<ResponseOptions> responseOptions = Optional.empty();
+    protected List<Referrer> referrers = Collections.emptyList();
+    protected Optional<RichContentCapability> richContentCapabilities = Optional.empty();
 
-    private FluentBuilder(AnyRequestMessage message) {
+    protected Type type;
+    protected RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
+
+    protected FluentBuilder(AnyRequestMessage message) {
       this.type = Type.Message;
       this.message = message;
     }
 
-    private FluentBuilder(EndSessionReason endSessionReason) {
+    protected FluentBuilder(EndSessionReason endSessionReason) {
       this.type = Type.EndSession;
       this.endSessionReason = endSessionReason;
     }
 
-    private FluentBuilder(BotSendMessageRequest requestEnvelope) {
+    public FluentBuilder(BotSendMessageRequest requestEnvelope) {
       this(requestEnvelope.getMessage());
       this.requestId = requestEnvelope.getRequestId();
       this.runtimeCRC = requestEnvelope.getRuntimeCRC();
       this.variables = requestEnvelope.getVariables();
       this.requestEnvelopeInterceptor = requestEnvelope.getRequestEnvelopeInterceptor();
+      this.tz = requestEnvelope.getTz();
+      this.responseOptions = requestEnvelope.getResponseOptions();
+      this.referrers = requestEnvelope.getReferrers();
+      this.richContentCapabilities = requestEnvelope.getRichContentCapabilities();
     }
 
     private FluentBuilder(BotEndSessionRequest requestEnvelope) {
@@ -127,7 +132,7 @@ public class BotRequest {
 
     @Override
     public FinalBuilder<T> requestId(String requestId) {
-      return requestId(Optional.of(requestId));
+      return requestId(Optional.ofNullable(requestId));
     }
 
     @Override
@@ -144,7 +149,7 @@ public class BotRequest {
 
     @Override
     public FinalBuilder<T> runtimeCRC(String runtimeCRC) {
-      this.runtimeCRC = Optional.of(runtimeCRC);
+      this.runtimeCRC = Optional.ofNullable(runtimeCRC);
       return this;
     }
 
@@ -158,7 +163,7 @@ public class BotRequest {
 
     @Override
     public FinalCloneBuilder<T> setRequestId(String requestId) {
-      this.requestId = Optional.of(requestId);
+      this.requestId = Optional.ofNullable(requestId);
       return this;
     }
 
@@ -176,7 +181,7 @@ public class BotRequest {
 
     @Override
     public FinalCloneBuilder<T> setRuntimeCRC(String runtimeCRC) {
-      this.runtimeCRC = Optional.of(runtimeCRC);
+      this.runtimeCRC = Optional.ofNullable(runtimeCRC);
       return this;
     }
 
@@ -188,7 +193,31 @@ public class BotRequest {
     }
 
     @Override
-    public FinalBuilder<T> variables(List<AnyVariable> variables) {
+    public InitMessageOptionalFieldsBuilder<T> tz(String tz) {
+      this.tz = Optional.of(tz);
+      return this;
+    }
+
+    @Override
+    public InitMessageOptionalFieldsBuilder<T> referrers(List<Referrer> referrers) {
+      this.referrers = referrers;
+      return this;
+    }
+
+    @Override
+    public InitMessageOptionalFieldsBuilder<T> responseOptions(ResponseOptions responseOptions) {
+      this.responseOptions = Optional.ofNullable(responseOptions);
+      return this;
+    }
+
+    @Override
+    public InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities) {
+      this.richContentCapabilities = Optional.ofNullable(richContentCapabilities);
+      return this;
+    }
+
+    @Override
+    public InitMessageOptionalFieldsBuilder<T> variables(List<AnyVariable> variables) {
       this.variables = variables;
       return this;
     }
@@ -203,7 +232,7 @@ public class BotRequest {
     public T build() {
       if (type == Type.Message) {
         return (T) new BotSendMessageRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
-            variables, message);
+            variables, message, tz, responseOptions, referrers, richContentCapabilities);
       } else if (type == Type.EndSession) {
         return (T) new BotEndSessionRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
             endSessionReason);
@@ -213,13 +242,16 @@ public class BotRequest {
     }
   }
 
-  public interface VariablesBuilder<T> extends FinalBuilder<T> {
+  public interface InitMessageOptionalFieldsBuilder<T> extends FinalBuilder<T> {
 
-    FinalBuilder<T> variables(List<AnyVariable> variables);
+    InitMessageOptionalFieldsBuilder<T> tz(String tz);
+    InitMessageOptionalFieldsBuilder<T> referrers(List<Referrer> referrers);
+    InitMessageOptionalFieldsBuilder<T> responseOptions(ResponseOptions responseOptions);
+    InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities);
+    InitMessageOptionalFieldsBuilder<T> variables(List<AnyVariable> variables);
   }
 
   public interface SendMessageRequestCloneBuilder<T> extends FinalCloneBuilder<T> {
-
     FinalCloneBuilder<T> setVariables(List<AnyVariable> variables);
   }
 

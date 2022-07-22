@@ -120,8 +120,8 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
     List<AnyVariable> updatedVariables = addIntegrationTypeAndNameToContextVariables(
         botSendMessageRequest.getVariables(), integrationName);
 
-    return BotRequest
-        .from(botSendMessageRequest)
+    return botSendMessageRequest
+        .clone()
         .setVariables(updatedVariables)
         .build();
   }
