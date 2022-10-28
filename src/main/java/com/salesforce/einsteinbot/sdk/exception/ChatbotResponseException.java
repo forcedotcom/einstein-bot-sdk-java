@@ -10,6 +10,7 @@ package com.salesforce.einsteinbot.sdk.exception;
 import com.salesforce.einsteinbot.sdk.model.Error;
 import java.util.StringJoiner;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse.Headers;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 /**
@@ -25,11 +26,14 @@ public class ChatbotResponseException extends WebClientException {
 
   private final int status;
   private final Error errorResponse;
+  private final Headers headers;
 
-  public ChatbotResponseException(HttpStatus status, Error errorResponse) {
+  public ChatbotResponseException(HttpStatus status, Error errorResponse,
+      Headers headers) {
     super(status.getReasonPhrase());
     this.status = status.value();
     this.errorResponse = errorResponse;
+    this.headers = headers;
   }
 
   public int getStatus() {
@@ -44,6 +48,7 @@ public class ChatbotResponseException extends WebClientException {
   public String toString() {
     return new StringJoiner(", ", ChatbotResponseException.class.getSimpleName() + "[", "]")
         .add("status = " + status)
+        .add("responseHeaders = " + headers)
         .add("errorResponse = " + errorResponse)
         .add("exception = " + super.toString())
         .toString();

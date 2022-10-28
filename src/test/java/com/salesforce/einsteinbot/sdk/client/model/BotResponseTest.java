@@ -15,7 +15,7 @@ import com.salesforce.einsteinbot.sdk.client.util.ResponseFactory;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.util.TestUtils;
-import java.util.Optional;
+import java.util.Collection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -53,9 +53,8 @@ public class BotResponseTest {
     assertEquals(httpStatusCode, botResponse.getHttpStatusCode());
     assertEquals(botHttpHeaders, botResponse.getHttpHeaders());
 
-    Optional<String> actualRequestId = botResponse.getHttpHeaders().getRequestIdHeader();
-    assertTrue(actualRequestId.isPresent());
-    assertEquals(requestId, actualRequestId.get());
+    String actualRequestId = botResponse.getHttpHeaders().getRequestIdHeaderAsCSV();
+    assertEquals(requestId, actualRequestId);
   }
 
   @Test

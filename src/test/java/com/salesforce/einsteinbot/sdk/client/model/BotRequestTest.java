@@ -83,7 +83,7 @@ public class BotRequestTest {
 
     assertTrue(botRequest instanceof BotEndSessionRequest);
     assertEquals(endSessionReason, ((BotEndSessionRequest) botRequest).getEndSessionReason());
-    assertNotNull(botRequest.getOrCreateRequestId());
+    assertFalse(botRequest.getRequestId().isPresent());
     assertFalse(botRequest.getRuntimeCRC().isPresent());
   }
 }

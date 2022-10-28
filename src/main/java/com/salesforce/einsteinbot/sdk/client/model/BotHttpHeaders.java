@@ -25,6 +25,10 @@ import org.springframework.util.MultiValueMap;
 /**
  * BotHttpHeaders - Class to store/retrieve Http Headers used by Bot API Requests.
  *
+ * As per RFC {@link https://www.rfc-editor.org/rfc/rfc7230#section-3.2} Http Header names
+ * are case insensitive. So we store them in uppercase. The get method would also convert
+ * header name parameter to uppercase before lookup.
+ *
  * @author relango
  */
 public class BotHttpHeaders {
@@ -36,18 +40,20 @@ public class BotHttpHeaders {
 
   private BotHttpHeaders(Multimap<String, String> headerValues) {
     Objects.requireNonNull(headerValues);
-    this.headerValues = headerValues;
+    headerValues
+        .entries()
+        .stream()
+        .forEach(e -> this.headerValues.put(e.getKey().toUpperCase(), e.getValue()) );
   }
 
   private BotHttpHeaders(Set<Entry<String, List<String>>> entries) {
     entries
         .stream()
         .forEach(this::addToHeader);
-
   }
 
   private void addToHeader(Entry<String, List<String>> entry) {
-    headerValues.putAll(entry.getKey(), entry.getValue());
+    headerValues.putAll(entry.getKey().toUpperCase(), entry.getValue());
   }
 
   public static Builder with() {
@@ -58,17 +64,25 @@ public class BotHttpHeaders {
     return new BotHttpHeaders(httpHeaders.entrySet());
   }
 
-  public Optional<String> getRequestIdHeader() {
-    return getFirst(HEADER_NAME_REQUEST_ID);
+  public String getRequestIdHeaderAsCSV() {
+    return String.join(", ", get(HEADER_NAME_REQUEST_ID));
   }
 
-  public Optional<String> getRuntimeCRCHeader() {
-    return getFirst(HEADER_NAME_RUNTIME_CRC);
+  public String getRuntimeCRCHeaderAsCSV() {
+    return String.join(", " , get(HEADER_NAME_RUNTIME_CRC));
+  }
+
+  public Collection<String> getRequestIdHeader() {
+    return get(HEADER_NAME_REQUEST_ID);
+  }
+
+  public Collection<String> getRuntimeCRCHeader() {
+    return get(HEADER_NAME_RUNTIME_CRC);
   }
 
   public Optional<String> getFirst(String headerName) {
     return Optional
-        .ofNullable(headerValues.get(headerName))
+        .ofNullable(headerValues.get(headerName.toUpperCase()))
         .flatMap(this::findFirstItem);
   }
 
@@ -81,11 +95,15 @@ public class BotHttpHeaders {
   }
 
   public Collection<String> get(String headerName) {
-    return headerValues.get(headerName);
+    return headerValues.get(headerName.toUpperCase());
   }
 
   public Multimap<String, String> getHeaderValues() {
     return Multimaps.unmodifiableMultimap(headerValues);
+  }
+
+  public boolean containsHeader(String headerName){
+    return headerValues.containsKey(headerName.toUpperCase());
   }
 
   @Override

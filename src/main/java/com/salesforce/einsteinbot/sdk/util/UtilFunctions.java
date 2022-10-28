@@ -19,16 +19,20 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.Lists;
 import com.salesforce.einsteinbot.sdk.handler.RFC3339DateFormat;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.openapitools.jackson.nullable.JsonNullableModule;
+import org.springframework.http.HttpHeaders;
 
 /**
  * UtilFunctions - Contains static utility functions used in Application
@@ -39,6 +43,7 @@ public class UtilFunctions {
 
   private static final ObjectMapper mapper = getMapper();
   private static final DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+  public static final String AUTHORIZATION_HEADER_MASKED = "MASKED";
 
 
   static {
@@ -118,5 +123,22 @@ public class UtilFunctions {
     dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
     return dateFormat;
+  }
+
+  public static Map<String, List<String>> maskAuthorizationHeader(HttpHeaders headers){
+    return headers.entrySet()
+        .stream()
+        .collect(Collectors.toMap(
+            Map.Entry::getKey,
+            UtilFunctions::maskAuthorizationHeaderEntry));
+
+  }
+
+  private static List<String> maskAuthorizationHeaderEntry(Map.Entry<String,List<String>> entry){
+    if (entry.getKey().toUpperCase().contains(HttpHeaders.AUTHORIZATION.toUpperCase())) {
+      return Lists.newArrayList(AUTHORIZATION_HEADER_MASKED);
+    } else {
+      return entry.getValue();
+    }
   }
 }

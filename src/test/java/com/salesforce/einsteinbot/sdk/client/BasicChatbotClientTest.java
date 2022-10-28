@@ -149,8 +149,8 @@ public class BasicChatbotClientTest {
 
     InitMessageEnvelope initMessageEnvelope = buildInitMessageEnvelope();
 
-    when(mockBotApi.establishChatSessionWithHttpInfo(eq(botId), eq(orgId), eq(requestId),
-        eq(initMessageEnvelope)))
+    when(mockBotApi.establishChatSessionWithHttpInfo(eq(botId), eq(orgId),
+        eq(initMessageEnvelope),  eq(requestId)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotResponse response = client.startChatSession(config, new ExternalSessionId(externalSessionId),
@@ -183,8 +183,8 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId),
-        eq(chatMessageEnvelope), eq(runtimeCRC)))
+    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId),
+        eq(chatMessageEnvelope), eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotResponse response = client.sendMessage(config, new RuntimeSessionId(sessionId),
@@ -201,8 +201,8 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(requestId),
-        eq(chatMessageEnvelope), eq(runtimeCRC)))
+    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId),
+        eq(chatMessageEnvelope),  eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotSendMessageRequest botSendMessageReq = BotRequest
@@ -309,8 +309,8 @@ public class BasicChatbotClientTest {
   }
 
   private void verifyResponseHeaders(BotHttpHeaders actualHttpHeaders) {
-    assertEquals(Optional.empty(), actualHttpHeaders.getRuntimeCRCHeader());
-    assertEquals(Optional.ofNullable(responseRequestId), actualHttpHeaders.getRequestIdHeader());
+    assertTrue(actualHttpHeaders.getRuntimeCRCHeaderAsCSV().isEmpty());
+    assertEquals(responseRequestId, actualHttpHeaders.getRequestIdHeaderAsCSV());
   }
 
   @Test
