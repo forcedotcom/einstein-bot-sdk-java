@@ -25,9 +25,9 @@ import org.springframework.util.MultiValueMap;
 /**
  * BotHttpHeaders - Class to store/retrieve Http Headers used by Bot API Requests.
  *
- * As per RFC {@link https://www.rfc-editor.org/rfc/rfc7230#section-3.2} Http Header names
+ * As per RFC https://www.rfc-editor.org/rfc/rfc7230#section-3.2 Http Header names
  * are case insensitive. So we store them in uppercase. The get method would also convert
- * header name parameter to uppercase before lookup.
+ * header name parameter to lowercase before lookup.
  *
  * @author relango
  */
@@ -43,7 +43,7 @@ public class BotHttpHeaders {
     headerValues
         .entries()
         .stream()
-        .forEach(e -> this.headerValues.put(e.getKey().toUpperCase(), e.getValue()) );
+        .forEach(e -> this.headerValues.put(e.getKey().toLowerCase(), e.getValue()) );
   }
 
   private BotHttpHeaders(Set<Entry<String, List<String>>> entries) {
@@ -53,7 +53,7 @@ public class BotHttpHeaders {
   }
 
   private void addToHeader(Entry<String, List<String>> entry) {
-    headerValues.putAll(entry.getKey().toUpperCase(), entry.getValue());
+    headerValues.putAll(entry.getKey().toLowerCase(), entry.getValue());
   }
 
   public static Builder with() {
@@ -82,7 +82,7 @@ public class BotHttpHeaders {
 
   public Optional<String> getFirst(String headerName) {
     return Optional
-        .ofNullable(headerValues.get(headerName.toUpperCase()))
+        .ofNullable(headerValues.get(headerName.toLowerCase()))
         .flatMap(this::findFirstItem);
   }
 
@@ -95,7 +95,7 @@ public class BotHttpHeaders {
   }
 
   public Collection<String> get(String headerName) {
-    return headerValues.get(headerName.toUpperCase());
+    return headerValues.get(headerName.toLowerCase());
   }
 
   public Multimap<String, String> getHeaderValues() {
@@ -103,7 +103,7 @@ public class BotHttpHeaders {
   }
 
   public boolean containsHeader(String headerName){
-    return headerValues.containsKey(headerName.toUpperCase());
+    return headerValues.containsKey(headerName.toLowerCase());
   }
 
   @Override

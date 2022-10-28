@@ -135,7 +135,7 @@ public class UtilFunctions {
   }
 
   private static List<String> maskAuthorizationHeaderEntry(Map.Entry<String,List<String>> entry){
-    if (entry.getKey().toUpperCase().contains(HttpHeaders.AUTHORIZATION.toUpperCase())) {
+    if (entry.getKey().toLowerCase().contains(HttpHeaders.AUTHORIZATION.toLowerCase())) {
       return Lists.newArrayList(AUTHORIZATION_HEADER_MASKED);
     } else {
       return entry.getValue();
