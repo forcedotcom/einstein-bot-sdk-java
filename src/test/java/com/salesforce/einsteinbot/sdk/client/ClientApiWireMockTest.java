@@ -229,8 +229,8 @@ public class ClientApiWireMockTest {
     assertEquals(botResponse.getHttpStatusCode(), HttpStatus.OK.value());
     BotHttpHeaders actualHttpHeaders = botResponse.getHttpHeaders();
 
-    assertEquals(Optional.empty(), actualHttpHeaders.getRuntimeCRCHeader());
-    assertEquals(Optional.ofNullable(responseRequestId), actualHttpHeaders.getRequestIdHeader());
+    assertTrue(actualHttpHeaders.getRuntimeCRCHeaderAsCSV().isEmpty());
+    assertEquals(responseRequestId, String.join(", ", actualHttpHeaders.getRequestIdHeaderAsCSV()));
     verifyResponseEnvelope(responseBodyFile, botResponse.getResponseEnvelope());
 
     ResponseEnvelope responseEnvelope = botResponse.getResponseEnvelope();

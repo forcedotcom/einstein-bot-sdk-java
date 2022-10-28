@@ -10,6 +10,7 @@ package com.salesforce.einsteinbot.sdk.util;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_NAME;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_NAME_INTEGRATION_TYPE;
 import static com.salesforce.einsteinbot.sdk.util.Constants.CONTEXT_VARIABLE_VALUE_API;
+import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.AUTHORIZATION_HEADER_MASKED;
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.addIntegrationTypeAndNameToContextVariables;
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.createTextVariable;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,14 +18,18 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.common.collect.Lists;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable.TypeEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+
 
 /**
  * UtilFunctionsTest - Unit Tests for methods in UtilFunctions
@@ -79,5 +84,20 @@ public class UtilFunctionsTest {
         currentContextVariables, Optional.empty());
 
     assertTrue(newContextVariables.isEmpty());
+  }
+
+  @Test
+  public void testMaskAuthorizationHeader(){
+    HttpHeaders headers = new HttpHeaders();
+    String requestId1 = "request-id1";
+    String requestId2 = "request-id2";
+    headers.add("X-Request-Id", requestId1);
+    headers.add("X-Request-Id", requestId2);
+    headers.add(HttpHeaders.AUTHORIZATION, "auth");
+    headers.add("X-SCRT-AUTHORIZATION", "scrt-auth");
+    Map<String, List<String>> masked = UtilFunctions.maskAuthorizationHeader(headers);
+    assertEquals(Lists.newArrayList(AUTHORIZATION_HEADER_MASKED),masked.get(HttpHeaders.AUTHORIZATION));
+    assertEquals(Lists.newArrayList(AUTHORIZATION_HEADER_MASKED), masked.get("X-SCRT-AUTHORIZATION"));
+    assertEquals(Lists.newArrayList(requestId1, requestId2), masked.get("X-Request-Id"));
   }
 }

@@ -7,9 +7,18 @@
 
 package com.salesforce.einsteinbot.sdk.util;
 
+import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.maskAuthorizationHeader;
+
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -27,7 +36,7 @@ public class WebClientUtil {
 
   public static Mono<ClientRequest> createLoggingRequestProcessor(ClientRequest clientRequest) {
     logger.info("Making {} Request to URI {} with Headers : {}", clientRequest.method(),
-        clientRequest.url(), clientRequest.headers());
+        clientRequest.url(), maskAuthorizationHeader(clientRequest.headers()));
     return Mono.just(clientRequest);
   }
 

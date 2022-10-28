@@ -87,9 +87,13 @@ public class BotSendMessageRequest extends BotRequest {
 
   @Override
   public String toString() {
-    return new StringJoiner(", ", BotSendMessageRequest.class.getSimpleName() + "{", "}")
+    return new StringJoiner(", ", BotSendMessageRequest.class.getSimpleName() + "[", "]")
         .add("variables=" + variables)
         .add("message=" + message)
+        .add("tz=" + tz)
+        .add("responseOptions=" + responseOptions)
+        .add("referrers=" + referrers)
+        .add("richContentCapabilities=" + richContentCapabilities)
         .add(super.toString())
         .toString();
   }

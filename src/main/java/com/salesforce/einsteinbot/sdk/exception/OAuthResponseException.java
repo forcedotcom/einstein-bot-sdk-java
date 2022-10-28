@@ -9,6 +9,7 @@ package com.salesforce.einsteinbot.sdk.exception;
 
 import java.util.StringJoiner;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse.Headers;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 /**
@@ -21,10 +22,13 @@ public class OAuthResponseException extends WebClientException {
 
   private final HttpStatus status;
   private final String errorResponse;
+  private final Headers headers;
 
-  public OAuthResponseException(HttpStatus status, String errorResponse) {
+  public OAuthResponseException(HttpStatus status, String errorResponse,
+      Headers headers) {
     super(status.getReasonPhrase());
     this.status = status;
+    this.headers = headers;
     this.errorResponse = errorResponse;
   }
 
@@ -40,6 +44,7 @@ public class OAuthResponseException extends WebClientException {
   public String toString() {
     return new StringJoiner(", ", OAuthResponseException.class.getSimpleName() + "[", "]")
         .add("status = " + status)
+        .add("responseHeaders = " + headers)
         .add("errorResponse = " + errorResponse)
         .add("exception = " + super.toString())
         .toString();

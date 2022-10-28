@@ -59,7 +59,7 @@ paths:
           name: "X-Request-ID"
           description: "Client supplied unique id to identify request for distributed tracing"
           example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
-          required: true
+          required: false
           schema:
             type: "string"
       requestBody:
@@ -119,7 +119,7 @@ paths:
           name: "X-Request-ID"
           description: "Client supplied unique id to identify request for distributed tracing"
           example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
-          required: true
+          required: false
           schema:
             type: "string"
         - in: "header"
@@ -192,7 +192,7 @@ paths:
           name: "X-Request-ID"
           description: "Client supplied unique id to identify request for distributed tracing"
           example: "36a73651-a46d-4d16-9a8a-fd436ed62e1a"
-          required: true
+          required: false
           schema:
             type: "string"
         - in: "header"

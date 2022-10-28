@@ -90,7 +90,8 @@ public class JwtBearerOAuth implements AuthMechanism {
     return clientResponse
         .bodyToMono(String.class)
         .flatMap(errorDetails -> Mono
-            .error(new OAuthResponseException(clientResponse.statusCode(), errorDetails)));
+            .error(new OAuthResponseException(clientResponse.statusCode(), errorDetails,
+                clientResponse.headers())));
   }
 
   @VisibleForTesting

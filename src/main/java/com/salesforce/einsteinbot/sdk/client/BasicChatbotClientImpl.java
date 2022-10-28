@@ -157,7 +157,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
-  private void notifyRequestEnvelopeInterceptor(BotRequest botRequest, Object requestEnvelope) {
+  protected void notifyRequestEnvelopeInterceptor(BotRequest botRequest, Object requestEnvelope) {
     botRequest.getRequestEnvelopeInterceptor()
         .accept(requestEnvelope);
   }
@@ -170,7 +170,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
         .endChatSessionWithHttpInfo(sessionId,
             orgId,
             endSessionReason,
-            botRequest.getOrCreateRequestId(),
+            botRequest.getRequestId().orElse(null),
             botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
         .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
@@ -186,7 +186,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
         .establishChatSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
-            botRequest.getOrCreateRequestId(), initMessageEnvelope)
+            initMessageEnvelope, botRequest.getRequestId().orElse(null))
         .toFuture()
         .thenApply(BotResponseBuilder::fromResponseEnvelopeResponseEntity);
 
@@ -201,8 +201,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     CompletableFuture<BotResponse> futureResponse = botApi
         .continueChatSessionWithHttpInfo(sessionId,
             orgId,
-            botRequest.getOrCreateRequestId(),
             messageEnvelope,
+            botRequest.getRequestId().orElse(null),
             botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
         .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
@@ -232,9 +232,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   private Consumer<ClientCodecConfigurer> createCodecsConfiguration(ObjectMapper mapper) {
     return clientDefaultCodecsConfigurer -> {
-      //isEnabled for LoggingJsonEncoder should be false if we don't want to Request Body for GDPR compliance.  TODO: Make this configurable in future
       clientDefaultCodecsConfigurer.defaultCodecs()
-          .jackson2JsonEncoder(new LoggingJsonEncoder(mapper, MediaType.APPLICATION_JSON, true));
+          .jackson2JsonEncoder(new LoggingJsonEncoder(mapper, MediaType.APPLICATION_JSON, false));
       clientDefaultCodecsConfigurer.defaultCodecs()
           .jackson2JsonDecoder(new Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON));
     };
@@ -244,6 +243,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     return clientResponse
         .bodyToMono(Error.class)
         .flatMap(errorDetails -> Mono
-            .error(new ChatbotResponseException(clientResponse.statusCode(), errorDetails)));
+            .error(new ChatbotResponseException(clientResponse.statusCode(), errorDetails,
+                clientResponse.headers())));
   }
 }

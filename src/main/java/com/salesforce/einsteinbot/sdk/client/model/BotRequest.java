@@ -47,12 +47,7 @@ public class BotRequest {
     this.requestEnvelopeInterceptor = requestEnvelopeInterceptor;
   }
 
-  @JsonIgnore
-  public String getOrCreateRequestId() {
-    return requestId.orElse(newRandomUUID());
-  }
-
-  public Optional getRequestId() {
+  public Optional<String> getRequestId() {
     return this.requestId;
   }
 
@@ -194,7 +189,7 @@ public class BotRequest {
 
     @Override
     public InitMessageOptionalFieldsBuilder<T> tz(String tz) {
-      this.tz = Optional.of(tz);
+      this.tz = Optional.ofNullable(tz);
       return this;
     }
 

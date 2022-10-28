@@ -37,17 +37,21 @@ public class BotHttpHeadersTest {
         .header(customHeaderName, customHeaderValue2)
         .build();
 
-    //RuntimeCRC is not provided, so it should be present
-    assertFalse(botHeader.getRuntimeCRCHeader().isPresent());
+    //RuntimeCRC is not provided, so it should not be present
+    assertTrue(botHeader.getRuntimeCRCHeaderAsCSV().isEmpty());
 
-    assertTrue(botHeader.getRequestIdHeader().isPresent());
-    assertEquals(requestId, botHeader.getRequestIdHeader().get());
+    assertFalse(botHeader.getRequestIdHeaderAsCSV().isEmpty());
+    assertEquals(requestId, String.join(",", botHeader.getRequestIdHeaderAsCSV()));
 
     Map<String, Collection<String>> allHeaders = botHeader.getAll();
-    assertTrue(allHeaders.containsKey(customHeaderName));
+    assertTrue(botHeader.containsHeader(customHeaderName));
 
     //Verify we can store multiple values for same header.
-    assertTrue(allHeaders.get(customHeaderName)
+    assertTrue(botHeader.get(customHeaderName)
+        .containsAll(Arrays.asList(customHeaderValue1, customHeaderValue2)));
+
+    //Verify reading header value in case insensitive way
+    assertTrue(botHeader.get(customHeaderName.toLowerCase())
         .containsAll(Arrays.asList(customHeaderValue1, customHeaderValue2)));
   }
 }
