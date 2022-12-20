@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import com.salesforce.einsteinbot.sdk.api.BotApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
+import com.salesforce.einsteinbot.sdk.api.VersionsApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
@@ -29,6 +30,7 @@ import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
+import com.salesforce.einsteinbot.sdk.exception.UnsupportedSDKException;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
@@ -40,11 +42,16 @@ import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage.TypeEnum;
 import com.salesforce.einsteinbot.sdk.util.TestUtils;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,6 +116,9 @@ public class BasicChatbotClientTest {
   private HealthApi mockHealthApi;
 
   @Mock
+  private VersionsApi mockVersionsApi;
+
+  @Mock
   private AnyResponseMessage responseMessage;
 
   @Mock
@@ -121,6 +131,9 @@ public class BasicChatbotClientTest {
   private Status healthStatus;
 
   @Mock
+  private SupportedVersions supportedVersions;
+
+  @Mock
   private RequestEnvelopeInterceptor requestEnvelopeInterceptor;
 
   @Captor
@@ -128,7 +141,7 @@ public class BasicChatbotClientTest {
 
   @Mock
   private AuthMechanism mockAuthMechanism;
-  private EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
+  private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
 
   @BeforeEach
   public void setup() {
@@ -143,6 +156,7 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testStartSession() {
+    stubVersionsResponse("5.0.0");
     ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(buildResponseEnvelope(), httpHeaders, httpStatus);
     BotResponse startSessionBotResponse = fromResponseEnvelopeResponseEntity(responseEntity);
@@ -162,8 +176,21 @@ public class BasicChatbotClientTest {
   }
 
   @Test
+  public void testStartSessionWithUnsupportedVersion() {
+    stubVersionsResponse("5.1.0");
+
+    Throwable exception = assertThrows(UnsupportedSDKException.class, () ->
+        client.startChatSession(config, new ExternalSessionId(externalSessionId),
+            buildBotSendMessageRequest(message, Optional.of(requestId))));
+
+    assertTrue(exception.getMessage()
+        .contains("SDK failed to start chat as the API version is not supported. Current API version in SDK is 5.0.0, latest supported API version is 5.1.0, please upgrade to the latest version."));
+  }
+
+  @Test
   public void testStartSessionWithInvalidFirstMessageType() {
 
+    stubVersionsResponse("5.0.0");
     AnyRequestMessage invalidFirstMessageType = buildChoiceMessage();
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () ->
@@ -328,5 +355,32 @@ public class BasicChatbotClientTest {
 
     assertEquals(healthStatus, client.getHealthStatus());
 
+  }
+
+  @Test
+  public void testGetSupportedVersions() {
+    stubVersionsResponse("5.0.0");
+
+    BasicChatbotClient client = ChatbotClients.basic()
+        .basePath(basePath)
+        .authMechanism(mockAuthMechanism)
+        .build();
+
+    ((BasicChatbotClientImpl) client).setVersionsApi(mockVersionsApi);
+
+    assertEquals(1, client.getSupportedVersions().getVersions().size());
+  }
+
+  private void stubVersionsResponse(String versionNumber) {
+    List<SupportedVersionsVersions> versions = new ArrayList<>();
+    SupportedVersionsVersions version = new SupportedVersionsVersions();
+    version.setVersionNumber(versionNumber);
+    version.setStatus(StatusEnum.ACTIVE);
+    versions.add(version);
+    SupportedVersions mockVersions = new SupportedVersions();
+    mockVersions.setVersions(versions);
+    Mono<SupportedVersions> monoResponse = Mono.fromCallable(() -> mockVersions);
+    when(mockVersionsApi.versionsGet()).thenReturn(monoResponse);
+    ((BasicChatbotClientImpl) client).setVersionsApi(mockVersionsApi);
   }
 }

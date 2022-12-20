@@ -1,0 +1,16 @@
+{
+  "versions": [
+    {
+      "versionNumber": "4.0.0",
+      "status": "DEPRECATED"
+    },
+    {
+      "versionNumber": "5.0.0",
+      "status": "ACTIVE"
+    },
+    {
+      "versionNumber": "5.1.0",
+      "status": "ACTIVE"
+    }
+  ]
+}

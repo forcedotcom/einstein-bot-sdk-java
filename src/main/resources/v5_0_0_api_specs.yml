@@ -31,6 +31,17 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
 
+  /versions:
+    get:
+      tags:
+        - "versions"
+      summary: "Supported API versions information for runtime"
+      responses:
+        200:
+          $ref: '#/components/responses/VersionsResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
   /v5.0.0/bots/{bot-id}/sessions:
     post:
       tags:
@@ -1264,6 +1275,26 @@ components:
         - "onlyChanged"
       additionalProperties: false
 
+    SupportedVersions:
+      type: "object"
+      properties:
+        versions:
+          type: "array"
+          description: "List of supported API versions"
+          items:
+            type: "object"
+            properties:
+              versionNumber:
+                type: "string"
+                description: "API Version number"
+              status:
+                type: string
+                description: "API Version status"
+                enum: [ "ACTIVE", "DEPRECATED" ]
+      required:
+        - "versions"
+      additionalProperties: false
+
     Status:
       type: "object"
       properties:
@@ -1313,6 +1344,13 @@ components:
       additionalProperties: false
 
   responses:
+
+    VersionsResponse:
+      description: "Runtime API supported versions response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SupportedVersions"
 
     StatusResponse:
       description: "Runtime health status check response"
