@@ -39,8 +39,12 @@
         <spring-reactor-test-version>3.2.3.RELEASE</spring-reactor-test-version>
         <spring-reactor-core-version>3.4.5</spring-reactor-core-version>
         <openapi-generator-version>5.4.0</openapi-generator-version>
+
+        <!-- Runtime follows a fixed naming convention for all API versions
+        and this property decides on which API version will be used in the SDK. -->
+        <api-spec-version>5_0_0</api-spec-version>
+        <api-spec-yaml-file>v${api-spec-version}_api_specs.yml</api-spec-yaml-file>
         <runtime-api-spec-url>https://runtime-api-na-west.prod.chatbots.sfdc.sh/docs/specs/${api-spec-yaml-file}</runtime-api-spec-url>
-        <api-spec-yaml-file>v5_0_0_api_specs.yml</api-spec-yaml-file>
     </properties>
 
     <licenses>
@@ -259,6 +263,22 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>${project.build.directory}/classes/properties-from-pom.properties</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

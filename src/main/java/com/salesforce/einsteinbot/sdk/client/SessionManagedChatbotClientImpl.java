@@ -11,7 +11,6 @@ import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.addIntegrationTy
 
 import com.salesforce.einsteinbot.sdk.cache.Cache;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
-import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
 import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
@@ -20,6 +19,7 @@ import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,6 +144,11 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
   @Override
   public Status getHealthStatus() {
     return basicClient.getHealthStatus();
+  }
+
+  @Override
+  public SupportedVersions getSupportedVersions() {
+    return basicClient.getSupportedVersions();
   }
 
   private void addSequenceIds(BotSendMessageRequest requestEnvelope) {

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.einsteinbot.sdk.api.BotApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
+import com.salesforce.einsteinbot.sdk.api.VersionsApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
@@ -28,15 +29,24 @@ import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
+import com.salesforce.einsteinbot.sdk.exception.UnsupportedSDKException;
 import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.Error;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
 import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
 import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
 import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -58,6 +68,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected BotApi botApi;
   protected HealthApi healthApi;
+  protected VersionsApi versionsApi;
   protected ApiClient apiClient;
   protected AuthMechanism authMechanism;
   protected ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
@@ -74,6 +85,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     apiClient.setUserAgent(releaseInfo.getAsUserAgent());
     botApi = new BotApi(apiClient);
     healthApi = new HealthApi(apiClient);
+    versionsApi = new VersionsApi(apiClient);
   }
 
   @VisibleForTesting
@@ -86,11 +98,19 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     this.healthApi = healthApi;
   }
 
+  @VisibleForTesting
+  void setVersionsApi(VersionsApi versionsApi) {
+    this.versionsApi = versionsApi;
+  }
+
   @Override
   public BotResponse startChatSession(RequestConfig config,
       ExternalSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
 
+    if (!isApiVersionSupported()) {
+      throw new UnsupportedSDKException(getCurrentApiVersion(), getLatestApiVersion());
+    }
     InitMessageEnvelope initMessageEnvelope = createInitMessageEnvelope(config, sessionId,
         botSendMessageRequest);
 
@@ -221,6 +241,20 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
+  public SupportedVersions getSupportedVersions() {
+    CompletableFuture<SupportedVersions> versionsFuture = versionsApi.versionsGet().toFuture();
+
+    try {
+      SupportedVersions versions = versionsFuture.get();
+      if (versions.getVersions().size() == 0) {
+        throw new RuntimeException("Versions response was incorrect");
+      }
+      return versions;
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException("Error in getting versions response", e);
+    }
+  }
+
   private WebClient createWebClient(WebClient.Builder webClientBuilder) {
 
     return webClientBuilder
@@ -245,5 +279,40 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
         .flatMap(errorDetails -> Mono
             .error(new ChatbotResponseException(clientResponse.statusCode(), errorDetails,
                 clientResponse.headers())));
+  }
+
+  private String getCurrentApiVersion() {
+    Properties properties;
+    InputStream is = getClass().getClassLoader()
+        .getResourceAsStream("properties-from-pom.properties");
+    properties = new Properties();
+    try {
+      properties.load(is);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load pom properties file.", e);
+    }
+
+    // Replacement needed here as the same property is used to know the api version
+    // (for example, 5.0.0), and for the api spec file naming convention (for example, v5_0_0).
+    return properties.getProperty("api-spec-version").replace("_", ".");
+  }
+
+  private String getLatestApiVersion() {
+    SupportedVersions versions = getSupportedVersions();
+    Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
+        .stream()
+        .filter(v -> Objects.equals(v.getStatus(), StatusEnum.ACTIVE))
+        .findFirst();
+    return supportedVersions.isPresent() ? supportedVersions.get().getVersionNumber() : getCurrentApiVersion();
+  }
+
+  private boolean isApiVersionSupported() {
+    String currentApiVersion = getCurrentApiVersion();
+    SupportedVersions versions = getSupportedVersions();
+    Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
+        .stream()
+        .filter(v -> Objects.equals(v.getVersionNumber(), currentApiVersion))
+        .findFirst();
+    return supportedVersions.isPresent();
   }
 }

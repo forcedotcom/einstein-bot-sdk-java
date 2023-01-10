@@ -42,9 +42,12 @@ import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
 import de.mkammerer.wiremock.WireMockExtension;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import net.javacrumbs.jsonunit.core.Option;
 import org.junit.jupiter.api.Assertions;
@@ -75,6 +78,7 @@ public class ClientApiWireMockTest {
   private static final String SEND_MESSAGE_URI = "/v5.0.0/sessions/" + SESSION_ID + "/messages";
   private static final String END_SESSION_URI = "/v5.0.0/sessions/" + SESSION_ID;
   private static final String STATUS_URI = "/status";
+  private static final String VERSIONS_URI = "/versions";
 
   private static final String TEST_REQUEST_ID = UUID.randomUUID().toString();
   public static final String SESSION_END_REASON_HEADER_KEY = "X-Session-End-Reason";
@@ -110,6 +114,8 @@ public class ClientApiWireMockTest {
         Optional.ofNullable(TEST_REQUEST_ID));
     botEndSessionRequest = buildSessionBotEndSessionRequest(endSessionReason,
         Optional.ofNullable(TEST_REQUEST_ID));
+    String responseBodyFile = "versionsResponse.json";
+    stubVersionsResponse(responseBodyFile);
   }
 
   @Test
@@ -153,6 +159,47 @@ public class ClientApiWireMockTest {
     Status status = client.getHealthStatus();
 
     verifyResponseEnvelope(responseBodyFile, status);
+  }
+
+  @Test
+  void testVerifyVersionFile() throws Exception {
+    Properties properties;
+    InputStream is = getClass().getClassLoader()
+        .getResourceAsStream("properties-from-pom.properties");
+    properties = new Properties();
+    properties.load(is);
+    String property = properties.getProperty("api-spec-yaml-file");
+    assertEquals("v5_0_0_api_specs.yml", property);
+  }
+
+  @Test
+  void testSupportedVersions() throws Exception {
+    String responseBodyFile = "versionsResponse.json";
+    stubVersionsResponse(responseBodyFile);
+    SupportedVersions versions = client.getSupportedVersions();
+
+    verifyResponseEnvelope(responseBodyFile, versions);
+  }
+
+  @Test
+  void testSupportedVersionsIncorrectResponse() throws Exception {
+    String responseBodyFile = "versionsErrorResponse.json";
+    stubVersionsResponse(responseBodyFile);
+    Throwable exception = assertThrows(RuntimeException.class,
+        () -> client.getSupportedVersions());
+
+    assertEquals("Versions response was incorrect", exception.getMessage());
+  }
+
+  @Test
+  void testSupportedVersionsErrorResponse() throws Exception {
+    String responseBodyFile = "errorResponse.json";
+    int errorStatusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+    stubVersionsResponse(responseBodyFile, errorStatusCode);
+    Throwable exception = assertThrows(RuntimeException.class,
+        () -> client.getSupportedVersions());
+
+    assertEquals("Error in getting versions response", exception.getMessage());
   }
 
   @Test
@@ -306,6 +353,29 @@ public class ClientApiWireMockTest {
                 (aResponse()
                     .withHeader("Content-Type", "application/json;charset=UTF-8")
                     .withBodyFile(TEST_MOCK_DIR + responseBodyFile))
+    );
+  }
+
+  private void stubVersionsResponse(String responseBodyFile) {
+    wireMock.stubFor(
+        get(VERSIONS_URI)
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json;charset=UTF-8")
+                    .withBodyFile(TEST_MOCK_DIR + responseBodyFile)
+            )
+    );
+  }
+
+  private void stubVersionsResponse(String responseBodyFile, int statusCode) {
+    wireMock.stubFor(
+        get(VERSIONS_URI)
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json;charset=UTF-8")
+                    .withBodyFile(TEST_MOCK_DIR + responseBodyFile)
+                    .withStatus(statusCode)
+            )
     );
   }
 
