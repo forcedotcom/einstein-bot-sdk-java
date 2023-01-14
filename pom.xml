@@ -176,10 +176,10 @@
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <typeMappings>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage=AnyRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,AnyOfStaticContentAttachmentsStaticContentText=AnyStaticContentMessage
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable=AnyVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage=AnyRequestMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage=AnyResponseMessage,AnyOfStaticContentAttachmentsStaticContentText=AnyStaticContentMessage,OneOfTextResponseMessageChoicesResponseMessageStaticContentMessageEscalateResponseMessageSessionEndedResponseMessage=AnyResponseMessage
                             </typeMappings>
                             <languageSpecificPrimitives>
-                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,AnyOfStaticContentAttachmentsStaticContentText
+                                AnyOfBooleanVariableDateVariableDateTimeVariableMoneyVariableNumberVariableTextVariableObjectVariableRefVariableListVariable,OneOfChoiceMessageTextMessageTransferSucceededRequestMessageTransferFailedRequestMessageRedirectMessage,OneOfSessionEndedResponseMessageTextResponseMessageChoicesResponseMessageEscalateResponseMessageStaticContentMessage,AnyOfStaticContentAttachmentsStaticContentText,OneOfTextResponseMessageChoicesResponseMessageStaticContentMessageEscalateResponseMessageSessionEndedResponseMessage
                             </languageSpecificPrimitives>
                             <library>webclient</library>
                             <additionalProperties>
