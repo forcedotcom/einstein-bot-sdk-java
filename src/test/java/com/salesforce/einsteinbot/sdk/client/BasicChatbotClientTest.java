@@ -156,15 +156,15 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testStartSession() {
-    stubVersionsResponse("5.0.0");
+    stubVersionsResponse("5.1.0");
     ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(buildResponseEnvelope(), httpHeaders, httpStatus);
     BotResponse startSessionBotResponse = fromResponseEnvelopeResponseEntity(responseEntity);
 
     InitMessageEnvelope initMessageEnvelope = buildInitMessageEnvelope();
 
-    when(mockBotApi.establishChatSessionWithHttpInfo(eq(botId), eq(orgId),
-        eq(initMessageEnvelope),  eq(requestId)))
+    when(mockBotApi.startSessionWithHttpInfo(eq(botId), eq(orgId),
+        eq(initMessageEnvelope), eq(requestId)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotResponse response = client.startChatSession(config, new ExternalSessionId(externalSessionId),
@@ -177,20 +177,20 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testStartSessionWithUnsupportedVersion() {
-    stubVersionsResponse("5.1.0");
+    stubVersionsResponse("5.2.0");
 
     Throwable exception = assertThrows(UnsupportedSDKException.class, () ->
         client.startChatSession(config, new ExternalSessionId(externalSessionId),
             buildBotSendMessageRequest(message, Optional.of(requestId))));
 
     assertTrue(exception.getMessage()
-        .contains("SDK failed to start chat as the API version is not supported. Current API version in SDK is 5.0.0, latest supported API version is 5.1.0, please upgrade to the latest version."));
+        .contains("SDK failed to start chat as the API version is not supported. Current API version in SDK is 5.1.0, latest supported API version is 5.2.0, please upgrade to the latest version."));
   }
 
   @Test
   public void testStartSessionWithInvalidFirstMessageType() {
 
-    stubVersionsResponse("5.0.0");
+    stubVersionsResponse("5.1.0");
     AnyRequestMessage invalidFirstMessageType = buildChoiceMessage();
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () ->
@@ -210,7 +210,7 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId),
+    when(mockBotApi.continueSessionWithHttpInfo(eq(sessionId), eq(orgId),
         eq(chatMessageEnvelope), eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
@@ -228,8 +228,8 @@ public class BasicChatbotClientTest {
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueChatSessionWithHttpInfo(eq(sessionId), eq(orgId),
-        eq(chatMessageEnvelope),  eq(requestId), eq(runtimeCRC)))
+    when(mockBotApi.continueSessionWithHttpInfo(eq(sessionId), eq(orgId),
+        eq(chatMessageEnvelope), eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
     BotSendMessageRequest botSendMessageReq = BotRequest
@@ -258,7 +258,7 @@ public class BasicChatbotClientTest {
         .createResponseEntity(endSessionResponseEnvelope, httpHeaders, httpStatus);
 
     when(mockBotApi
-        .endChatSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId),
+        .endSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId),
             eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
@@ -344,7 +344,7 @@ public class BasicChatbotClientTest {
   public void testGetHealthStatus() {
     Mono<Status> monoResponse = Mono.fromCallable(() -> healthStatus);
 
-    when(mockHealthApi.statusGet()).thenReturn(monoResponse);
+    when(mockHealthApi.checkHealthStatus()).thenReturn(monoResponse);
 
     BasicChatbotClient client = ChatbotClients.basic()
         .basePath(basePath)
@@ -359,7 +359,7 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testGetSupportedVersions() {
-    stubVersionsResponse("5.0.0");
+    stubVersionsResponse("5.1.0");
 
     BasicChatbotClient client = ChatbotClients.basic()
         .basePath(basePath)
@@ -380,7 +380,7 @@ public class BasicChatbotClientTest {
     SupportedVersions mockVersions = new SupportedVersions();
     mockVersions.setVersions(versions);
     Mono<SupportedVersions> monoResponse = Mono.fromCallable(() -> mockVersions);
-    when(mockVersionsApi.versionsGet()).thenReturn(monoResponse);
+    when(mockVersionsApi.getAPIVersions()).thenReturn(monoResponse);
     ((BasicChatbotClientImpl) client).setVersionsApi(mockVersionsApi);
   }
 }

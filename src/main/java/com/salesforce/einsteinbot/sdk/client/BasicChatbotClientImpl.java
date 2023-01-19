@@ -187,7 +187,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
-        .endChatSessionWithHttpInfo(sessionId,
+        .endSessionWithHttpInfo(sessionId,
             orgId,
             endSessionReason,
             botRequest.getRequestId().orElse(null),
@@ -205,7 +205,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
-        .establishChatSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
+        .startSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
             initMessageEnvelope, botRequest.getRequestId().orElse(null))
         .toFuture()
         .thenApply(BotResponseBuilder::fromResponseEnvelopeResponseEntity);
@@ -219,7 +219,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     apiClient.setBearerToken(authMechanism.getToken());
     CompletableFuture<BotResponse> futureResponse = botApi
-        .continueChatSessionWithHttpInfo(sessionId,
+        .continueSessionWithHttpInfo(sessionId,
             orgId,
             messageEnvelope,
             botRequest.getRequestId().orElse(null),
@@ -232,7 +232,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   }
 
   public Status getHealthStatus() {
-    CompletableFuture<Status> statusFuture = healthApi.statusGet().toFuture();
+    CompletableFuture<Status> statusFuture = healthApi.checkHealthStatus().toFuture();
 
     try {
       return statusFuture.get();
@@ -242,7 +242,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   }
 
   public SupportedVersions getSupportedVersions() {
-    CompletableFuture<SupportedVersions> versionsFuture = versionsApi.versionsGet().toFuture();
+    CompletableFuture<SupportedVersions> versionsFuture = versionsApi.getAPIVersions().toFuture();
 
     try {
       SupportedVersions versions = versionsFuture.get();

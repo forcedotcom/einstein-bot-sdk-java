@@ -245,14 +245,15 @@ Here is the SDK version and corresponding Runtime API version supported by it.
 | SDK Version          | Supported Runtime API                     
 | -------------------- | --------------------------------------
 | 1.x.x                | /v4.0.0                        
-| 2.x.x                | /v5.0.0                         
+| 2.0.x                | /v5.0.0
+| 2.1.x                | /v5.1.0
 
 ### Branching model to support development of multiple API versions
 
 We will maintain the SDK code for each Runtime API version separately in individual branches. 
 We will cut off release branch for each Runtime API version.
 
-For eg, Currently, the master branch is used to develop for Runtime API Version 5.0.0. 
+For eg, Currently, the master branch is used to develop for Runtime API Version 5.1.0. 
 The [releases/api-4.x](https://github.com/forcedotcom/einstein-bot-sdk-java/tree/releases/api-4.x) branch is used to maintain support for API 4.0.0.
 
 So to make change for SDK 1.x.x that supports API v4.0.0, it should be committed to `releases/api-4.x` branch. 
