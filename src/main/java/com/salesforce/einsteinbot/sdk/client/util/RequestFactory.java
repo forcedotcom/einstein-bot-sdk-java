@@ -52,7 +52,6 @@ public class RequestFactory {
 
     sendMessageRequest.getTz().ifPresent( v -> initMessageEnvelope.setTz(v));
     sendMessageRequest.getResponseOptions().ifPresent( v -> initMessageEnvelope.setResponseOptions(v));
-    sendMessageRequest.getRichContentCapabilities().ifPresent( v -> initMessageEnvelope.setRichContentCapabilities(v));
 
     return initMessageEnvelope;
 
