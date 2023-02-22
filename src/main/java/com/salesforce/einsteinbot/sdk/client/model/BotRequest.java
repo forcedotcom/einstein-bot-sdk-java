@@ -16,7 +16,6 @@ import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.Referrer;
 import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
-import com.salesforce.einsteinbot.sdk.model.RichContentCapability;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -91,7 +90,6 @@ public class BotRequest {
     protected Optional<String> tz = Optional.empty();
     protected Optional<ResponseOptions> responseOptions = Optional.empty();
     protected List<Referrer> referrers = Collections.emptyList();
-    protected Optional<RichContentCapability> richContentCapabilities = Optional.empty();
 
     protected Type type;
     protected RequestEnvelopeInterceptor requestEnvelopeInterceptor = v -> {/*NOOP Consumer*/};
@@ -115,7 +113,6 @@ public class BotRequest {
       this.tz = requestEnvelope.getTz();
       this.responseOptions = requestEnvelope.getResponseOptions();
       this.referrers = requestEnvelope.getReferrers();
-      this.richContentCapabilities = requestEnvelope.getRichContentCapabilities();
     }
 
     private FluentBuilder(BotEndSessionRequest requestEnvelope) {
@@ -205,11 +202,6 @@ public class BotRequest {
       return this;
     }
 
-    @Override
-    public InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities) {
-      this.richContentCapabilities = Optional.ofNullable(richContentCapabilities);
-      return this;
-    }
 
     @Override
     public InitMessageOptionalFieldsBuilder<T> variables(List<AnyVariable> variables) {
@@ -227,7 +219,7 @@ public class BotRequest {
     public T build() {
       if (type == Type.Message) {
         return (T) new BotSendMessageRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
-            variables, message, tz, responseOptions, referrers, richContentCapabilities);
+            variables, message, tz, responseOptions, referrers);
       } else if (type == Type.EndSession) {
         return (T) new BotEndSessionRequest(requestId, runtimeCRC, requestEnvelopeInterceptor,
             endSessionReason);
@@ -242,7 +234,6 @@ public class BotRequest {
     InitMessageOptionalFieldsBuilder<T> tz(String tz);
     InitMessageOptionalFieldsBuilder<T> referrers(List<Referrer> referrers);
     InitMessageOptionalFieldsBuilder<T> responseOptions(ResponseOptions responseOptions);
-    InitMessageOptionalFieldsBuilder<T> richContentCapabilities(RichContentCapability richContentCapabilities);
     InitMessageOptionalFieldsBuilder<T> variables(List<AnyVariable> variables);
   }
 

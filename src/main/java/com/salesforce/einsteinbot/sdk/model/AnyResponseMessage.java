@@ -22,8 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = TextResponseMessage.class, name = "text"),
     @JsonSubTypes.Type(value = ChoicesResponseMessage.class, name = "choices"),
     @JsonSubTypes.Type(value = EscalateResponseMessage.class, name = "escalate"),
-    @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, name = "sessionEnded"),
-    @JsonSubTypes.Type(value = StaticContentMessage.class, name = "messageDefinition")
+    @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, name = "sessionEnded")
 })
 public interface AnyResponseMessage {
 

@@ -248,6 +248,8 @@ Here is the SDK version and corresponding Runtime API version supported by it.
 | 2.0.x                | /v5.0.0
 | 2.1.x                | /v5.1.0
 
+**Note**: The support for rich links has been removed from API V5.1.0, please upgrade from SDK V2.1.0 to V2.1.1 or later.
+
 ### Branching model to support development of multiple API versions
 
 We will maintain the SDK code for each Runtime API version separately in individual branches. 

@@ -12,7 +12,6 @@ import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.Referrer;
 import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
-import com.salesforce.einsteinbot.sdk.model.RichContentCapability;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,7 +31,6 @@ public class BotSendMessageRequest extends BotRequest {
   private Optional<String> tz;
   private Optional<ResponseOptions> responseOptions;
   private List<Referrer> referrers;
-  private Optional<RichContentCapability> richContentCapabilities;
 
   protected BotSendMessageRequest(Optional<String> requestId, Optional<String> runtimeCRC,
       RequestEnvelopeInterceptor requestEnvelopeInterceptor,
@@ -40,21 +38,18 @@ public class BotSendMessageRequest extends BotRequest {
       AnyRequestMessage message,
       Optional<String> tz,
       Optional<ResponseOptions> responseOptions,
-      List<Referrer> referrers,
-      Optional<RichContentCapability> richContentCapabilities) {
+      List<Referrer> referrers) {
     super(requestId, runtimeCRC, requestEnvelopeInterceptor);
     Objects.requireNonNull(message);
     Objects.requireNonNull(variables);
     Objects.requireNonNull(tz);
     Objects.requireNonNull(responseOptions);
     Objects.requireNonNull(referrers);
-    Objects.requireNonNull(richContentCapabilities);
     this.variables = variables;
     this.message = message;
     this.tz = tz;
     this.referrers = referrers;
     this.responseOptions = responseOptions;
-    this.richContentCapabilities = richContentCapabilities;
   }
 
   public List<AnyVariable> getVariables() {
@@ -77,9 +72,6 @@ public class BotSendMessageRequest extends BotRequest {
     return referrers;
   }
 
-  public Optional<RichContentCapability> getRichContentCapabilities() {
-    return richContentCapabilities;
-  }
 
   public SendMessageRequestCloneBuilder<BotSendMessageRequest> clone(){
     return new FluentBuilder(this);
@@ -93,7 +85,6 @@ public class BotSendMessageRequest extends BotRequest {
         .add("tz=" + tz)
         .add("responseOptions=" + responseOptions)
         .add("referrers=" + referrers)
-        .add("richContentCapabilities=" + richContentCapabilities)
         .add(super.toString())
         .toString();
   }

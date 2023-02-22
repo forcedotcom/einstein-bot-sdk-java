@@ -28,9 +28,7 @@ import com.salesforce.einsteinbot.sdk.client.util.RequestFactory;
 import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
-import com.salesforce.einsteinbot.sdk.model.AnyStaticContentMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
-import com.salesforce.einsteinbot.sdk.model.Attachment;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoices;
@@ -39,9 +37,6 @@ import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessageTargets;
 import com.salesforce.einsteinbot.sdk.model.SessionEndedResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.SessionEndedResponseMessage.ReasonEnum;
-import com.salesforce.einsteinbot.sdk.model.StaticContentAttachments;
-import com.salesforce.einsteinbot.sdk.model.StaticContentMessage;
-import com.salesforce.einsteinbot.sdk.model.StaticContentText;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.Status.StatusEnum;
 import com.salesforce.einsteinbot.sdk.model.TextResponseMessage;
@@ -440,20 +435,6 @@ public class ApiExampleUsingSDK {
         //Implement logic to do any clean on the channel.
         sb.append("The Chat session ended with Reason : " + reason);
 
-      } else if (message instanceof StaticContentMessage) {
-        AnyStaticContentMessage staticContentMessage = ((StaticContentMessage) message)
-            .getStaticContent();
-        if (staticContentMessage instanceof StaticContentText) {
-          String richContentText = ((StaticContentText) staticContentMessage).getText();
-          //Display Rich Content text depending on your channel.
-          sb.append("Received Rich Content Text: " + richContentText);
-
-        } else if (staticContentMessage instanceof StaticContentAttachments) {
-          List<Attachment> attachments = ((StaticContentAttachments) staticContentMessage)
-              .getAttachments();
-          //Display Attachments depending on your channel.
-          sb.append("Received Attachment : " + attachments);
-        }
       }
     }
     return sb.toString();
