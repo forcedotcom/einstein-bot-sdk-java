@@ -17,13 +17,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @since 234
  */
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = TextResponseMessage.class, name = "text"),
-    @JsonSubTypes.Type(value = ChoicesResponseMessage.class, name = "choices"),
-    @JsonSubTypes.Type(value = EscalateResponseMessage.class, name = "escalate"),
-    @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, name = "sessionEnded")
-})
+        @JsonSubTypes.Type(value = TextResponseMessage.class, names = {"text"}),
+        @JsonSubTypes.Type(value = ChoicesResponseMessage.class, names = {"choices"}),
+        @JsonSubTypes.Type(value = EscalateResponseMessage.class, names = {"escalate"}),
+        @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, names = {"sessionEnded"}),
+ })//TODO more comment
 public interface AnyResponseMessage {
 
   Schedule getSchedule();
