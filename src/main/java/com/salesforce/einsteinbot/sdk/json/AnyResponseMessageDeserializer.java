@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,20 +14,30 @@ import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * AnyResponseMessageDeserializer - Custom deserializer for AnyResponseMessage
+ * Uses @JsonSubTypes annotation of AnyResponseMessage to deserialize the JSON to the correct subtype.
+ *
+ * @see AnyResponseMessage for more details.
+ * @author relango
+ */
 public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
 
     private final static String KEY_DELIMITER = ":";
     public static final String TYPE_FIELD_NAME = "type";
     public static final String MESSAGE_TYPE_FIELD_NAME = "messageType";
     public static final String ERROR_MESSAGE = "JSON should contain one of the valid values defined in @JsonSubTypes annotation of AnyResponseMessage.";
-    LinkedHashMap<String, ? extends Class<?>> typeMessageTypeToSubTypeMapping;
+    private LinkedHashMap<String, ? extends Class<?>> typeMessageTypeToSubTypeMapping;
 
     public AnyResponseMessageDeserializer(Class<T> clazz) {
         super(clazz);
+        // Map holding key type:messageType with value of subtype class.
+        // The map is constructed using JsonSubTypes annotation of AnyResponseMessage.
         typeMessageTypeToSubTypeMapping = Arrays
                 .stream(clazz.getAnnotation(JsonSubTypes.class).value())
-                .collect(Collectors.toMap(this::getTypeNameKey, JsonSubTypes.Type::value,
-                        (a, b) -> a, LinkedHashMap::new));
+                .collect(Collectors
+                        .toMap(this::getTypeNameKey, JsonSubTypes.Type::value, (k, v) -> k, LinkedHashMap::new)
+                );
     }
 
     private String getTypeNameKey(JsonSubTypes.Type type) {
@@ -57,6 +68,8 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
         String keyName = messageTypeValue.isPresent() ?
                 String.format("%s%s%s", typeValue.get(), KEY_DELIMITER, messageTypeValue.get()): typeValue.get();
 
+        // Based on the value of type and messageType,
+        // deserialize the object to the right subtype by looking up the typeMessageTypeToSubTypeMapping.
         if (typeMessageTypeToSubTypeMapping.containsKey(keyName)){
             return (T) objectMapper.treeToValue(object, typeMessageTypeToSubTypeMapping.get(keyName));
         }

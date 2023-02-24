@@ -8,22 +8,13 @@ package com.salesforce.einsteinbot.sdk.model;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.salesforce.einsteinbot.sdk.json.AnyResponseMessageDeserializer;
+import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
 
 /**
  * AnyResponseMessage - Base type to support polymorphic anyOf for ResponseMessage. Uses Jackson
  * annotations to resolve subclass type based on value of 'type' field and 'messageType' field.
  *
- * @author relango
- * @since 234
- */
-
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = TextResponseMessage.class, names = { "text" }),
-        @JsonSubTypes.Type(value = ChoicesResponseMessage.class, names = { "choices" }),
-        @JsonSubTypes.Type(value = EscalateResponseMessage.class, names = { "escalate"  }),
-        @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, names = { "sessionEnded" }),
- })
-/**
  * We could not use build-in JsonTypeInfo because for some response message types we need to look up
  * two fields 'type' and 'messageType' to map the right subclass.
  *
@@ -35,7 +26,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  *
  * So we registered custom AnyResponseMessageDeserializer in the ObjectMapperFactory in UtilFunctions.getMapper().
  * So get object mapper from UtilFunctions.getMapper().
+ *
+ * @see AnyResponseMessageDeserializer
+ * @see UtilFunctions#getMapper()
+ *
+ * @author relango
+ * @since 234
  */
+
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = TextResponseMessage.class, names = { "text" }),
+        @JsonSubTypes.Type(value = ChoicesResponseMessage.class, names = { "choices" }),
+        @JsonSubTypes.Type(value = EscalateResponseMessage.class, names = { "escalate"  }),
+        @JsonSubTypes.Type(value = SessionEndedResponseMessage.class, names = { "sessionEnded" }),
+ })
+
 public interface AnyResponseMessage {
 
   Schedule getSchedule();
