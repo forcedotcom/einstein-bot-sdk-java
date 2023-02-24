@@ -1,5 +1,7 @@
 # Einstein Bots Runtime - Java SDK
 
+Also refer to [Einstein Bot SDK public documentation](https://developer.salesforce.com/docs/service/einstein-bot-api/guide/sdk-overview.html)
+
 Java SDK to interact with Einstein Bots Runtime. This SDK is a wrapper around the [Einstein Bots Runtime API](https://developer.salesforce.com/docs/service/einstein-bot-api/guide/get-started-overview.html) that provides a few added features out of the box:
 
 * Auth support
@@ -200,6 +202,12 @@ private void getHealthStatus() {
     System.out.println(client.getHealthStatus()); // 'client' created in Step 3A or 3B
   }
 ```
+
+## Tips and Tricks
+
+* If you run into Json serialization or deserialization issues, use object mapper instance from [UtilFunctions.getMapper()](https://github.com/forcedotcom/einstein-bot-sdk-java/blob/master/src/main/java/com/salesforce/einsteinbot/sdk/util/UtilFunctions.java#L110)
+
+
 
 ### Full code examples
 
