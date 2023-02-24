@@ -205,7 +205,7 @@ private void getHealthStatus() {
 
 ## Tips and Tricks
 
-* If you run into Json serialization or deserialization issues, use object mapper instance from [UtilFunctions.getMapper()](https://github.com/forcedotcom/einstein-bot-sdk-java/blob/master/src/main/java/com/salesforce/einsteinbot/sdk/util/UtilFunctions.java#L110)
+* If you run into Json serialization or deserialization issues, use object mapper instance from [UtilFunctions.getMapper()](https://github.com/forcedotcom/einstein-bot-sdk-java/blob/master/src/main/java/com/salesforce/einsteinbot/sdk/util/UtilFunctions.java#L114)
 
 
 
