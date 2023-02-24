@@ -35,6 +35,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openapitools.jackson.nullable.JsonNullableModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.springframework.http.HttpHeaders;
 
 /**
@@ -113,6 +114,7 @@ public class UtilFunctions {
   public static ObjectMapper getMapper() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setDateFormat(createDefaultDateFormat());
+    mapper.registerModule(new Jdk8Module());
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

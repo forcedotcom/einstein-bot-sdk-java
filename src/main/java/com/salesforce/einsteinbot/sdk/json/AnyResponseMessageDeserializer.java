@@ -18,7 +18,7 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
     private final static String KEY_DELIMITER = ":";
     public static final String TYPE_FIELD_NAME = "type";
     public static final String MESSAGE_TYPE_FIELD_NAME = "messageType";
-    public static final String ERROR_MESSAGE = "Invalid type or message type value. Please check value of @JsonSubTypes annotation in AnyResponseMessage.";
+    public static final String ERROR_MESSAGE = "JSON should contain one of the valid values defined in @JsonSubTypes annotation of AnyResponseMessage.";
     LinkedHashMap<String, ? extends Class<?>> typeMessageTypeToSubTypeMapping;
 
     public AnyResponseMessageDeserializer(Class<T> clazz) {
@@ -39,9 +39,9 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
         ObjectMapper objectMapper = (ObjectMapper) p.getCodec();
         ObjectNode object = objectMapper.readTree(p);
 
-        Optional<String> typeValue =  Optional.of(object.get(TYPE_FIELD_NAME))
+        Optional<String> typeValue =  Optional.ofNullable(object.get(TYPE_FIELD_NAME))
                 .map(v -> v.asText());
-        Optional<String> messageTypeValue = Optional.of(object.get(MESSAGE_TYPE_FIELD_NAME))
+        Optional<String> messageTypeValue = Optional.ofNullable(object.get(MESSAGE_TYPE_FIELD_NAME))
                 .map(v -> v.asText());
         return deserialize(objectMapper, typeValue, messageTypeValue, object);
     }
@@ -52,14 +52,18 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
                           Optional<String> messageTypeValue,
                           ObjectNode object) throws IOException {
 
-        typeValue.orElseThrow(() -> new IllegalArgumentException(ERROR_MESSAGE));
+        typeValue.orElseThrow(() -> new IllegalArgumentException("Missing type value." + ERROR_MESSAGE));
 
         String keyName = messageTypeValue.isPresent() ?
-                String.format("%s%s%s", typeValue, KEY_DELIMITER, messageTypeValue.get()): typeValue.get();
+                String.format("%s%s%s", typeValue.get(), KEY_DELIMITER, messageTypeValue.get()): typeValue.get();
 
         if (typeMessageTypeToSubTypeMapping.containsKey(keyName)){
             return (T) objectMapper.treeToValue(object, typeMessageTypeToSubTypeMapping.get(keyName));
         }
-        throw new IllegalArgumentException(ERROR_MESSAGE);
+        throw new IllegalArgumentException(String.format("Invalid type or messageType value. type : %s %s. %s",
+                typeValue.get(),
+                messageTypeValue.map(v -> ", messageType : " + v).orElse(""),
+                ERROR_MESSAGE)
+        );
     }
 }
