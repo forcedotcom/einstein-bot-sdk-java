@@ -22,7 +22,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import com.salesforce.einsteinbot.sdk.handler.RFC3339DateFormat;
-import com.salesforce.einsteinbot.sdk.json.AnyResponseMessageDeserializer;
+import com.salesforce.einsteinbot.sdk.json.AnyResponseAndRequestMessageDeserializer;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
@@ -122,7 +123,8 @@ public class UtilFunctions {
     mapper.registerModule(jnm);
     mapper.setSerializationInclusion(Include.NON_NULL);
     SimpleModule simpleModule = new SimpleModule();
-    simpleModule.addDeserializer(AnyResponseMessage.class, new AnyResponseMessageDeserializer(AnyResponseMessage.class));
+    simpleModule.addDeserializer(AnyResponseMessage.class, new AnyResponseAndRequestMessageDeserializer(AnyResponseMessage.class));
+    simpleModule.addDeserializer(AnyRequestMessage.class, new AnyResponseAndRequestMessageDeserializer(AnyRequestMessage.class));
     mapper.registerModule(simpleModule);
     return mapper;
   }

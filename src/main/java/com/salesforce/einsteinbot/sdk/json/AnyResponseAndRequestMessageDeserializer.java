@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 
 import java.io.IOException;
@@ -19,18 +20,24 @@ import java.util.stream.Collectors;
  * Uses @JsonSubTypes annotation of AnyResponseMessage to deserialize the JSON to the correct subtype.
  *
  * @see AnyResponseMessage for more details.
+ * @see AnyRequestMessage for more details.
  * @author relango
  */
-public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
+public class AnyResponseAndRequestMessageDeserializer<T> extends StdDeserializer<T> {
 
     private final static String KEY_DELIMITER = ":";
     public static final String TYPE_FIELD_NAME = "type";
     public static final String MESSAGE_TYPE_FIELD_NAME = "messageType";
-    public static final String ERROR_MESSAGE = "JSON should contain one of the valid values defined in @JsonSubTypes annotation of AnyResponseMessage.";
+    public static final String ERROR_MESSAGE_FORMAT = "JSON should contain one of the valid values defined in @JsonSubTypes annotation of %s.";
     private LinkedHashMap<String, ? extends Class<?>> typeMessageTypeToSubTypeMapping;
+    private String className;
 
-    public AnyResponseMessageDeserializer(Class<T> clazz) {
+    public String errorMessage = "JSON should contain one of the valid values defined in @JsonSubTypes annotation of %s.";
+
+    public AnyResponseAndRequestMessageDeserializer(Class<T> clazz) {
         super(clazz);
+        this.className = clazz.getSimpleName();
+        this.errorMessage = String.format(ERROR_MESSAGE_FORMAT, className);
         // Map holding key type:messageType with value of subtype class.
         // The map is constructed using JsonSubTypes annotation of AnyResponseMessage.
         typeMessageTypeToSubTypeMapping = Arrays
@@ -49,7 +56,6 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
 
         ObjectMapper objectMapper = (ObjectMapper) p.getCodec();
         ObjectNode object = objectMapper.readTree(p);
-
         Optional<String> typeValue =  Optional.ofNullable(object.get(TYPE_FIELD_NAME))
                 .map(v -> v.asText());
         Optional<String> messageTypeValue = Optional.ofNullable(object.get(MESSAGE_TYPE_FIELD_NAME))
@@ -63,7 +69,7 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
                           Optional<String> messageTypeValue,
                           ObjectNode object) throws IOException {
 
-        typeValue.orElseThrow(() -> new IllegalArgumentException("Missing type value." + ERROR_MESSAGE));
+        typeValue.orElseThrow(() -> new IllegalArgumentException("Missing type value. " + errorMessage));
 
         String keyName = messageTypeValue.isPresent() ?
                 String.format("%s%s%s", typeValue.get(), KEY_DELIMITER, messageTypeValue.get()): typeValue.get();
@@ -76,7 +82,7 @@ public class AnyResponseMessageDeserializer<T> extends StdDeserializer<T> {
         throw new IllegalArgumentException(String.format("Invalid type or messageType value. type : %s %s. %s",
                 typeValue.get(),
                 messageTypeValue.map(v -> ", messageType : " + v).orElse(""),
-                ERROR_MESSAGE)
+                errorMessage)
         );
     }
 }
