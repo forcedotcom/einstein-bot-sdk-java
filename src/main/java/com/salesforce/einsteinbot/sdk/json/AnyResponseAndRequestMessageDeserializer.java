@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * AnyResponseMessageDeserializer - Custom deserializer for AnyResponseMessage
+ * AnyResponseAndRequestMessageDeserializer - Custom deserializer for AnyResponseMessage
  * Uses @JsonSubTypes annotation of AnyResponseMessage to deserialize the JSON to the correct subtype.
  *
  * @see AnyResponseMessage for more details.
