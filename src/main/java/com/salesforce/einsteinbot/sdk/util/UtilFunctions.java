@@ -18,9 +18,13 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import com.salesforce.einsteinbot.sdk.handler.RFC3339DateFormat;
+import com.salesforce.einsteinbot.sdk.json.AnyResponseAndRequestMessageDeserializer;
+import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
+import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.TextVariable;
 import java.text.DateFormat;
@@ -32,6 +36,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openapitools.jackson.nullable.JsonNullableModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.springframework.http.HttpHeaders;
 
 /**
@@ -110,11 +115,17 @@ public class UtilFunctions {
   public static ObjectMapper getMapper() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setDateFormat(createDefaultDateFormat());
+    mapper.registerModule(new Jdk8Module());
     mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     JsonNullableModule jnm = new JsonNullableModule();
     mapper.registerModule(jnm);
     mapper.setSerializationInclusion(Include.NON_NULL);
+    SimpleModule simpleModule = new SimpleModule();
+    simpleModule.addDeserializer(AnyResponseMessage.class, new AnyResponseAndRequestMessageDeserializer(AnyResponseMessage.class));
+    simpleModule.addDeserializer(AnyRequestMessage.class, new AnyResponseAndRequestMessageDeserializer(AnyRequestMessage.class));
+    mapper.registerModule(simpleModule);
     return mapper;
   }
 
