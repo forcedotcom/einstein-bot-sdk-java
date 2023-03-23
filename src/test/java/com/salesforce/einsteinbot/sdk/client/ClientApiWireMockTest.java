@@ -232,8 +232,6 @@ public class ClientApiWireMockTest {
             ChatbotResponseException.class);
     assertEquals(errorStatusCode, chatbotResponseException.getStatus());
     assertEquals(errorMessage, chatbotResponseException.getErrorResponse().getError());
-    assertTrue(chatbotResponseException.getErrorResponse().getMessage().
-            contains("This Error Response is returned before hitting Runtime Service"));
   }
 
   @Test

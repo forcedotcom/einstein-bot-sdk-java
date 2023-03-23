@@ -9,20 +9,13 @@ package com.salesforce.einsteinbot.sdk.util;
 
 import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.maskAuthorizationHeader;
 
-import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.salesforce.einsteinbot.sdk.model.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -72,20 +65,20 @@ public class WebClientUtil {
         return BodyExtractors.toMono(Error.class)
                 .extract(inputMessage, context);
       } else {
-        return buildErrorFromClientResponse(inputMessage, context);
+        return buildErrorFromClientResponseBodyString(inputMessage, context);
       }
     };
     return extractor;
   }
 
-  private static Mono<Error> buildErrorFromClientResponse(ReactiveHttpInputMessage clientResponse, BodyExtractor.Context context) {
+  private static Mono<Error> buildErrorFromClientResponseBodyString(ReactiveHttpInputMessage clientResponse, BodyExtractor.Context context) {
     ClientHttpResponse response = (ClientHttpResponse) clientResponse;
     Mono<String> bodyString = BodyExtractors.toMono(String.class).
             extract(clientResponse, context);
     return bodyString.map(errorMessage -> new Error()
             .status(response.getRawStatusCode())
-            .message("This Error Response is returned before hitting Runtime Service, " +
-                    "See the 'error' field for details")
+            .message("This Response content type is not 'application/json', " +
+                    "See the 'error' field for actual error returned by the server.")
             .error(errorMessage));
   }
 }
