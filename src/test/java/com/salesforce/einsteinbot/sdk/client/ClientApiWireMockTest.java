@@ -219,6 +219,24 @@ public class ClientApiWireMockTest {
   }
 
   @Test
+  void testStartSessionRequestWithErrorBeforeHittingServer() throws Exception {
+    String errorMessage = "fault filter abort";
+    int errorStatusCode = HttpStatus.NOT_FOUND.value();
+    stubStartSessionResponseWithBodyText(errorMessage, errorStatusCode);
+
+    Throwable exceptionThrown = assertThrows(java.lang.RuntimeException.class,
+            () -> client.startChatSession(requestConfig, externalSessionId,
+                    botSendMessageRequest));
+
+    ChatbotResponseException chatbotResponseException = validateAndGetCause(exceptionThrown,
+            ChatbotResponseException.class);
+    assertEquals(errorStatusCode, chatbotResponseException.getStatus());
+    assertEquals(errorMessage, chatbotResponseException.getErrorResponse().getError());
+    assertTrue(chatbotResponseException.getErrorResponse().getMessage().
+            contains("This Error Response is returned before hitting Runtime Service"));
+  }
+
+  @Test
   void testConnectionError() {
 
     BasicChatbotClient clientForError = ChatbotClients.basic()
@@ -321,6 +339,18 @@ public class ClientApiWireMockTest {
                     .withHeader("Content-Type", "application/json;charset=UTF-8")
                     .withHeader(HEADER_NAME_REQUEST_ID, responseRequestId)
                     .withBodyFile(TEST_MOCK_DIR + responseBodyFile))
+    );
+  }
+
+  private void stubStartSessionResponseWithBodyText(String responseBody, int statusCode) {
+    wireMock.stubFor(
+            post(START_SESSION_URI)
+                    .willReturn
+                            (aResponse()
+                                    .withStatus(statusCode)
+                                    .withHeader("Content-Type", "text/html;charset=UTF-8")
+                                    .withHeader(HEADER_NAME_REQUEST_ID, responseRequestId)
+                                    .withBody(responseBody))
     );
   }
 
