@@ -14,11 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.salesforce.einsteinbot.sdk.model.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -57,5 +63,29 @@ public class WebClientUtil {
         .andThen(
             ExchangeFilterFunction.ofResponseProcessor(responseProcessor)
         );
+  }
+
+  public static BodyExtractor<Mono<Error>, ReactiveHttpInputMessage> errorBodyExtractor() {
+    BodyExtractor<Mono<Error>, ReactiveHttpInputMessage> extractor = (inputMessage, context) -> {
+      String contentType = inputMessage.getHeaders().getContentType().toString();
+      if (contentType.contains("application/json")) {
+        return BodyExtractors.toMono(Error.class)
+                .extract(inputMessage, context);
+      } else {
+        return buildErrorFromClientResponse(inputMessage, context);
+      }
+    };
+    return extractor;
+  }
+
+  private static Mono<Error> buildErrorFromClientResponse(ReactiveHttpInputMessage clientResponse, BodyExtractor.Context context) {
+    ClientHttpResponse response = (ClientHttpResponse) clientResponse;
+    Mono<String> bodyString = BodyExtractors.toMono(String.class).
+            extract(clientResponse, context);
+    return bodyString.map(errorMessage -> new Error()
+            .status(response.getRawStatusCode())
+            .message("This Error Response is returned before hitting Runtime Service, " +
+                    "See the 'error' field for details")
+            .error(errorMessage));
   }
 }

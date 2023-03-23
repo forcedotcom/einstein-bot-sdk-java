@@ -33,7 +33,6 @@ import com.salesforce.einsteinbot.sdk.exception.UnsupportedSDKException;
 import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
-import com.salesforce.einsteinbot.sdk.model.Error;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
@@ -50,6 +49,8 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
+
+import com.salesforce.einsteinbot.sdk.util.WebClientUtil;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -275,8 +276,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   private Mono<ClientResponse> mapErrorResponse(ClientResponse clientResponse) {
     return clientResponse
-        .bodyToMono(Error.class)
-        .flatMap(errorDetails -> Mono
+            .body(WebClientUtil.errorBodyExtractor())
+            .flatMap(errorDetails -> Mono
             .error(new ChatbotResponseException(clientResponse.statusCode(), errorDetails,
                 clientResponse.headers())));
   }
