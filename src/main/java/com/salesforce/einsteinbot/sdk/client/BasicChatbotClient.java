@@ -30,9 +30,9 @@ public interface BasicChatbotClient extends ChatbotClient<RuntimeSessionId> {
       ExternalSessionId sessionId,
       BotSendMessageRequest requestEnvelope);
 
-  Status getHealthStatus();
+  Status getHealthStatus(RequestConfig config);
 
-  SupportedVersions getSupportedVersions();
+  SupportedVersions getSupportedVersions(RequestConfig config);
 
   /**
    * BasicClientFluentBuilder provides Fluent API to create Basic Chatbot Client.

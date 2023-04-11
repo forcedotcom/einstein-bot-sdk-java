@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.salesforce.einsteinbot.sdk.cache.InMemoryCache;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
@@ -38,6 +39,7 @@ import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.client.util.ClientFactory;
 import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
@@ -55,6 +57,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 /**
@@ -69,7 +72,6 @@ public class ClientApiWireMockTest {
   private static final String USER_AGENT_HEADER_KEY = "User-Agent";
   private static final String ORG_ID_HEADER_KEY = "X-Org-Id";
   private static final String REQUEST_ID_HEADER_KEY = "X-Request-ID";
-  private static final String TEST_FORCE_CONFIG = "https://esw5.test1.my.pc-rnd.salesforce.com";
   private static final String EXTERNAL_SESSION_KEY = "session1";
   private static final String SESSION_ID = "chatbotSessionId";
   private static final String responseRequestId = "ResponseRequestId";
@@ -79,6 +81,7 @@ public class ClientApiWireMockTest {
   private static final String END_SESSION_URI = "/v5.1.0/sessions/" + SESSION_ID;
   private static final String STATUS_URI = "/status";
   private static final String VERSIONS_URI = "/versions";
+  private static final String API_INFO_URI = "/services/data/v58.0/connect/bots/api-info";
 
   private static final String TEST_REQUEST_ID = UUID.randomUUID().toString();
   public static final String SESSION_END_REASON_HEADER_KEY = "X-Session-End-Reason";
@@ -88,18 +91,17 @@ public class ClientApiWireMockTest {
   private final ExternalSessionId externalSessionId = new ExternalSessionId(EXTERNAL_SESSION_KEY);
   private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
 
-  private static final RequestConfig requestConfig = RequestConfig
-      .with()
-      .botId(TEST_BOT_ID)
-      .orgId(TEST_ORG_ID)
-      .forceConfigEndpoint(TEST_FORCE_CONFIG)
-      .build();
-
   @RegisterExtension
   WireMockExtension wireMock = new WireMockExtension(options()
       .dynamicPort()
       .dynamicHttpsPort());
 
+  @RegisterExtension
+  WireMockExtension forceMock = new WireMockExtension(options()
+      .dynamicPort()
+      .dynamicHttpsPort());
+
+  private RequestConfig requestConfig;
   private BasicChatbotClient client;
   private BotSendMessageRequest botSendMessageRequest;
   private BotEndSessionRequest botEndSessionRequest;
@@ -116,6 +118,13 @@ public class ClientApiWireMockTest {
         Optional.ofNullable(TEST_REQUEST_ID));
     String responseBodyFile = "versionsResponse.json";
     stubVersionsResponse(responseBodyFile);
+    stubRuntimeUrlResponse();
+    this.requestConfig = RequestConfig
+        .with()
+        .botId(TEST_BOT_ID)
+        .orgId(TEST_ORG_ID)
+        .forceConfigEndpoint(forceMock.getBaseUri().toString())
+        .build();
   }
 
   @Test
@@ -134,6 +143,12 @@ public class ClientApiWireMockTest {
   void testSendMessageRequest() throws Exception {
     String responseBodyFile = "sendMessageResponse.json";
     stubSendMessageResponse(responseBodyFile);
+    InMemoryCache cache = new InMemoryCache(3600L);
+    cache.set(runtimeSessionId.getValue(), wireMock.getBaseUri().toString());
+    cache.setObject(wireMock.getBaseUri().toString(), ClientFactory.createClient(
+        wireMock.getBaseUri().toString(), WebClient.builder()
+    ));
+    ((BasicChatbotClientImpl) this.client).setCache(cache);
 
     BotResponse botResponse = client.sendMessage(requestConfig, runtimeSessionId,
         botSendMessageRequest);
@@ -145,7 +160,12 @@ public class ClientApiWireMockTest {
   void testEndSessionRequest() throws Exception {
     String responseBodyFile = "endSessionResponse.json";
     stubEndSessionResponse(responseBodyFile);
-
+    InMemoryCache cache = new InMemoryCache(3600L);
+    cache.set(runtimeSessionId.getValue(), wireMock.getBaseUri().toString());
+    cache.setObject(wireMock.getBaseUri().toString(), ClientFactory.createClient(
+        wireMock.getBaseUri().toString(), WebClient.builder()
+    ));
+    ((BasicChatbotClientImpl) this.client).setCache(cache);
     BotResponse botResponse = client.endChatSession(requestConfig, runtimeSessionId,
         botEndSessionRequest);
     verifyRequestUriAndHeadersForEndSession(END_SESSION_URI);
@@ -156,7 +176,7 @@ public class ClientApiWireMockTest {
   void testStatus() throws Exception {
     String responseBodyFile = "statusResponse.json";
     stubStatusResponse(responseBodyFile);
-    Status status = client.getHealthStatus();
+    Status status = client.getHealthStatus(requestConfig);
 
     verifyResponseEnvelope(responseBodyFile, status);
   }
@@ -176,7 +196,7 @@ public class ClientApiWireMockTest {
   void testSupportedVersions() throws Exception {
     String responseBodyFile = "versionsResponse.json";
     stubVersionsResponse(responseBodyFile);
-    SupportedVersions versions = client.getSupportedVersions();
+    SupportedVersions versions = client.getSupportedVersions(requestConfig);
 
     verifyResponseEnvelope(responseBodyFile, versions);
   }
@@ -186,7 +206,7 @@ public class ClientApiWireMockTest {
     String responseBodyFile = "versionsErrorResponse.json";
     stubVersionsResponse(responseBodyFile);
     Throwable exception = assertThrows(RuntimeException.class,
-        () -> client.getSupportedVersions());
+        () -> client.getSupportedVersions(requestConfig));
 
     assertEquals("Versions response was incorrect", exception.getMessage());
   }
@@ -197,7 +217,7 @@ public class ClientApiWireMockTest {
     int errorStatusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
     stubVersionsResponse(responseBodyFile, errorStatusCode);
     Throwable exception = assertThrows(RuntimeException.class,
-        () -> client.getSupportedVersions());
+        () -> client.getSupportedVersions(requestConfig));
 
     assertEquals("Error in getting versions response", exception.getMessage());
   }
@@ -241,6 +261,12 @@ public class ClientApiWireMockTest {
         .basePath(replaceUriWithInvalidPort(wireMock.getBaseUri()))
         .authMechanism(new TestAuthMechanism())
         .build();
+
+    InMemoryCache cache = new InMemoryCache(3600L);
+    cache.setObject(wireMock.getBaseUri().toString(), ClientFactory.createClient(
+        replaceUriWithInvalidPort(wireMock.getBaseUri()), WebClient.builder()
+    ));
+    ((BasicChatbotClientImpl) clientForError).setCache(cache);
 
     Throwable exceptionThrown = assertThrows(java.lang.RuntimeException.class,
         () -> clientForError.startChatSession(requestConfig, externalSessionId,
@@ -403,6 +429,18 @@ public class ClientApiWireMockTest {
                     .withHeader("Content-Type", "application/json;charset=UTF-8")
                     .withBodyFile(TEST_MOCK_DIR + responseBodyFile)
                     .withStatus(statusCode)
+            )
+    );
+  }
+
+  private void stubRuntimeUrlResponse() {
+    forceMock.stubFor(
+        get(API_INFO_URI)
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withHeader("Content-Type", "application/json;charset=UTF-8")
+                    .withBody("{\"runtimeBaseUrl\":\"" + wireMock.getBaseUri() + "\"}")
             )
     );
   }

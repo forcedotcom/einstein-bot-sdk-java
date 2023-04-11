@@ -7,11 +7,16 @@
 
 package com.salesforce.einsteinbot.sdk.client;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static com.salesforce.einsteinbot.sdk.client.BasicChatbotClientImpl.API_INFO_URI;
 import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildBotSendMessageRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -21,6 +26,7 @@ import com.salesforce.einsteinbot.sdk.api.BotApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.api.VersionsApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
+import com.salesforce.einsteinbot.sdk.cache.InMemoryCache;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
@@ -29,8 +35,10 @@ import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
+import com.salesforce.einsteinbot.sdk.client.util.ClientFactory.ClientWrapper;
 import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.exception.UnsupportedSDKException;
+import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
@@ -49,6 +57,7 @@ import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage.TypeEnum;
 import com.salesforce.einsteinbot.sdk.util.TestUtils;
+import de.mkammerer.wiremock.WireMockExtension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +65,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -72,10 +82,14 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 public class BasicChatbotClientTest {
 
+  @RegisterExtension
+  WireMockExtension forceMock = new WireMockExtension(options()
+      .dynamicPort()
+      .dynamicHttpsPort());
+
   private final String authToken = "C2C TOKEN";
   private final String orgId = "00DSB0000001ThY2AU";
   private final String botId = "testBotId";
-  private final String forceConfigEndpoint = "testForceConfigEndpoint";
   private final String sessionId = "testSessionId";
   private final String externalSessionId = "testExternalSessionIdId";
   private final String basePath = "http://runtime-api-na-west.stg.chatbots.sfdc.sh";
@@ -83,12 +97,8 @@ public class BasicChatbotClientTest {
   private final String requestId = "TestRequestId";
   private final String runtimeCRC = null;
 
-  private final RequestConfig config = RequestConfig
-      .with()
-      .botId(botId)
-      .orgId(orgId)
-      .forceConfigEndpoint(forceConfigEndpoint)
-      .build();
+  private String forceConfigEndpoint;
+  private RequestConfig config;
 
   private final long sequenceId = System.currentTimeMillis();
   private final String messageText = "hello";
@@ -113,6 +123,12 @@ public class BasicChatbotClientTest {
   private BotApi mockBotApi;
 
   @Mock
+  private InMemoryCache cache;
+
+  @Mock
+  private ClientWrapper mockClientWrapper;
+
+  @Mock
   private HealthApi mockHealthApi;
 
   @Mock
@@ -129,6 +145,9 @@ public class BasicChatbotClientTest {
 
   @Mock
   private Status healthStatus;
+
+  @Mock
+  private ApiClient mockApiClient;
 
   @Mock
   private SupportedVersions supportedVersions;
@@ -151,7 +170,25 @@ public class BasicChatbotClientTest {
         .authMechanism(mockAuthMechanism)
         .build();
 
-    ((BasicChatbotClientImpl) client).setBotApi(mockBotApi);
+    forceMock.stubFor(
+        get(API_INFO_URI)
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withHeader("Content-Type", "application/json;charset=UTF-8")
+                    .withBody("{\"runtimeBaseUrl\":\"" + basePath + "\"}")
+            )
+    );
+
+    forceConfigEndpoint = forceMock.getBaseUri().toString();
+    config = RequestConfig
+        .with()
+        .botId(botId)
+        .orgId(orgId)
+        .forceConfigEndpoint(forceConfigEndpoint)
+        .build();
+
+    ((BasicChatbotClientImpl) this.client).setCache(cache);
   }
 
   @Test
@@ -162,7 +199,10 @@ public class BasicChatbotClientTest {
     BotResponse startSessionBotResponse = fromResponseEnvelopeResponseEntity(responseEntity);
 
     InitMessageEnvelope initMessageEnvelope = buildInitMessageEnvelope();
-
+    when(mockClientWrapper.getApiClient()).thenReturn(mockApiClient);
+    when(mockClientWrapper.getBotApi()).thenReturn(mockBotApi);
+    when(mockClientWrapper.getVersionsApi()).thenReturn(mockVersionsApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
     when(mockBotApi.startSessionWithHttpInfo(eq(botId), eq(orgId),
         eq(initMessageEnvelope), eq(requestId)))
         .thenReturn(createMonoApiResponse(responseEntity));
@@ -178,7 +218,8 @@ public class BasicChatbotClientTest {
   @Test
   public void testStartSessionWithUnsupportedVersion() {
     stubVersionsResponse("5.2.0");
-
+    when(mockClientWrapper.getVersionsApi()).thenReturn(mockVersionsApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
     Throwable exception = assertThrows(UnsupportedSDKException.class, () ->
         client.startChatSession(config, new ExternalSessionId(externalSessionId),
             buildBotSendMessageRequest(message, Optional.of(requestId))));
@@ -191,6 +232,8 @@ public class BasicChatbotClientTest {
   public void testStartSessionWithInvalidFirstMessageType() {
 
     stubVersionsResponse("5.1.0");
+    when(mockClientWrapper.getVersionsApi()).thenReturn(mockVersionsApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
     AnyRequestMessage invalidFirstMessageType = buildChoiceMessage();
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () ->
@@ -204,6 +247,10 @@ public class BasicChatbotClientTest {
   @Test
   public void testSendMessage() {
 
+    when(mockClientWrapper.getApiClient()).thenReturn(mockApiClient);
+    when(mockClientWrapper.getBotApi()).thenReturn(mockBotApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
+    when(cache.get(anyString())).thenReturn(Optional.of(basePath));
     ChatMessageResponseEnvelope sendMessageResponseEnvelope = buildChatMessageResponseEnvelope();
     ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(sendMessageResponseEnvelope, httpHeaders, httpStatus);
@@ -222,6 +269,10 @@ public class BasicChatbotClientTest {
   @Test
   public void testSendMessageWithRequestInterceptor() {
 
+    when(mockClientWrapper.getApiClient()).thenReturn(mockApiClient);
+    when(mockClientWrapper.getBotApi()).thenReturn(mockBotApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
+    when(cache.get(anyString())).thenReturn(Optional.of(basePath));
     ChatMessageResponseEnvelope sendMessageResponseEnvelope = buildChatMessageResponseEnvelope();
     ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(sendMessageResponseEnvelope, httpHeaders, httpStatus);
@@ -252,7 +303,6 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testEndSession() {
-
     ChatMessageResponseEnvelope endSessionResponseEnvelope = buildChatMessageResponseEnvelope();
     ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(endSessionResponseEnvelope, httpHeaders, httpStatus);
@@ -261,6 +311,10 @@ public class BasicChatbotClientTest {
         .endSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId),
             eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
+    when(mockClientWrapper.getApiClient()).thenReturn(mockApiClient);
+    when(mockClientWrapper.getBotApi()).thenReturn(mockBotApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
+    when(cache.get(anyString())).thenReturn(Optional.of(basePath));
 
     BotResponse response = client
         .endChatSession(config, new RuntimeSessionId(sessionId), buildEndSessionRequestEnvelope());
@@ -345,30 +399,20 @@ public class BasicChatbotClientTest {
     Mono<Status> monoResponse = Mono.fromCallable(() -> healthStatus);
 
     when(mockHealthApi.checkHealthStatus()).thenReturn(monoResponse);
+    when(mockClientWrapper.getHealthApi()).thenReturn(mockHealthApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
 
-    BasicChatbotClient client = ChatbotClients.basic()
-        .basePath(basePath)
-        .authMechanism(mockAuthMechanism)
-        .build();
-
-    ((BasicChatbotClientImpl) client).setHealthApi(mockHealthApi);
-
-    assertEquals(healthStatus, client.getHealthStatus());
+    assertEquals(healthStatus, client.getHealthStatus(config));
 
   }
 
   @Test
   public void testGetSupportedVersions() {
     stubVersionsResponse("5.1.0");
+    when(mockClientWrapper.getVersionsApi()).thenReturn(mockVersionsApi);
+    when(cache.getObject(anyString())).thenReturn(Optional.of(mockClientWrapper));
 
-    BasicChatbotClient client = ChatbotClients.basic()
-        .basePath(basePath)
-        .authMechanism(mockAuthMechanism)
-        .build();
-
-    ((BasicChatbotClientImpl) client).setVersionsApi(mockVersionsApi);
-
-    assertEquals(1, client.getSupportedVersions().getVersions().size());
+    assertEquals(1, client.getSupportedVersions(config).getVersions().size());
   }
 
   private void stubVersionsResponse(String versionNumber) {

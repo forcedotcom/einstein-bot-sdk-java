@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class InMemoryCache implements Cache {
 
-  private final com.google.common.cache.Cache<String, String> cache;
+  private final com.google.common.cache.Cache<String, Object> cache;
 
   public InMemoryCache(long ttlSeconds) {
     cache = CacheBuilder.newBuilder().expireAfterAccess(ttlSeconds, TimeUnit.SECONDS).build();
@@ -25,7 +25,12 @@ public class InMemoryCache implements Cache {
 
   @Override
   public Optional<String> get(String key) {
-    String val = cache.getIfPresent(key);
+    String val = (String) cache.getIfPresent(key);
+    return Optional.ofNullable(val);
+  }
+
+  public Optional<Object> getObject(String key) {
+    Object val = cache.getIfPresent(key);
     return Optional.ofNullable(val);
   }
 
@@ -34,12 +39,20 @@ public class InMemoryCache implements Cache {
     cache.put(key, val);
   }
 
+  public void setObject(String key, Object val) {
+    cache.put(key, val);
+  }
+
   /**
    * This method does not respect the ttlSeconds parameter.
    */
   @Override
   public void set(String key, String val, long ttlSeconds) {
-    cache.put(key, val);
+    set(key, val);
+  }
+
+  public void setObject(String key, Object val, long ttlSeconds) {
+    setObject(key, val);
   }
 
   @Override

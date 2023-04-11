@@ -25,7 +25,7 @@ public class RedisCache implements Cache {
   private static final Long DEFAULT_TTL_SECONDS = 259140L; // 2 days, 23 hours, 59 minutes
 
   private JedisPool jedisPool;
-  private long ttlSeconds;
+  private final long ttlSeconds;
 
   /**
    * This constructor will use the default ttl of 259,140 seconds and will assume standard Redis
