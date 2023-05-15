@@ -29,7 +29,7 @@ public interface ChatbotClient<T extends BotSessionId> {
       T sessionId,
       BotEndSessionRequest requestEnvelope);
 
-  Status getHealthStatus();
+  Status getHealthStatus(RequestConfig config);
 
-  SupportedVersions getSupportedVersions();
+  SupportedVersions getSupportedVersions(RequestConfig config);
 }

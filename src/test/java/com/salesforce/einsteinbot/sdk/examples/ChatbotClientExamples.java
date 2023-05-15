@@ -153,7 +153,7 @@ public class ChatbotClientExamples {
         .authMechanism(oAuth)
         .build();
 
-    System.out.println("Health Status: " + convertObjectToJson(client.getHealthStatus()));
+    System.out.println("Health Status: " + convertObjectToJson(client.getHealthStatus(config)));
   }
 
   private void getSupportedVersions() throws Exception {
@@ -162,6 +162,6 @@ public class ChatbotClientExamples {
         .authMechanism(oAuth)
         .build();
 
-    System.out.println("Supported Versions: " + convertObjectToJson(client.getSupportedVersions()));
+    System.out.println("Supported Versions: " + convertObjectToJson(client.getSupportedVersions(config)));
   }
 }

@@ -403,9 +403,9 @@ public class ApiExampleUsingSDK {
         .authMechanism(oAuth)
         .build();
 
-    Status status = client.getHealthStatus();
+    Status status = client.getHealthStatus(createRequestConfig());
     boolean isRuntimeUp = status.equals(StatusEnum.UP);
-    System.out.println("Health Status: " + convertObjectToJson(client.getHealthStatus()));
+    System.out.println("Health Status: " + convertObjectToJson(client.getHealthStatus(createRequestConfig())));
   }
 
   private String getResponseMessageAsText(List<AnyResponseMessage> messages) {

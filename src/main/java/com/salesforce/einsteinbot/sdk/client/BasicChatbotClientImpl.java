@@ -10,16 +10,15 @@ package com.salesforce.einsteinbot.sdk.client;
 import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromChatMessageResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildChatMessageEnvelope;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildInitMessageEnvelope;
-import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createErrorResponseProcessor;
-import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createFilter;
-import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createLoggingRequestProcessor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.einsteinbot.sdk.api.BotApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
 import com.salesforce.einsteinbot.sdk.api.VersionsApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
+import com.salesforce.einsteinbot.sdk.cache.InMemoryCache;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotResponse;
@@ -28,9 +27,9 @@ import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
 import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
-import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
+import com.salesforce.einsteinbot.sdk.client.util.ClientFactory;
+import com.salesforce.einsteinbot.sdk.client.util.ClientFactory.ClientWrapper;
 import com.salesforce.einsteinbot.sdk.exception.UnsupportedSDKException;
-import com.salesforce.einsteinbot.sdk.handler.ApiClient;
 import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
@@ -38,25 +37,21 @@ import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
 import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
 import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
-import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
-import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
-import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 
-import com.salesforce.einsteinbot.sdk.util.WebClientUtil;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
+import org.apache.http.client.utils.URIUtils;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  * This is a basic implementation of {@link BasicChatbotClient}. It does not perform session
@@ -67,41 +62,45 @@ import reactor.core.publisher.Mono;
  */
 public class BasicChatbotClientImpl implements BasicChatbotClient {
 
-  protected BotApi botApi;
-  protected HealthApi healthApi;
-  protected VersionsApi versionsApi;
-  protected ApiClient apiClient;
+  private static final Long DEFAULT_TTL_SECONDS = Duration.ofDays(3).getSeconds();
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  static final String API_INFO_URI = "/services/data/v58.0/connect/bots/api-info";
+
+  protected InMemoryCache cache;
+  protected String basePath;
+  protected WebClient.Builder webClientBuilder;
   protected AuthMechanism authMechanism;
-  protected ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
+  protected ClientWrapper clientWrapper;
 
   protected BasicChatbotClientImpl(String basePath,
       AuthMechanism authMechanism,
       WebClient.Builder webClientBuilder) {
 
     this.authMechanism = authMechanism;
-    this.apiClient = new ApiClient(createWebClient(webClientBuilder), UtilFunctions.getMapper(),
-        UtilFunctions
-            .createDefaultDateFormat());
-    apiClient.setBasePath(basePath);
-    apiClient.setUserAgent(releaseInfo.getAsUserAgent());
-    botApi = new BotApi(apiClient);
-    healthApi = new HealthApi(apiClient);
-    versionsApi = new VersionsApi(apiClient);
+    this.basePath = basePath;
+    this.webClientBuilder = webClientBuilder;
+    this.clientWrapper = ClientFactory.createClient(basePath, webClientBuilder);
+    this.cache = new InMemoryCache(DEFAULT_TTL_SECONDS);
   }
 
   @VisibleForTesting
   void setBotApi(BotApi botApi) {
-    this.botApi = botApi;
+    this.clientWrapper.setBotApi(botApi);
   }
 
   @VisibleForTesting
   void setHealthApi(HealthApi healthApi) {
-    this.healthApi = healthApi;
+    this.clientWrapper.setHealthApi(healthApi);
   }
 
   @VisibleForTesting
   void setVersionsApi(VersionsApi versionsApi) {
-    this.versionsApi = versionsApi;
+    this.clientWrapper.setVersionsApi(versionsApi);
+  }
+
+  @VisibleForTesting
+  void setCache(InMemoryCache cache) {
+    this.cache = cache;
   }
 
   @Override
@@ -109,18 +108,26 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       ExternalSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
 
-    if (!isApiVersionSupported()) {
-      throw new UnsupportedSDKException(getCurrentApiVersion(), getLatestApiVersion());
+    if (!isApiVersionSupported(config)) {
+      throw new UnsupportedSDKException(getCurrentApiVersion(), getLatestApiVersion(config));
     }
+
+    ClientWrapper clientWrapper = getOrCreateClientWrapper(config);
+    this.clientWrapper = clientWrapper;
+
     InitMessageEnvelope initMessageEnvelope = createInitMessageEnvelope(config, sessionId,
         botSendMessageRequest);
 
     notifyRequestEnvelopeInterceptor(botSendMessageRequest, initMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeEstablishChatSession(config,
         initMessageEnvelope,
-        botSendMessageRequest);
+        botSendMessageRequest,
+        clientWrapper);
     try {
-      return futureResponse.get();
+      BotResponse botResponse = futureResponse.get();
+      this.cache.set(botResponse.getResponseEnvelope().getSessionId(), basePath);
+      this.cache.setObject(basePath, clientWrapper);
+      return botResponse;
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     }
@@ -141,11 +148,13 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     ChatMessageEnvelope chatMessageEnvelope = createChatMessageEnvelope(botSendMessageRequest);
 
+    ClientWrapper clientWrapper = getCachedClientWrapper(sessionId);
     notifyRequestEnvelopeInterceptor(botSendMessageRequest, chatMessageEnvelope);
     CompletableFuture<BotResponse> futureResponse = invokeContinueChatSession(config.getOrgId(),
         sessionId.getValue(),
         chatMessageEnvelope,
-        botSendMessageRequest);
+        botSendMessageRequest,
+        clientWrapper);
 
     try {
       return futureResponse.get();
@@ -166,11 +175,14 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       BotEndSessionRequest botEndSessionRequest) {
 
     EndSessionReason endSessionReason = botEndSessionRequest.getEndSessionReason();
+
+    ClientWrapper clientWrapper = getCachedClientWrapper(sessionId);
     notifyRequestEnvelopeInterceptor(botEndSessionRequest, "EndSessionReason: " + endSessionReason);
     CompletableFuture<BotResponse> futureResponse = invokeEndChatSession(config.getOrgId(),
         sessionId.getValue(),
         endSessionReason,
-        botEndSessionRequest);
+        botEndSessionRequest,
+        clientWrapper);
     try {
       return futureResponse.get();
     } catch (InterruptedException | ExecutionException e) {
@@ -183,11 +195,23 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
         .accept(requestEnvelope);
   }
 
-  protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId,
-      EndSessionReason endSessionReason, BotEndSessionRequest botRequest) {
+  private ClientWrapper getCachedClientWrapper(RuntimeSessionId sessionId) {
+    Optional<String> basePath = this.cache.get(sessionId.getValue());
+    if (!basePath.isPresent()) {
+      throw new RuntimeException("No base path found in cache for session ID: " + sessionId.getValue());
+    }
+    Optional<Object> clientOptional = this.cache.getObject(basePath.get());
+    if (!clientOptional.isPresent()) {
+      throw new RuntimeException("No client implementation found in cache for base path: " + basePath.get());
+    }
+    return (ClientWrapper) clientOptional.get();
+  }
 
-    apiClient.setBearerToken(authMechanism.getToken());
-    CompletableFuture<BotResponse> futureResponse = botApi
+  protected CompletableFuture<BotResponse> invokeEndChatSession(String orgId, String sessionId,
+      EndSessionReason endSessionReason, BotEndSessionRequest botRequest, ClientWrapper clientWrapper) {
+
+    clientWrapper.getApiClient().setBearerToken(authMechanism.getToken());
+    CompletableFuture<BotResponse> futureResponse = clientWrapper.getBotApi()
         .endSessionWithHttpInfo(sessionId,
             orgId,
             endSessionReason,
@@ -202,10 +226,11 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeEstablishChatSession(RequestConfig config,
       InitMessageEnvelope initMessageEnvelope,
-      BotSendMessageRequest botRequest) {
+      BotSendMessageRequest botRequest,
+      ClientWrapper clientWrapper) {
 
-    apiClient.setBearerToken(authMechanism.getToken());
-    CompletableFuture<BotResponse> futureResponse = botApi
+    clientWrapper.getApiClient().setBearerToken(authMechanism.getToken());
+    CompletableFuture<BotResponse> futureResponse = clientWrapper.getBotApi()
         .startSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
             initMessageEnvelope, botRequest.getRequestId().orElse(null))
         .toFuture()
@@ -216,10 +241,11 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected CompletableFuture<BotResponse> invokeContinueChatSession(String orgId, String sessionId,
       ChatMessageEnvelope messageEnvelope,
-      BotSendMessageRequest botRequest) {
+      BotSendMessageRequest botRequest,
+      ClientWrapper clientWrapper) {
 
-    apiClient.setBearerToken(authMechanism.getToken());
-    CompletableFuture<BotResponse> futureResponse = botApi
+    clientWrapper.getApiClient().setBearerToken(authMechanism.getToken());
+    CompletableFuture<BotResponse> futureResponse = clientWrapper.getBotApi()
         .continueSessionWithHttpInfo(sessionId,
             orgId,
             messageEnvelope,
@@ -232,8 +258,9 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     return futureResponse;
   }
 
-  public Status getHealthStatus() {
-    CompletableFuture<Status> statusFuture = healthApi.checkHealthStatus().toFuture();
+  public Status getHealthStatus(RequestConfig requestConfig) {
+    ClientWrapper clientWrapper = getOrCreateClientWrapper(requestConfig);
+    CompletableFuture<Status> statusFuture = clientWrapper.getHealthApi().checkHealthStatus().toFuture();
 
     try {
       return statusFuture.get();
@@ -242,8 +269,9 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
-  public SupportedVersions getSupportedVersions() {
-    CompletableFuture<SupportedVersions> versionsFuture = versionsApi.getAPIVersions().toFuture();
+  public SupportedVersions getSupportedVersions(RequestConfig requestConfig) {
+    ClientWrapper clientWrapper = getOrCreateClientWrapper(requestConfig);
+    CompletableFuture<SupportedVersions> versionsFuture = clientWrapper.getVersionsApi().getAPIVersions().toFuture();
 
     try {
       SupportedVersions versions = versionsFuture.get();
@@ -256,30 +284,38 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     }
   }
 
-  private WebClient createWebClient(WebClient.Builder webClientBuilder) {
-
-    return webClientBuilder
-        .codecs(createCodecsConfiguration(UtilFunctions.getMapper()))
-        .filter(createFilter(clientRequest -> createLoggingRequestProcessor(clientRequest),
-            clientResponse -> createErrorResponseProcessor(clientResponse, this::mapErrorResponse)))
-        .build();
+  private ClientWrapper getOrCreateClientWrapper(RequestConfig requestConfig) {
+    String basePath = getRuntimeUrl(requestConfig.getForceConfigEndpoint());
+    Optional<Object> clientOptional = this.cache.getObject(basePath);
+    ClientWrapper clientWrapper = ClientFactory.createClient(basePath, webClientBuilder);
+    if (clientOptional.isPresent()) {
+      clientWrapper = (ClientWrapper) clientOptional.get();
+    }
+    return clientWrapper;
   }
 
-  private Consumer<ClientCodecConfigurer> createCodecsConfiguration(ObjectMapper mapper) {
-    return clientDefaultCodecsConfigurer -> {
-      clientDefaultCodecsConfigurer.defaultCodecs()
-          .jackson2JsonEncoder(new LoggingJsonEncoder(mapper, MediaType.APPLICATION_JSON, false));
-      clientDefaultCodecsConfigurer.defaultCodecs()
-          .jackson2JsonDecoder(new Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON));
-    };
-  }
-
-  private Mono<ClientResponse> mapErrorResponse(ClientResponse clientResponse) {
-    return clientResponse
-            .body(WebClientUtil.errorBodyExtractor())
-            .flatMap(errorDetails -> Mono
-            .error(new ChatbotResponseException(clientResponse.statusCode(), errorDetails,
-                clientResponse.headers())));
+  private String getRuntimeUrl(String forceEndpoint) {
+    try {
+      URI uri = URI.create(forceEndpoint);
+      HttpHost forceHost = URIUtils.extractHost(uri);
+      String infoPath = uri.getRawPath().replace("/$", "") + API_INFO_URI;
+      WebClient webClient = WebClient.builder()
+          .baseUrl(forceHost.toString())
+          .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .build();
+      JsonNode node = webClient.get()
+          .uri(infoPath)
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + this.authMechanism.getToken())
+          .retrieve()
+          .bodyToMono(JsonNode.class)
+          .block();
+      if (node == null) {
+        throw new RuntimeException("Could not get runtime URL");
+      }
+      return node.get("runtimeBaseUrl").asText();
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   private String getCurrentApiVersion() {
@@ -298,8 +334,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     return properties.getProperty("api-spec-version").replace("_", ".");
   }
 
-  private String getLatestApiVersion() {
-    SupportedVersions versions = getSupportedVersions();
+  private String getLatestApiVersion(RequestConfig requestConfig) {
+    SupportedVersions versions = getSupportedVersions(requestConfig);
     Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
         .stream()
         .filter(v -> Objects.equals(v.getStatus(), StatusEnum.ACTIVE))
@@ -307,9 +343,9 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     return supportedVersions.isPresent() ? supportedVersions.get().getVersionNumber() : getCurrentApiVersion();
   }
 
-  private boolean isApiVersionSupported() {
+  private boolean isApiVersionSupported(RequestConfig requestConfig) {
     String currentApiVersion = getCurrentApiVersion();
-    SupportedVersions versions = getSupportedVersions();
+    SupportedVersions versions = getSupportedVersions(requestConfig);
     Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
         .stream()
         .filter(v -> Objects.equals(v.getVersionNumber(), currentApiVersion))

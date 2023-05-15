@@ -142,13 +142,13 @@ public class SessionManagedChatbotClientImpl implements SessionManagedChatbotCli
   }
 
   @Override
-  public Status getHealthStatus() {
-    return basicClient.getHealthStatus();
+  public Status getHealthStatus(RequestConfig config) {
+    return basicClient.getHealthStatus(config);
   }
 
   @Override
-  public SupportedVersions getSupportedVersions() {
-    return basicClient.getSupportedVersions();
+  public SupportedVersions getSupportedVersions(RequestConfig config) {
+    return basicClient.getSupportedVersions(config);
   }
 
   private void addSequenceIds(BotSendMessageRequest requestEnvelope) {
