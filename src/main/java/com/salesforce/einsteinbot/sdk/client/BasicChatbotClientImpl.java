@@ -12,7 +12,6 @@ import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildCha
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildInitMessageEnvelope;
 import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createErrorResponseProcessor;
 import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createFilter;
-import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createLoggingRequestProcessor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -187,7 +186,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       EndSessionReason endSessionReason, BotEndSessionRequest botRequest) {
 
     apiClient.setBearerToken(authMechanism.getToken());
-    CompletableFuture<BotResponse> futureResponse = botApi
+
+      return botApi
         .endSessionWithHttpInfo(sessionId,
             orgId,
             endSessionReason,
@@ -196,8 +196,6 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
         .toFuture()
         .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
             sessionId));
-
-    return futureResponse;
   }
 
   protected CompletableFuture<BotResponse> invokeEstablishChatSession(RequestConfig config,
@@ -205,13 +203,12 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       BotSendMessageRequest botRequest) {
 
     apiClient.setBearerToken(authMechanism.getToken());
-    CompletableFuture<BotResponse> futureResponse = botApi
+
+      return botApi
         .startSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
             initMessageEnvelope, botRequest.getRequestId().orElse(null))
         .toFuture()
         .thenApply(BotResponseBuilder::fromResponseEnvelopeResponseEntity);
-
-    return futureResponse;
   }
 
   protected CompletableFuture<BotResponse> invokeContinueChatSession(String orgId, String sessionId,
@@ -219,7 +216,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       BotSendMessageRequest botRequest) {
 
     apiClient.setBearerToken(authMechanism.getToken());
-    CompletableFuture<BotResponse> futureResponse = botApi
+
+      return botApi
         .continueSessionWithHttpInfo(sessionId,
             orgId,
             messageEnvelope,
@@ -228,8 +226,6 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
         .toFuture()
         .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
             sessionId));
-
-    return futureResponse;
   }
 
   public Status getHealthStatus() {
@@ -247,7 +243,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     try {
       SupportedVersions versions = versionsFuture.get();
-      if (versions.getVersions().size() == 0) {
+      if (versions.getVersions().isEmpty()) {
         throw new RuntimeException("Versions response was incorrect");
       }
       return versions;
@@ -260,7 +256,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     return webClientBuilder
         .codecs(createCodecsConfiguration(UtilFunctions.getMapper()))
-        .filter(createFilter(clientRequest -> createLoggingRequestProcessor(clientRequest),
+        .filter(createFilter(WebClientUtil::createLoggingRequestProcessor,
             clientResponse -> createErrorResponseProcessor(clientResponse, this::mapErrorResponse)))
         .build();
   }
