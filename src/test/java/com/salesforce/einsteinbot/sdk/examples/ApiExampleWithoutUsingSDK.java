@@ -65,9 +65,9 @@ public class ApiExampleWithoutUsingSDK {
 
   private static ObjectMapper mapper = new ObjectMapper();
 
-  private static final String START_SESSION_URI = "/v5.1.0/bots/{botId}/sessions";
-  private static final String SEND_MESSAGE_URI = "/v5.1.0/sessions/{sessionId}/messages";
-  private static final String END_SESSION_URI = "/v5.1.0/sessions/{sessionId}";
+  private static final String START_SESSION_URI = "/v5.2.0/bots/{botId}/sessions";
+  private static final String SEND_MESSAGE_URI = "/v5.2.0/sessions/{sessionId}/messages";
+  private static final String END_SESSION_URI = "/v5.2.0/sessions/{sessionId}";
   private final String OAUTH_URL = loginEndpoint + "/services/oauth2/token";
 
   private RestTemplate restTemplate = new RestTemplate();
