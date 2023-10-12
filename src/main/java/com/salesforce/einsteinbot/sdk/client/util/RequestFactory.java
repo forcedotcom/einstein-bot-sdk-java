@@ -16,7 +16,6 @@ import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
-import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import java.util.List;
@@ -47,11 +46,9 @@ public class RequestFactory {
         .externalSessionKey(externalSessionKey)
         .forceConfig(forceConfig)
         .message(message)
-        .variables(sendMessageRequest.getVariables())
-        .referrers(sendMessageRequest.getReferrers());
+        .variables(sendMessageRequest.getVariables());
 
     sendMessageRequest.getTz().ifPresent( v -> initMessageEnvelope.setTz(v));
-    sendMessageRequest.getResponseOptions().ifPresent( v -> initMessageEnvelope.setResponseOptions(v));
 
     return initMessageEnvelope;
 
@@ -91,10 +88,9 @@ public class RequestFactory {
         .sequenceId(System.currentTimeMillis());
   }
 
-  public static ChatMessageEnvelope buildChatMessageEnvelope(AnyRequestMessage message, Optional<ResponseOptions> responseOptions) {
+  public static ChatMessageEnvelope buildChatMessageEnvelope(AnyRequestMessage message) {
     ChatMessageEnvelope chatMessageEnvelope = new ChatMessageEnvelope()
         .message(message);
-    responseOptions.ifPresent( v -> chatMessageEnvelope.setResponseOptions(v));
     return chatMessageEnvelope;
   }
 

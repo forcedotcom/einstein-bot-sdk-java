@@ -17,9 +17,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.salesforce.einsteinbot.sdk.api.BotApi;
+import com.salesforce.einsteinbot.sdk.api.AssistantApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
-import com.salesforce.einsteinbot.sdk.api.VersionsApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotHttpHeaders;
@@ -42,16 +41,12 @@ import com.salesforce.einsteinbot.sdk.model.ForceConfig;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage.TypeEnum;
 import com.salesforce.einsteinbot.sdk.util.TestUtils;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,28 +105,16 @@ public class BasicChatbotClientTest {
   private BasicChatbotClient client;
 
   @Mock
-  private BotApi mockBotApi;
+  private AssistantApi mockAssistantApi;
 
   @Mock
   private HealthApi mockHealthApi;
 
   @Mock
-  private VersionsApi mockVersionsApi;
-
-  @Mock
   private AnyResponseMessage responseMessage;
 
   @Mock
-  private AnyVariable variable;
-
-  @Mock
-  private Object metrics;
-
-  @Mock
   private Status healthStatus;
-
-  @Mock
-  private SupportedVersions supportedVersions;
 
   @Mock
   private RequestEnvelopeInterceptor requestEnvelopeInterceptor;
@@ -151,19 +134,18 @@ public class BasicChatbotClientTest {
         .authMechanism(mockAuthMechanism)
         .build();
 
-    ((BasicChatbotClientImpl) client).setBotApi(mockBotApi);
+    ((BasicChatbotClientImpl) client).setAssistantApi(mockAssistantApi);
   }
 
   @Test
   public void testStartSession() {
-    stubVersionsResponse("5.2.0");
     ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(buildResponseEnvelope(), httpHeaders, httpStatus);
     BotResponse startSessionBotResponse = fromResponseEnvelopeResponseEntity(responseEntity);
 
     InitMessageEnvelope initMessageEnvelope = buildInitMessageEnvelope();
 
-    when(mockBotApi.startSessionWithHttpInfo(eq(botId), eq(orgId),
+    when(mockAssistantApi.startSessionWithHttpInfo(eq(botId), eq(orgId),
         eq(initMessageEnvelope), eq(requestId)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
@@ -176,21 +158,7 @@ public class BasicChatbotClientTest {
   }
 
   @Test
-  public void testStartSessionWithUnsupportedVersion() {
-    stubVersionsResponse("5.3.0");
-
-    Throwable exception = assertThrows(UnsupportedSDKException.class, () ->
-        client.startChatSession(config, new ExternalSessionId(externalSessionId),
-            buildBotSendMessageRequest(message, Optional.of(requestId))));
-
-    assertTrue(exception.getMessage()
-        .contains("SDK failed to start chat as the API version is not supported. Current API version in SDK is 5.2.0, latest supported API version is 5.3.0, please upgrade to the latest version."));
-  }
-
-  @Test
   public void testStartSessionWithInvalidFirstMessageType() {
-
-    stubVersionsResponse("5.2.0");
     AnyRequestMessage invalidFirstMessageType = buildChoiceMessage();
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () ->
@@ -204,13 +172,13 @@ public class BasicChatbotClientTest {
   @Test
   public void testSendMessage() {
 
-    ChatMessageResponseEnvelope sendMessageResponseEnvelope = buildChatMessageResponseEnvelope();
-    ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
+    ResponseEnvelope sendMessageResponseEnvelope = buildResponseEnvelope();
+    ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(sendMessageResponseEnvelope, httpHeaders, httpStatus);
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueSessionWithHttpInfo(eq(sessionId), eq(orgId),
+    when(mockAssistantApi.continueSessionWithHttpInfo(eq(sessionId), eq(orgId),
         eq(chatMessageEnvelope), eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
@@ -222,13 +190,13 @@ public class BasicChatbotClientTest {
   @Test
   public void testSendMessageWithRequestInterceptor() {
 
-    ChatMessageResponseEnvelope sendMessageResponseEnvelope = buildChatMessageResponseEnvelope();
-    ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
+    ResponseEnvelope sendMessageResponseEnvelope = buildResponseEnvelope();
+    ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(sendMessageResponseEnvelope, httpHeaders, httpStatus);
 
     ChatMessageEnvelope chatMessageEnvelope = buildChatMessageEnvelope();
 
-    when(mockBotApi.continueSessionWithHttpInfo(eq(sessionId), eq(orgId),
+    when(mockAssistantApi.continueSessionWithHttpInfo(eq(sessionId), eq(orgId),
         eq(chatMessageEnvelope), eq(requestId), eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
 
@@ -257,7 +225,7 @@ public class BasicChatbotClientTest {
     ResponseEntity<ChatMessageResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(endSessionResponseEnvelope, httpHeaders, httpStatus);
 
-    when(mockBotApi
+    when(mockAssistantApi
         .endSessionWithHttpInfo(eq(sessionId), eq(orgId), eq(endSessionReason), eq(requestId),
             eq(runtimeCRC)))
         .thenReturn(createMonoApiResponse(responseEntity));
@@ -289,8 +257,7 @@ public class BasicChatbotClientTest {
         )
         .externalSessionKey(externalSessionId)
         .message(initMessage)
-        .variables(Collections.emptyList())
-        .referrers(Collections.emptyList());
+        .variables(Collections.emptyList());
   }
 
   private BotEndSessionRequest buildEndSessionRequestEnvelope() {
@@ -304,9 +271,7 @@ public class BasicChatbotClientTest {
     return new ChatMessageResponseEnvelope()
         .addProcessedSequenceIdsItem(System.currentTimeMillis())
         .addMessagesItem(responseMessage)
-        .botVersion(botVersion)
-        .addVariablesItem(variable)
-        .metrics(metrics);
+        .botVersion(botVersion);
   }
 
   private ResponseEnvelope buildResponseEnvelope() {
@@ -314,9 +279,21 @@ public class BasicChatbotClientTest {
         .sessionId(sessionId)
         .botVersion(botVersion)
         .addProcessedSequenceIdsItem(System.currentTimeMillis())
-        .addMessagesItem(responseMessage)
-        .addVariablesItem(variable)
-        .metrics(metrics);
+        .addMessagesItem(responseMessage);
+  }
+
+  private void verifyResponse(ResponseEnvelope expectedResponseEnvelope,
+      BotResponse actualResponse) {
+    verifyResponseHeaders(actualResponse.getHttpHeaders());
+    assertEquals(httpStatus.value(), actualResponse.getHttpStatusCode());
+    ResponseEnvelope actualResponseEnvelope = actualResponse.getResponseEnvelope();
+    assertEquals(sessionId, actualResponseEnvelope.getSessionId());
+    assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(),
+        actualResponseEnvelope.getProcessedSequenceIds());
+    assertEquals(expectedResponseEnvelope.getMessages(), actualResponseEnvelope.getMessages());
+    assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(),
+        actualResponseEnvelope.getProcessedSequenceIds());
+    assertEquals(expectedResponseEnvelope.getBotVersion(), actualResponseEnvelope.getBotVersion());
   }
 
   private void verifyResponse(ChatMessageResponseEnvelope expectedResponseEnvelope,
@@ -331,8 +308,6 @@ public class BasicChatbotClientTest {
     assertEquals(expectedResponseEnvelope.getProcessedSequenceIds(),
         actualResponseEnvelope.getProcessedSequenceIds());
     assertEquals(expectedResponseEnvelope.getBotVersion(), actualResponseEnvelope.getBotVersion());
-    assertEquals(expectedResponseEnvelope.getVariables(), actualResponseEnvelope.getVariables());
-    assertEquals(expectedResponseEnvelope.getMetrics(), actualResponseEnvelope.getMetrics());
   }
 
   private void verifyResponseHeaders(BotHttpHeaders actualHttpHeaders) {
@@ -355,32 +330,5 @@ public class BasicChatbotClientTest {
 
     assertEquals(healthStatus, client.getHealthStatus());
 
-  }
-
-  @Test
-  public void testGetSupportedVersions() {
-    stubVersionsResponse("5.2.0");
-
-    BasicChatbotClient client = ChatbotClients.basic()
-        .basePath(basePath)
-        .authMechanism(mockAuthMechanism)
-        .build();
-
-    ((BasicChatbotClientImpl) client).setVersionsApi(mockVersionsApi);
-
-    assertEquals(1, client.getSupportedVersions().getVersions().size());
-  }
-
-  private void stubVersionsResponse(String versionNumber) {
-    List<SupportedVersionsVersions> versions = new ArrayList<>();
-    SupportedVersionsVersions version = new SupportedVersionsVersions();
-    version.setVersionNumber(versionNumber);
-    version.setStatus(StatusEnum.ACTIVE);
-    versions.add(version);
-    SupportedVersions mockVersions = new SupportedVersions();
-    mockVersions.setVersions(versions);
-    Mono<SupportedVersions> monoResponse = Mono.fromCallable(() -> mockVersions);
-    when(mockVersionsApi.getAPIVersions()).thenReturn(monoResponse);
-    ((BasicChatbotClientImpl) client).setVersionsApi(mockVersionsApi);
   }
 }

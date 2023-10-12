@@ -42,7 +42,6 @@ import com.salesforce.einsteinbot.sdk.exception.ChatbotResponseException;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
 import de.mkammerer.wiremock.WireMockExtension;
 import java.io.InputStream;
 import java.net.URI;
@@ -74,9 +73,9 @@ public class ClientApiWireMockTest {
   private static final String SESSION_ID = "chatbotSessionId";
   private static final String responseRequestId = "ResponseRequestId";
 
-  private static final String START_SESSION_URI = "/v5.2.0/bots/" + TEST_BOT_ID + "/sessions";
-  private static final String SEND_MESSAGE_URI = "/v5.2.0/sessions/" + SESSION_ID + "/messages";
-  private static final String END_SESSION_URI = "/v5.2.0/sessions/" + SESSION_ID;
+  private static final String START_SESSION_URI = "/assistants/" + TEST_BOT_ID + "/sessions";
+  private static final String SEND_MESSAGE_URI = "/sessions/" + SESSION_ID + "/messages";
+  private static final String END_SESSION_URI = "/sessions/" + SESSION_ID;
   private static final String STATUS_URI = "/status";
   private static final String VERSIONS_URI = "/versions";
 
@@ -148,7 +147,7 @@ public class ClientApiWireMockTest {
 
     BotResponse botResponse = client.endChatSession(requestConfig, runtimeSessionId,
         botEndSessionRequest);
-    verifyRequestUriAndHeadersForEndSession(END_SESSION_URI);
+    verifyRequestUriAndHeadersForEndSession();
     verifyResponse(responseBodyFile, botResponse);
   }
 
@@ -169,37 +168,7 @@ public class ClientApiWireMockTest {
     properties = new Properties();
     properties.load(is);
     String property = properties.getProperty("api-spec-yaml-file");
-    assertEquals("v5_2_0_api_specs.yml", property);
-  }
-
-  @Test
-  void testSupportedVersions() throws Exception {
-    String responseBodyFile = "versionsResponse.json";
-    stubVersionsResponse(responseBodyFile);
-    SupportedVersions versions = client.getSupportedVersions();
-
-    verifyResponseEnvelope(responseBodyFile, versions);
-  }
-
-  @Test
-  void testSupportedVersionsIncorrectResponse() throws Exception {
-    String responseBodyFile = "versionsErrorResponse.json";
-    stubVersionsResponse(responseBodyFile);
-    Throwable exception = assertThrows(RuntimeException.class,
-        () -> client.getSupportedVersions());
-
-    assertEquals("Versions response was incorrect", exception.getMessage());
-  }
-
-  @Test
-  void testSupportedVersionsErrorResponse() throws Exception {
-    String responseBodyFile = "errorResponse.json";
-    int errorStatusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-    stubVersionsResponse(responseBodyFile, errorStatusCode);
-    Throwable exception = assertThrows(RuntimeException.class,
-        () -> client.getSupportedVersions());
-
-    assertEquals("Error in getting versions response", exception.getMessage());
+    assertEquals("v5_3_0_api_specs.yml", property);
   }
 
   @Test
@@ -267,18 +236,16 @@ public class ClientApiWireMockTest {
     wireMock.verify(
         postRequestedFor(
             urlEqualTo(expectedUri))
-            .withHeader(AUTHORIZATION_HEADER_KEY, containing("Bearer"))
             .withHeader(USER_AGENT_HEADER_KEY, containing(EXPECTED_SDK_NAME + "/"))
             .withHeader(ORG_ID_HEADER_KEY, equalTo(TEST_ORG_ID))
             .withHeader(REQUEST_ID_HEADER_KEY, equalTo(TEST_REQUEST_ID))
     );
   }
 
-  private void verifyRequestUriAndHeadersForEndSession(String expectedUri) {
+  private void verifyRequestUriAndHeadersForEndSession() {
     wireMock.verify(
         deleteRequestedFor(
-            urlEqualTo(expectedUri))
-            .withHeader(AUTHORIZATION_HEADER_KEY, containing("Bearer"))
+            urlEqualTo(ClientApiWireMockTest.END_SESSION_URI))
             .withHeader(USER_AGENT_HEADER_KEY, containing(EXPECTED_SDK_NAME + "/"))
             .withHeader(ORG_ID_HEADER_KEY, equalTo(TEST_ORG_ID))
             .withHeader(REQUEST_ID_HEADER_KEY, equalTo(TEST_REQUEST_ID))

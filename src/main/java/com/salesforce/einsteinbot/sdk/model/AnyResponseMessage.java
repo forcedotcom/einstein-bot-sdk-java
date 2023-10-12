@@ -34,6 +34,10 @@ import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
  */
 
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = InquireResponseMessage.class, names = { "inquire" }),
+        @JsonSubTypes.Type(value = ErrorResponseMessage.class, names = { "errorResponse" }),
+        @JsonSubTypes.Type(value = ConfirmResponseMessage.class, names = { "confirm" }),
+        @JsonSubTypes.Type(value = InformResponseMessage.class, names = { "inform" }),
         @JsonSubTypes.Type(value = TextResponseMessage.class, names = { "text" }),
         @JsonSubTypes.Type(value = ChoicesResponseMessage.class, names = { "choices" }),
         @JsonSubTypes.Type(value = EscalateResponseMessage.class, names = { "escalate"  }),

@@ -8,6 +8,7 @@
 package com.salesforce.einsteinbot.sdk.client;
 
 import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromChatMessageResponseEnvelopeResponseEntity;
+import static com.salesforce.einsteinbot.sdk.client.model.BotResponseBuilder.fromResponseEnvelopeResponseEntity;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildChatMessageEnvelope;
 import static com.salesforce.einsteinbot.sdk.client.util.RequestFactory.buildInitMessageEnvelope;
 import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createErrorResponseProcessor;
@@ -15,9 +16,8 @@ import static com.salesforce.einsteinbot.sdk.util.WebClientUtil.createFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.salesforce.einsteinbot.sdk.api.BotApi;
+import com.salesforce.einsteinbot.sdk.api.AssistantApi;
 import com.salesforce.einsteinbot.sdk.api.HealthApi;
-import com.salesforce.einsteinbot.sdk.api.VersionsApi;
 import com.salesforce.einsteinbot.sdk.auth.AuthMechanism;
 import com.salesforce.einsteinbot.sdk.client.model.BotEndSessionRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotRequest;
@@ -34,16 +34,11 @@ import com.salesforce.einsteinbot.sdk.model.ChatMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
 import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
 import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
 import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -66,9 +61,8 @@ import reactor.core.publisher.Mono;
  */
 public class BasicChatbotClientImpl implements BasicChatbotClient {
 
-  protected BotApi botApi;
+  protected AssistantApi assistantApi;
   protected HealthApi healthApi;
-  protected VersionsApi versionsApi;
   protected ApiClient apiClient;
   protected AuthMechanism authMechanism;
   protected ReleaseInfo releaseInfo = ReleaseInfo.getInstance();
@@ -83,14 +77,13 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
             .createDefaultDateFormat());
     apiClient.setBasePath(basePath);
     apiClient.setUserAgent(releaseInfo.getAsUserAgent());
-    botApi = new BotApi(apiClient);
+    assistantApi = new AssistantApi(apiClient);
     healthApi = new HealthApi(apiClient);
-    versionsApi = new VersionsApi(apiClient);
   }
 
   @VisibleForTesting
-  void setBotApi(BotApi botApi) {
-    this.botApi = botApi;
+  void setAssistantApi(AssistantApi assistantApi) {
+    this.assistantApi = assistantApi;
   }
 
   @VisibleForTesting
@@ -98,19 +91,10 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     this.healthApi = healthApi;
   }
 
-  @VisibleForTesting
-  void setVersionsApi(VersionsApi versionsApi) {
-    this.versionsApi = versionsApi;
-  }
-
   @Override
   public BotResponse startChatSession(RequestConfig config,
       ExternalSessionId sessionId,
       BotSendMessageRequest botSendMessageRequest) {
-
-    if (!isApiVersionSupported()) {
-      throw new UnsupportedSDKException(getCurrentApiVersion(), getLatestApiVersion());
-    }
     InitMessageEnvelope initMessageEnvelope = createInitMessageEnvelope(config, sessionId,
         botSendMessageRequest);
 
@@ -155,8 +139,8 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   protected ChatMessageEnvelope createChatMessageEnvelope(BotSendMessageRequest botSendMessageRequest) {
     return buildChatMessageEnvelope(
-        botSendMessageRequest.getMessage(),
-        botSendMessageRequest.getResponseOptions());
+        botSendMessageRequest.getMessage()
+    );
   }
 
   @Override
@@ -187,7 +171,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     apiClient.setBearerToken(authMechanism.getToken());
 
-      return botApi
+      return assistantApi
         .endSessionWithHttpInfo(sessionId,
             orgId,
             endSessionReason,
@@ -204,7 +188,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     apiClient.setBearerToken(authMechanism.getToken());
 
-      return botApi
+      return assistantApi
         .startSessionWithHttpInfo(config.getBotId(), config.getOrgId(),
             initMessageEnvelope, botRequest.getRequestId().orElse(null))
         .toFuture()
@@ -217,15 +201,14 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
     apiClient.setBearerToken(authMechanism.getToken());
 
-      return botApi
+      return assistantApi
         .continueSessionWithHttpInfo(sessionId,
             orgId,
             messageEnvelope,
             botRequest.getRequestId().orElse(null),
             botRequest.getRuntimeCRC().orElse(null))
         .toFuture()
-        .thenApply(responseEntity -> fromChatMessageResponseEnvelopeResponseEntity(responseEntity,
-            sessionId));
+        .thenApply(BotResponseBuilder::fromResponseEnvelopeResponseEntity);
   }
 
   public Status getHealthStatus() {
@@ -235,20 +218,6 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
       return statusFuture.get();
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  public SupportedVersions getSupportedVersions() {
-    CompletableFuture<SupportedVersions> versionsFuture = versionsApi.getAPIVersions().toFuture();
-
-    try {
-      SupportedVersions versions = versionsFuture.get();
-      if (versions.getVersions().isEmpty()) {
-        throw new RuntimeException("Versions response was incorrect");
-      }
-      return versions;
-    } catch (InterruptedException | ExecutionException e) {
-      throw new RuntimeException("Error in getting versions response", e);
     }
   }
 
@@ -292,24 +261,5 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     // Replacement needed here as the same property is used to know the api version
     // (for example, 5.0.0), and for the api spec file naming convention (for example, v5_0_0).
     return properties.getProperty("api-spec-version").replace("_", ".");
-  }
-
-  private String getLatestApiVersion() {
-    SupportedVersions versions = getSupportedVersions();
-    Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
-        .stream()
-        .filter(v -> Objects.equals(v.getStatus(), StatusEnum.ACTIVE))
-        .findFirst();
-    return supportedVersions.isPresent() ? supportedVersions.get().getVersionNumber() : getCurrentApiVersion();
-  }
-
-  private boolean isApiVersionSupported() {
-    String currentApiVersion = getCurrentApiVersion();
-    SupportedVersions versions = getSupportedVersions();
-    Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
-        .stream()
-        .filter(v -> Objects.equals(v.getVersionNumber(), currentApiVersion))
-        .findFirst();
-    return supportedVersions.isPresent();
   }
 }

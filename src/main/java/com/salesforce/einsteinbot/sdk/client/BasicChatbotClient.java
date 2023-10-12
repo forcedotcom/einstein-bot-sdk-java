@@ -14,7 +14,6 @@ import com.salesforce.einsteinbot.sdk.client.model.ExternalSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.client.model.RuntimeSessionId;
 import com.salesforce.einsteinbot.sdk.model.Status;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
 import java.util.Objects;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -31,8 +30,6 @@ public interface BasicChatbotClient extends ChatbotClient<RuntimeSessionId> {
       BotSendMessageRequest requestEnvelope);
 
   Status getHealthStatus();
-
-  SupportedVersions getSupportedVersions();
 
   /**
    * BasicClientFluentBuilder provides Fluent API to create Basic Chatbot Client.

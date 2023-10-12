@@ -13,7 +13,6 @@ import com.salesforce.einsteinbot.sdk.client.model.BotSendMessageRequest;
 import com.salesforce.einsteinbot.sdk.client.model.BotSessionId;
 import com.salesforce.einsteinbot.sdk.client.model.RequestConfig;
 import com.salesforce.einsteinbot.sdk.model.Status;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
 
 /**
  * Base interface for Chatbot client. It provides methods to interact with Bot and get Health
@@ -30,6 +29,4 @@ public interface ChatbotClient<T extends BotSessionId> {
       BotEndSessionRequest requestEnvelope);
 
   Status getHealthStatus();
-
-  SupportedVersions getSupportedVersions();
 }

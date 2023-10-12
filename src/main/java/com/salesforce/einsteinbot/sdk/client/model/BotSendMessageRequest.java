@@ -10,8 +10,6 @@ package com.salesforce.einsteinbot.sdk.client.model;
 import com.salesforce.einsteinbot.sdk.client.util.RequestEnvelopeInterceptor;
 import com.salesforce.einsteinbot.sdk.model.AnyRequestMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
-import com.salesforce.einsteinbot.sdk.model.Referrer;
-import com.salesforce.einsteinbot.sdk.model.ResponseOptions;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,27 +27,20 @@ public class BotSendMessageRequest extends BotRequest {
   private List<AnyVariable> variables;
   private AnyRequestMessage message;
   private Optional<String> tz;
-  private Optional<ResponseOptions> responseOptions;
-  private List<Referrer> referrers;
 
   protected BotSendMessageRequest(Optional<String> requestId, Optional<String> runtimeCRC,
       RequestEnvelopeInterceptor requestEnvelopeInterceptor,
       List<AnyVariable> variables,
       AnyRequestMessage message,
-      Optional<String> tz,
-      Optional<ResponseOptions> responseOptions,
-      List<Referrer> referrers) {
+      Optional<String> tz
+  ) {
     super(requestId, runtimeCRC, requestEnvelopeInterceptor);
     Objects.requireNonNull(message);
     Objects.requireNonNull(variables);
     Objects.requireNonNull(tz);
-    Objects.requireNonNull(responseOptions);
-    Objects.requireNonNull(referrers);
     this.variables = variables;
     this.message = message;
     this.tz = tz;
-    this.referrers = referrers;
-    this.responseOptions = responseOptions;
   }
 
   public List<AnyVariable> getVariables() {
@@ -64,15 +55,6 @@ public class BotSendMessageRequest extends BotRequest {
     return tz;
   }
 
-  public Optional<ResponseOptions> getResponseOptions() {
-    return responseOptions;
-  }
-
-  public List<Referrer> getReferrers() {
-    return referrers;
-  }
-
-
   public SendMessageRequestCloneBuilder<BotSendMessageRequest> clone(){
     return new FluentBuilder(this);
   }
@@ -83,8 +65,6 @@ public class BotSendMessageRequest extends BotRequest {
         .add("variables=" + variables)
         .add("message=" + message)
         .add("tz=" + tz)
-        .add("responseOptions=" + responseOptions)
-        .add("referrers=" + referrers)
         .add(super.toString())
         .toString();
   }

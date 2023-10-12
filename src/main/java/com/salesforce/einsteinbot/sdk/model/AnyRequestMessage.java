@@ -36,7 +36,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
       @JsonSubTypes.Type(value = RedirectMessage.class, names = { "redirect" }),
       @JsonSubTypes.Type(value = TransferSucceededRequestMessage.class, names = { "transferSucceeded" }),
       @JsonSubTypes.Type(value = TransferFailedRequestMessage.class, names = { "transferFailed" }),
-      @JsonSubTypes.Type(value = EndSessionMessage.class, names = { "endSession" })
+      @JsonSubTypes.Type(value = EndSessionMessage.class, names = { "endSession" }),
+      @JsonSubTypes.Type(value = SetVariablesMessage.class, names = { "setVariables" }),
+      @JsonSubTypes.Type(value = CancelMessage.class, names = { "cancel" }),
+      @JsonSubTypes.Type(value = ReplyMessage.class, names = { "reply" })
 })
 public interface AnyRequestMessage {
 

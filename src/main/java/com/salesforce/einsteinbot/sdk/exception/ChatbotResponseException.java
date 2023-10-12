@@ -7,17 +7,17 @@
 
 package com.salesforce.einsteinbot.sdk.exception;
 
-import com.salesforce.einsteinbot.sdk.model.Error;
+import com.salesforce.einsteinbot.sdk.model.ErrorSchema;
 import java.util.StringJoiner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse.Headers;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 /**
- * ChatbotResponseException - Exception Class to wrap Runtime Error Response payload.
+ * ChatbotResponseException - Exception Class to wrap Runtime ErrorSchema Response payload.
  * <p>
  * The Spring Webclient uses Throwable to report all errors. So we extended WebClient's
- * ChatbotResponseException and wrap the Error Response Inside it.
+ * ChatbotResponseException and wrap the ErrorSchema Response Inside it.
  *
  * @author relango
  * @since 234
@@ -25,10 +25,10 @@ import org.springframework.web.reactive.function.client.WebClientException;
 public class ChatbotResponseException extends WebClientException {
 
   private final int status;
-  private final Error errorResponse;
+  private final ErrorSchema errorResponse;
   private final Headers headers;
 
-  public ChatbotResponseException(HttpStatus status, Error errorResponse,
+  public ChatbotResponseException(HttpStatus status, ErrorSchema errorResponse,
       Headers headers) {
     super(status.getReasonPhrase());
     this.status = status.value();
@@ -40,7 +40,7 @@ public class ChatbotResponseException extends WebClientException {
     return status;
   }
 
-  public Error getErrorResponse() {
+  public ErrorSchema getErrorResponse() {
     return errorResponse;
   }
 

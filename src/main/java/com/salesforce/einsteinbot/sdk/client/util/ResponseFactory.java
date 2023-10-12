@@ -24,8 +24,6 @@ public class ResponseFactory {
         .sessionId(sessionId)
         .processedSequenceIds(chatMessageResponseEnvelope.getProcessedSequenceIds())
         .messages(chatMessageResponseEnvelope.getMessages())
-        .botVersion(chatMessageResponseEnvelope.getBotVersion())
-        .variables(chatMessageResponseEnvelope.getVariables())
-        .metrics(chatMessageResponseEnvelope.getMetrics());
+        .botVersion(chatMessageResponseEnvelope.getBotVersion());
   }
 }

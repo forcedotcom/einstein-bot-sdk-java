@@ -75,7 +75,6 @@ public class ChatbotClientExamples {
     sendUsingBasicClient();
     sendUsingSessionManagedClient();
     getHealthStatus();
-    getSupportedVersions();
   }
 
   private void sendUsingBasicClient() throws Exception {
@@ -154,14 +153,5 @@ public class ChatbotClientExamples {
         .build();
 
     System.out.println("Health Status: " + convertObjectToJson(client.getHealthStatus()));
-  }
-
-  private void getSupportedVersions() throws Exception {
-    BasicChatbotClient client = ChatbotClients.basic()
-        .basePath(basePath)
-        .authMechanism(oAuth)
-        .build();
-
-    System.out.println("Supported Versions: " + convertObjectToJson(client.getSupportedVersions()));
   }
 }
