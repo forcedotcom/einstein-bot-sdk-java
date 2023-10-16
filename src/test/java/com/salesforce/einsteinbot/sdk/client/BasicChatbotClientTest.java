@@ -156,7 +156,7 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testStartSession() {
-    stubVersionsResponse("5.2.0");
+    stubVersionsResponse("5.3.0");
     ResponseEntity<ResponseEnvelope> responseEntity = TestUtils
         .createResponseEntity(buildResponseEnvelope(), httpHeaders, httpStatus);
     BotResponse startSessionBotResponse = fromResponseEnvelopeResponseEntity(responseEntity);
@@ -177,20 +177,20 @@ public class BasicChatbotClientTest {
 
   @Test
   public void testStartSessionWithUnsupportedVersion() {
-    stubVersionsResponse("5.3.0");
+    stubVersionsResponse("5.4.0");
 
     Throwable exception = assertThrows(UnsupportedSDKException.class, () ->
         client.startChatSession(config, new ExternalSessionId(externalSessionId),
             buildBotSendMessageRequest(message, Optional.of(requestId))));
 
     assertTrue(exception.getMessage()
-        .contains("SDK failed to start chat as the API version is not supported. Current API version in SDK is 5.2.0, latest supported API version is 5.3.0, please upgrade to the latest version."));
+        .contains("SDK failed to start chat as the API version is not supported. Current API version in SDK is 5.3.0, latest supported API version is 5.4.0, please upgrade to the latest version."));
   }
 
   @Test
   public void testStartSessionWithInvalidFirstMessageType() {
 
-    stubVersionsResponse("5.2.0");
+    stubVersionsResponse("5.3.0");
     AnyRequestMessage invalidFirstMessageType = buildChoiceMessage();
 
     Throwable exception = assertThrows(IllegalArgumentException.class, () ->
