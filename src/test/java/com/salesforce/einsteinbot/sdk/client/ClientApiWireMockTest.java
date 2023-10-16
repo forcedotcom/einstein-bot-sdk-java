@@ -74,9 +74,9 @@ public class ClientApiWireMockTest {
   private static final String SESSION_ID = "chatbotSessionId";
   private static final String responseRequestId = "ResponseRequestId";
 
-  private static final String START_SESSION_URI = "/v5.2.0/bots/" + TEST_BOT_ID + "/sessions";
-  private static final String SEND_MESSAGE_URI = "/v5.2.0/sessions/" + SESSION_ID + "/messages";
-  private static final String END_SESSION_URI = "/v5.2.0/sessions/" + SESSION_ID;
+  private static final String START_SESSION_URI = "/v5.3.0/bots/" + TEST_BOT_ID + "/sessions";
+  private static final String SEND_MESSAGE_URI = "/v5.3.0/sessions/" + SESSION_ID + "/messages";
+  private static final String END_SESSION_URI = "/v5.3.0/sessions/" + SESSION_ID;
   private static final String STATUS_URI = "/status";
   private static final String VERSIONS_URI = "/versions";
 
@@ -169,7 +169,7 @@ public class ClientApiWireMockTest {
     properties = new Properties();
     properties.load(is);
     String property = properties.getProperty("api-spec-yaml-file");
-    assertEquals("v5_2_0_api_specs.yml", property);
+    assertEquals("v5_3_0_api_specs.yml", property);
   }
 
   @Test

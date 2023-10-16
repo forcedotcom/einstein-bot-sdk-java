@@ -59,13 +59,13 @@
   ],
   "_links" : {
     "self" : {
-      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.2.0/bots/0XxSB00000006rp0AA/sessions"
+      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.3.0/bots/0XxSB00000006rp0AA/sessions"
     },
     "messages" : {
-      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.2.0/sessions/85bce2f1-4596-4b96-9cd5-4b4efedb8c0a/messages"
+      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.3.0/sessions/85bce2f1-4596-4b96-9cd5-4b4efedb8c0a/messages"
     },
     "session" : {
-      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.2.0/sessions/85bce2f1-4596-4b96-9cd5-4b4efedb8c0a"
+      "href" : "https://runtime-api-na-west.stg.chatbots.sfdc.sh/v5.3.0/sessions/85bce2f1-4596-4b96-9cd5-4b4efedb8c0a"
     }
   }
 }
