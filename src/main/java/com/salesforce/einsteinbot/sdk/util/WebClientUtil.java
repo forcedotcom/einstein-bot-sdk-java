@@ -11,7 +11,7 @@ import static com.salesforce.einsteinbot.sdk.util.UtilFunctions.maskAuthorizatio
 
 import java.util.function.Function;
 
-import com.salesforce.einsteinbot.sdk.model.Error;
+import com.salesforce.einsteinbot.sdk.model.ErrorSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -58,11 +58,11 @@ public class WebClientUtil {
         );
   }
 
-  public static BodyExtractor<Mono<Error>, ReactiveHttpInputMessage> errorBodyExtractor() {
-    BodyExtractor<Mono<Error>, ReactiveHttpInputMessage> extractor = (inputMessage, context) -> {
+  public static BodyExtractor<Mono<ErrorSchema>, ReactiveHttpInputMessage> errorBodyExtractor() {
+    BodyExtractor<Mono<ErrorSchema>, ReactiveHttpInputMessage> extractor = (inputMessage, context) -> {
       String contentType = inputMessage.getHeaders().getContentType().toString();
       if (contentType.contains("application/json")) {
-        return BodyExtractors.toMono(Error.class)
+        return BodyExtractors.toMono(ErrorSchema.class)
                 .extract(inputMessage, context);
       } else {
         return buildErrorFromClientResponseBodyString(inputMessage, context);
@@ -71,11 +71,11 @@ public class WebClientUtil {
     return extractor;
   }
 
-  private static Mono<Error> buildErrorFromClientResponseBodyString(ReactiveHttpInputMessage clientResponse, BodyExtractor.Context context) {
+  private static Mono<ErrorSchema> buildErrorFromClientResponseBodyString(ReactiveHttpInputMessage clientResponse, BodyExtractor.Context context) {
     ClientHttpResponse response = (ClientHttpResponse) clientResponse;
     Mono<String> bodyString = BodyExtractors.toMono(String.class).
             extract(clientResponse, context);
-    return bodyString.map(errorMessage -> new Error()
+    return bodyString.map(errorMessage -> new ErrorSchema()
             .status(response.getRawStatusCode())
             .message("This Response content type is not 'application/json', " +
                     "See the 'error' field for actual error returned by the server.")

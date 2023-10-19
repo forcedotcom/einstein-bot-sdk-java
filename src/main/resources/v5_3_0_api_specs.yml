@@ -1218,7 +1218,7 @@ components:
     # Do not show examples here as this Error schema is used
     # generically for all error codes.
     # The examples specific to the error code are shown elsewhere.
-    Error:
+    ErrorSchema:
       type: "object"
       properties:
         status:
@@ -1276,7 +1276,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
       headers:
         "X-Request-ID":
           description: "Request ID. A UUID in string format to help with request tracking."
@@ -1328,7 +1328,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 400
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1349,7 +1349,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 401
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1369,7 +1369,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 403
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1390,7 +1390,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 404
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1411,7 +1411,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 410
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1432,7 +1432,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 422
             path: "v4.0.0/messages"
@@ -1453,7 +1453,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 423
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1474,7 +1474,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 429
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
@@ -1495,7 +1495,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/ErrorSchema"
           example:
             status: 503
             path: "/v1/00DRM00000067To/chatbots/HelloWorldBot/messages"
