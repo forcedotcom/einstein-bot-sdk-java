@@ -49,7 +49,7 @@ jobs:
         id: release
         run: >
           mvn -V -gs $GITHUB_WORKSPACE/generated-settings/settings.xml -B -P sign-artifacts,releases -e release:clean release:prepare &&
-          echo "::set-output name=RELEASED_VERSION::$(grep scm.tag= release.properties | cut -d'=' -f2 | cut -c2-)"
+          echo "RELEASED_VERSION=$(grep scm.tag= release.properties | cut -d'=' -f2 | cut -c2-)" >> "$GITHUB_OUTPUT"
         env:
           MAVEN_CENTRAL_USER: ${{ secrets.MAVEN_CENTRAL_USER }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
