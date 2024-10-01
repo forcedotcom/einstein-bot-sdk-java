@@ -64,7 +64,6 @@
             <roles>
                 <role>Developer</role>
             </roles>
-            <email>osscore@salesforce.com</email>
             <organization>Salesforce</organization>
         </developer>
         <developer>
@@ -72,7 +71,6 @@
             <roles>
                 <role>Developer</role>
             </roles>
-            <email>einstein-bots-platform@salesforce.com</email>
             <organization>Salesforce</organization>
         </developer>
     </developers>
