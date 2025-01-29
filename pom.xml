@@ -21,24 +21,24 @@
 
     <properties>
         <base-sdk-package>com.salesforce.einsteinbot.sdk</base-sdk-package>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
         <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <jackson-databind-nullable-version>0.2.1</jackson-databind-nullable-version>
-        <swagger-core-version>1.6.2</swagger-core-version>
-        <jackson-version>2.13.4.2</jackson-version>
-        <jackson-annotations-version>2.13.4</jackson-annotations-version>
+        <swagger-core-version>2.1.7</swagger-core-version>
+        <jackson-version>2.14.0</jackson-version>
+        <jackson-annotations-version>2.14.0</jackson-annotations-version>
         <javax-annotation-version>1.3.2</javax-annotation-version>
-        <spring-boot-starter-webflux-version>2.5.12</spring-boot-starter-webflux-version>
+        <spring-boot-starter-webflux-version>3.4.1</spring-boot-starter-webflux-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <einstein-bot-openapi-codegen-version>5.4.4</einstein-bot-openapi-codegen-version>
+        <einstein-bot-openapi-codegen-version>5.4.5-SNAPSHOT</einstein-bot-openapi-codegen-version>
         <junit-jupiter-version>5.5.2</junit-jupiter-version>
-        <spring-reactor-test-version>3.2.3.RELEASE</spring-reactor-test-version>
-        <spring-reactor-core-version>3.4.5</spring-reactor-core-version>
-        <openapi-generator-version>5.4.0</openapi-generator-version>
+        <spring-reactor-test-version>3.7.2</spring-reactor-test-version>
+        <spring-reactor-core-version>3.7.2</spring-reactor-core-version>
+        <openapi-generator-version>7.11.0</openapi-generator-version>
 
         <!-- Runtime follows a fixed naming convention for all API versions
         and this property decides on which API version will be used in the SDK. -->
@@ -164,7 +164,6 @@
                             <inputSpec>${project.basedir}/src/main/resources/${api-spec-yaml-file}</inputSpec>
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
-                                <java8>true</java8>
                                 <dateLibrary>java8</dateLibrary>
                             </configOptions>
                             <modelPackage>${base-sdk-package}.model</modelPackage>
@@ -217,6 +216,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <parameters>true</parameters>
+                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -282,7 +284,6 @@
             </plugin>
         </plugins>
     </build>
-
     <dependencies>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -291,8 +292,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
             <version>${swagger-core-version}</version>
         </dependency>
         <dependency>

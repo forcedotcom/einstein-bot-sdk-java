@@ -34,6 +34,7 @@ import java.util.Optional;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -90,7 +91,7 @@ public class JwtBearerOAuth implements AuthMechanism {
     return clientResponse
         .bodyToMono(String.class)
         .flatMap(errorDetails -> Mono
-            .error(new OAuthResponseException(clientResponse.statusCode(), errorDetails,
+            .error(new OAuthResponseException(HttpStatus.resolve(clientResponse.statusCode().value()), errorDetails,
                 clientResponse.headers())));
   }
 
