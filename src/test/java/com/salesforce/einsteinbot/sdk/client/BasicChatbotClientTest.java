@@ -141,7 +141,7 @@ public class BasicChatbotClientTest {
 
   @Mock
   private AuthMechanism mockAuthMechanism;
-  private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
+  private final EndSessionReason endSessionReason = EndSessionReason.USER_REQUEST;
 
   @BeforeEach
   public void setup() {
@@ -302,10 +302,10 @@ public class BasicChatbotClientTest {
 
   private ChatMessageResponseEnvelope buildChatMessageResponseEnvelope() {
     return new ChatMessageResponseEnvelope()
-        .addProcessedSequenceIdsItem(System.currentTimeMillis())
-        .addMessagesItem(responseMessage)
+        .addprocessedSequenceIdsItem(System.currentTimeMillis())
+        .addmessagesItem(responseMessage)
         .botVersion(botVersion)
-        .addVariablesItem(variable)
+        .addvariablesItem(variable)
         .metrics(metrics);
   }
 
@@ -313,9 +313,9 @@ public class BasicChatbotClientTest {
     return new ResponseEnvelope()
         .sessionId(sessionId)
         .botVersion(botVersion)
-        .addProcessedSequenceIdsItem(System.currentTimeMillis())
-        .addMessagesItem(responseMessage)
-        .addVariablesItem(variable)
+        .addprocessedSequenceIdsItem(System.currentTimeMillis())
+        .addmessagesItem(responseMessage)
+        .addvariablesItem(variable)
         .metrics(metrics);
   }
 

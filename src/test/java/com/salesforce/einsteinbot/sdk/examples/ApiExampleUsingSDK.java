@@ -31,10 +31,10 @@ import com.salesforce.einsteinbot.sdk.model.AnyResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.AnyVariable;
 import com.salesforce.einsteinbot.sdk.model.ChoiceMessage;
 import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessage;
-import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoices;
+import com.salesforce.einsteinbot.sdk.model.ChoicesResponseMessageChoicesInner;
 import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessage;
-import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessageTargets;
+import com.salesforce.einsteinbot.sdk.model.EscalateResponseMessageTargetsInner;
 import com.salesforce.einsteinbot.sdk.model.SessionEndedResponseMessage;
 import com.salesforce.einsteinbot.sdk.model.SessionEndedResponseMessage.ReasonEnum;
 import com.salesforce.einsteinbot.sdk.model.Status;
@@ -175,7 +175,7 @@ public class ApiExampleUsingSDK {
       throws JsonProcessingException {
     // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
-        .withEndSession(EndSessionReason.USERREQUEST).build();
+        .withEndSession(EndSessionReason.USER_REQUEST).build();
 
     // Send Request to End Chat session
     BotResponse endSessionResponse = client
@@ -190,7 +190,7 @@ public class ApiExampleUsingSDK {
       String sessionId) throws JsonProcessingException {
     // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
-        .withEndSession(EndSessionReason.USERREQUEST).build();
+        .withEndSession(EndSessionReason.USER_REQUEST).build();
 
     // Send Request to End Chat session with invalid session Id and handle error.
     RuntimeSessionId invalidSessionId = new RuntimeSessionId("invalid session id");
@@ -212,7 +212,7 @@ public class ApiExampleUsingSDK {
       throws JsonProcessingException {
     // Build Bot End Session Message Request
     BotEndSessionRequest botEndSessionRequest = BotRequest
-        .withEndSession(EndSessionReason.USERREQUEST).build();
+        .withEndSession(EndSessionReason.USER_REQUEST).build();
 
     // Send Request to End Chat session
     BotResponse endSessionResponse = client
@@ -415,16 +415,16 @@ public class ApiExampleUsingSDK {
         sb.append(((TextResponseMessage) message).getText())
             .append("\n");
       } else if (message instanceof ChoicesResponseMessage) {
-        List<ChoicesResponseMessageChoices> choices = ((ChoicesResponseMessage) message)
+        List<ChoicesResponseMessageChoicesInner> choices = ((ChoicesResponseMessage) message)
             .getChoices();
-        for (ChoicesResponseMessageChoices choice : choices) {
+        for (ChoicesResponseMessageChoicesInner choice : choices) {
           sb.append(choice.getAlias())
               .append(".")
               .append(choice.getLabel())
               .append("\n");
         }
       } else if (message instanceof EscalateResponseMessage) {
-        List<EscalateResponseMessageTargets> targets = ((EscalateResponseMessage) message)
+        List<EscalateResponseMessageTargetsInner> targets = ((EscalateResponseMessage) message)
             .getTargets();
         //Implement your code to actually do the transfer.
         sb.append("Transferring you to Agent in Target : " + targets);
@@ -464,14 +464,14 @@ public class ApiExampleUsingSDK {
 
   public static AnyRequestMessage buildTransferSuccessMessage() {
     return new TransferSucceededRequestMessage()
-        .type(TransferSucceededRequestMessage.TypeEnum.TRANSFERSUCCEEDED)
+        .type(TransferSucceededRequestMessage.TypeEnum.TRANSFER_SUCCEEDED)
         .sequenceId(System.currentTimeMillis());
   }
 
   public static AnyRequestMessage buildTransferFailedMessage() {
     return new TransferFailedRequestMessage()
-        .type(TransferFailedRequestMessage.TypeEnum.TRANSFERFAILED)
-        .reason(TransferFailedRequestMessage.ReasonEnum.NOAGENTAVAILABLE)
+        .type(TransferFailedRequestMessage.TypeEnum.TRANSFER_FAILED)
+        .reason(TransferFailedRequestMessage.ReasonEnum.NO_AGENT_AVAILABLE)
         .sequenceId(System.currentTimeMillis());
   }
 }

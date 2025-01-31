@@ -101,7 +101,7 @@ public class ChatbotClientExamples {
     System.out.println("Text Message Response :" + convertObjectToJson(textMsgResponse));
 
     BotEndSessionRequest botEndSessionRequest = BotRequest
-        .withEndSession(EndSessionReason.USERREQUEST).build();
+        .withEndSession(EndSessionReason.USER_REQUEST).build();
 
     BotResponse endSessionResponse = client
         .endChatSession(config, new RuntimeSessionId(sessionId), botEndSessionRequest);
@@ -139,7 +139,7 @@ public class ChatbotClientExamples {
     System.out.println("Second Message Response: " + convertObjectToJson(secondMsgResp));
 
     BotEndSessionRequest botEndSessionRequest = BotRequest
-        .withEndSession(EndSessionReason.USERREQUEST).build();
+        .withEndSession(EndSessionReason.USER_REQUEST).build();
 
     BotResponse endSessionResponse = client
         .endChatSession(config, externalSessionKey, botEndSessionRequest);

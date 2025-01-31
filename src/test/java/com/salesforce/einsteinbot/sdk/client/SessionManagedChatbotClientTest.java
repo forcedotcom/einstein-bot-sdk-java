@@ -87,7 +87,7 @@ public class SessionManagedChatbotClientTest {
   private final RuntimeSessionId runtimeSessionId = new RuntimeSessionId(chatbotSessionId);
   private final ExternalSessionId externalSessionId = new ExternalSessionId(externalSessionKey);
   private final String forceConfigEndpoint = "testForceConfig";
-  private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
+  private final EndSessionReason endSessionReason = EndSessionReason.USER_REQUEST;
   private final HttpStatus httpStatus = HttpStatus.OK;
   private final BotHttpHeaders httpHeaders = BotHttpHeaders.with().build();
 

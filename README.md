@@ -134,7 +134,7 @@ private void sendUsingBasicClient(){
 
     //End a chat session
     BotEndSessionRequest botEndSessionRequest = BotRequest
-      .withEndSession(EndSessionReason.USERREQUEST)
+      .withEndSession(EndSessionReason.USER_REQUEST)
       .build();
 
     BotResponse endSessionResponse = client
@@ -169,7 +169,7 @@ private void sendUsingSessionManagedClient() {
 
     //End a chat session
     BotEndSessionRequest botEndSessionRequest = BotRequest
-      .withEndSession(EndSessionReason.USERREQUEST)
+      .withEndSession(EndSessionReason.USER_REQUEST)
       .build();
 
     BotResponse endSessionResponse = client
