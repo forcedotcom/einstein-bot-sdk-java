@@ -11,7 +11,7 @@
 
     <groupId>com.salesforce.einsteinbot</groupId>
     <artifactId>einstein-bot-sdk-java</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>einstein-bot-sdk-java</name>
     <description>Java SDK to interact with Einstein Bots Runtime.
