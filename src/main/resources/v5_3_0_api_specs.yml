@@ -762,7 +762,7 @@ components:
           - $ref: "#/components/schemas/TextVariable"
           - $ref: "#/components/schemas/ObjectVariable"
           - $ref: "#/components/schemas/RefVariable"
-          - $ref: "#/components/schemas/ListVariable"
+          - $ref: "#/components/schemas/ListVariable" 
       nullable: true
 
     Referrer:

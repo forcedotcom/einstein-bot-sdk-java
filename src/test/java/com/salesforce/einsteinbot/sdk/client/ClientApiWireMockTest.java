@@ -86,7 +86,7 @@ public class ClientApiWireMockTest {
 
   private final RuntimeSessionId runtimeSessionId = new RuntimeSessionId(SESSION_ID);
   private final ExternalSessionId externalSessionId = new ExternalSessionId(EXTERNAL_SESSION_KEY);
-  private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
+  private final EndSessionReason endSessionReason = EndSessionReason.USER_REQUEST;
 
   private static final RequestConfig requestConfig = RequestConfig
       .with()

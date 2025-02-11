@@ -35,8 +35,8 @@ import com.salesforce.einsteinbot.sdk.model.EndSessionReason;
 import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersionsInner;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersionsInner.StatusEnum;
 import com.salesforce.einsteinbot.sdk.util.LoggingJsonEncoder;
 import com.salesforce.einsteinbot.sdk.util.ReleaseInfo;
 import com.salesforce.einsteinbot.sdk.util.UtilFunctions;
@@ -50,6 +50,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import com.salesforce.einsteinbot.sdk.util.WebClientUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -274,7 +275,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
     return clientResponse
             .body(WebClientUtil.errorBodyExtractor())
             .flatMap(errorDetails -> Mono
-            .error(new ChatbotResponseException(clientResponse.statusCode(), errorDetails,
+            .error(new ChatbotResponseException(HttpStatus.resolve(clientResponse.statusCode().value()), errorDetails,
                 clientResponse.headers())));
   }
 
@@ -296,7 +297,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
 
   private String getLatestApiVersion() {
     SupportedVersions versions = getSupportedVersions();
-    Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
+    Optional<SupportedVersionsVersionsInner> supportedVersions = versions.getVersions()
         .stream()
         .filter(v -> Objects.equals(v.getStatus(), StatusEnum.ACTIVE))
         .findFirst();
@@ -306,7 +307,7 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   private boolean isApiVersionSupported() {
     String currentApiVersion = getCurrentApiVersion();
     SupportedVersions versions = getSupportedVersions();
-    Optional<SupportedVersionsVersions> supportedVersions = versions.getVersions()
+    Optional<SupportedVersionsVersionsInner> supportedVersions = versions.getVersions()
         .stream()
         .filter(v -> Objects.equals(v.getVersionNumber(), currentApiVersion))
         .findFirst();

@@ -43,8 +43,8 @@ import com.salesforce.einsteinbot.sdk.model.InitMessageEnvelope;
 import com.salesforce.einsteinbot.sdk.model.ResponseEnvelope;
 import com.salesforce.einsteinbot.sdk.model.Status;
 import com.salesforce.einsteinbot.sdk.model.SupportedVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions;
-import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersions.StatusEnum;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersionsInner;
+import com.salesforce.einsteinbot.sdk.model.SupportedVersionsVersionsInner.StatusEnum;
 import com.salesforce.einsteinbot.sdk.model.TextInitMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage;
 import com.salesforce.einsteinbot.sdk.model.TextMessage.TypeEnum;
@@ -141,7 +141,7 @@ public class BasicChatbotClientTest {
 
   @Mock
   private AuthMechanism mockAuthMechanism;
-  private final EndSessionReason endSessionReason = EndSessionReason.USERREQUEST;
+  private final EndSessionReason endSessionReason = EndSessionReason.USER_REQUEST;
 
   @BeforeEach
   public void setup() {
@@ -302,10 +302,10 @@ public class BasicChatbotClientTest {
 
   private ChatMessageResponseEnvelope buildChatMessageResponseEnvelope() {
     return new ChatMessageResponseEnvelope()
-        .addProcessedSequenceIdsItem(System.currentTimeMillis())
-        .addMessagesItem(responseMessage)
+        .addprocessedSequenceIdsItem(System.currentTimeMillis())
+        .addmessagesItem(responseMessage)
         .botVersion(botVersion)
-        .addVariablesItem(variable)
+        .addvariablesItem(variable)
         .metrics(metrics);
   }
 
@@ -313,9 +313,9 @@ public class BasicChatbotClientTest {
     return new ResponseEnvelope()
         .sessionId(sessionId)
         .botVersion(botVersion)
-        .addProcessedSequenceIdsItem(System.currentTimeMillis())
-        .addMessagesItem(responseMessage)
-        .addVariablesItem(variable)
+        .addprocessedSequenceIdsItem(System.currentTimeMillis())
+        .addmessagesItem(responseMessage)
+        .addvariablesItem(variable)
         .metrics(metrics);
   }
 
@@ -372,8 +372,8 @@ public class BasicChatbotClientTest {
   }
 
   private void stubVersionsResponse(String versionNumber) {
-    List<SupportedVersionsVersions> versions = new ArrayList<>();
-    SupportedVersionsVersions version = new SupportedVersionsVersions();
+    List<SupportedVersionsVersionsInner> versions = new ArrayList<>();
+    SupportedVersionsVersionsInner version = new SupportedVersionsVersionsInner();
     version.setVersionNumber(versionNumber);
     version.setStatus(StatusEnum.ACTIVE);
     versions.add(version);
