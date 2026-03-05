@@ -58,25 +58,6 @@
         <url>http://www.salesforce.com</url>
     </organization>
 
-    <developers>
-        <developer>
-            <name>Salesforce</name>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <email>osscore@salesforce.com</email>
-            <organization>Salesforce</organization>
-        </developer>
-        <developer>
-            <name>Rajasekar Elango</name>
-            <roles>
-                <role>Developer</role>
-            </roles>
-            <email>einstein-bots-platform@salesforce.com</email>
-            <organization>Salesforce</organization>
-        </developer>
-    </developers>
-
     <scm>
         <connection>scm:git:https://github.com/forcedotcom/einstein-bot-sdk-java.git</connection>
         <developerConnection>scm:git:https://github.com/forcedotcom/einstein-bot-sdk-java.git</developerConnection>
