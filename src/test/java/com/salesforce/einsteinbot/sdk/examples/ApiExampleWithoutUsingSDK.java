@@ -214,21 +214,21 @@ public class ApiExampleWithoutUsingSDK {
 
   private String createStartSessionUrl() {
     return UriComponentsBuilder
-        .fromHttpUrl(RUNTIME_URL)
+        .fromUriString(RUNTIME_URL)
         .path(START_SESSION_URI)
         .buildAndExpand(botId).toString();
   }
 
   private String createContinueSessionUrl(String sessionId) {
     return UriComponentsBuilder
-        .fromHttpUrl(RUNTIME_URL)
+        .fromUriString(RUNTIME_URL)
         .path(SEND_MESSAGE_URI)
         .buildAndExpand(sessionId).toString();
   }
 
   private String createEndSessionUrl(String sessionId) {
     return UriComponentsBuilder
-        .fromHttpUrl(RUNTIME_URL)
+        .fromUriString(RUNTIME_URL)
         .path(END_SESSION_URI)
         .buildAndExpand(sessionId).toString();
   }

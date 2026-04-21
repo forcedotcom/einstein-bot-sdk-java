@@ -11,7 +11,7 @@
 
     <groupId>com.salesforce.einsteinbot</groupId>
     <artifactId>einstein-bot-sdk-java</artifactId>
-    <version>3.0.4-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>einstein-bot-sdk-java</name>
     <description>Java SDK to interact with Einstein Bots Runtime.
@@ -27,17 +27,17 @@
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
         <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <jackson-databind-nullable-version>0.2.1</jackson-databind-nullable-version>
-        <swagger-core-version>2.1.7</swagger-core-version>
-        <jackson-version>2.15.0</jackson-version>
-        <jackson-annotations-version>2.15.0</jackson-annotations-version>
-        <javax-annotation-version>1.3.2</javax-annotation-version>
-        <spring-boot-starter-webflux-version>3.3.8</spring-boot-starter-webflux-version>
+        <jackson-databind-nullable-version>0.2.10</jackson-databind-nullable-version>
+        <swagger-core-version>2.2.25</swagger-core-version>
+        <jackson-version>2.21.0</jackson-version>
+        <jackson-annotations-version>2.21</jackson-annotations-version>
+        <jakarta-annotation-version>3.0.0</jakarta-annotation-version>
+        <spring-boot-starter-webflux-version>4.0.5</spring-boot-starter-webflux-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <einstein-bot-openapi-codegen-version>7.10.4</einstein-bot-openapi-codegen-version>
-        <junit-jupiter-version>5.5.2</junit-jupiter-version>
-        <spring-reactor-test-version>3.7.2</spring-reactor-test-version>
-        <spring-reactor-core-version>3.7.2</spring-reactor-core-version>
+        <junit-jupiter-version>5.11.4</junit-jupiter-version>
+        <spring-reactor-test-version>3.7.6</spring-reactor-test-version>
+        <spring-reactor-core-version>3.7.6</spring-reactor-core-version>
         <openapi-generator-version>7.10.0</openapi-generator-version>
 
         <!-- Runtime follows a fixed naming convention for all API versions
@@ -83,6 +83,19 @@
         <url>https://github.com/forcedotcom/einstein-bot-sdk-java</url>
         <tag>HEAD</tag>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>maven-central-direct</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <distributionManagement>
         <repository>
@@ -147,6 +160,51 @@
                             <replaceValue>additionalProperties: false</replaceValue>
                             <recursive>false</recursive>
                             <fileMask>${api-spec-yaml-file}</fileMask>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>fix-generated-headers-entrySet</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <baseDir>target/generated-sources/openapi</baseDir>
+                            <findRegex>: headers\.entrySet\(\)</findRegex>
+                            <replaceValue>: headers.headerSet()</replaceValue>
+                            <recursive>true</recursive>
+                            <fileMask>ApiClient.java</fileMask>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>fix-generated-headers-containsKey</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <baseDir>target/generated-sources/openapi</baseDir>
+                            <findRegex>defaultHeaders\.containsKey\(</findRegex>
+                            <replaceValue>defaultHeaders.containsHeader(</replaceValue>
+                            <recursive>true</recursive>
+                            <fileMask>ApiClient.java</fileMask>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>fix-generated-fromHttpUrl</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>find-and-replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacementType>file-contents</replacementType>
+                            <baseDir>target/generated-sources/openapi</baseDir>
+                            <findRegex>\.fromHttpUrl\(</findRegex>
+                            <replaceValue>.fromUriString(</replaceValue>
+                            <recursive>true</recursive>
+                            <fileMask>ApiClient.java</fileMask>
                         </configuration>
                     </execution>
                 </executions>
@@ -288,9 +346,9 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>${javax-annotation-version}</version>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta-annotation-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -306,6 +364,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
             <version>${jackson-version}</version>
         </dependency>
         <dependency>
@@ -339,13 +402,13 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-handler</artifactId>
-            <version>4.1.115.Final</version>
+            <version>4.2.10.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec</artifactId>
-            <version>4.1.115.Final</version>
+            <version>4.2.10.Final</version>
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
@@ -356,7 +419,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.9.0</version>
+            <version>5.14.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -78,7 +78,7 @@ public class WebClientUtil {
      Mono<String> bodyString = BodyExtractors.toMono(String.class).
             extract(clientResponse, context);
      return bodyString.map(errorMessage -> new Error()
-            .status(response.getRawStatusCode())
+            .status(response.getStatusCode().value())
             .message("This Response content type is not 'application/json', " +
                     "See the 'error' field for actual error returned by the server.")
             .error(errorMessage));

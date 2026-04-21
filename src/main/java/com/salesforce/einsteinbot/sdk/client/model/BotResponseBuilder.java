@@ -26,7 +26,7 @@ public class BotResponseBuilder {
       ResponseEntity<ResponseEnvelope> responseEntity) {
     responseEntity.getHeaders();
     return BotResponse.with(responseEntity.getBody(),
-        responseEntity.getStatusCodeValue(),
+        responseEntity.getStatusCode().value(),
         fromSpringHttpHeaders(responseEntity.getHeaders()));
   }
 
@@ -34,7 +34,7 @@ public class BotResponseBuilder {
       ResponseEntity<ChatMessageResponseEnvelope> responseEntity, String sessionId) {
     ResponseEnvelope responseEnvelope = buildResponseEnvelope(sessionId, responseEntity.getBody());
     return BotResponse.with(responseEnvelope,
-        responseEntity.getStatusCodeValue(),
+        responseEntity.getStatusCode().value(),
         fromSpringHttpHeaders(responseEntity.getHeaders()));
   }
 }
