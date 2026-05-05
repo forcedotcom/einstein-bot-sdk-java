@@ -4,9 +4,8 @@ Also refer to [Einstein Bot SDK public documentation](https://developer.salesfor
 
 Java SDK to interact with Einstein Bots Runtime. This SDK is a wrapper around the [Einstein Bots Runtime API](https://developer.salesforce.com/docs/service/einstein-bot-api/guide/get-started-overview.html) that provides a few added features out of the box:
 
-* Auth support
-* Session management
-
+- Auth support
+- Session management
 
 ## Auth Support
 
@@ -38,6 +37,7 @@ the external session ID could be a combination of Slack app ID, Slack user ID an
 ```
 
 ### 1. Create Redis Cache
+
 ```java
 
     Cache redis = new RedisCache(); // uses default values for ttl (3 days) and redisUrl (redis://127.0.0.1:6379)
@@ -48,6 +48,7 @@ the external session ID could be a combination of Slack app ID, Slack user ID an
 ```
 
 ### 2. Setup OAuth
+
 ```java
     private final String pvtKeyFile = "<your pvt key file>"; //filepath to pvt key file in der format
     private final String loginEndpoint = "<your login endpoint>"; //i.e. https://login.salesforce.com/
@@ -74,6 +75,7 @@ You are also able to use a different constructor and pass in a `java.security.Pr
     .loginEndpoint(loginEndpoint)
     ...
 ```
+
 ### 3. Setup Chatbot Client
 
 Follow **step 3A** to use `BasicChatbotClient` if you want to track sessions yourself or 
@@ -205,10 +207,8 @@ private void getHealthStatus() {
 
 ## Tips and Tricks
 
-* If you use your own ObjectMapper instance in your application. Check how ObjectMapper is created in [UtilFunctions.getMapper()](https://github.com/forcedotcom/einstein-bot-sdk-java/blob/master/src/main/java/com/salesforce/einsteinbot/sdk/util/UtilFunctions.java#L114) to make sure to configure it correctly. 
+- If you use your own ObjectMapper instance in your application. Check how ObjectMapper is created in [UtilFunctions.getMapper()](https://github.com/forcedotcom/einstein-bot-sdk-java/blob/master/src/main/java/com/salesforce/einsteinbot/sdk/util/UtilFunctions.java#L114) to make sure to configure it correctly. 
 Otherwise, you may run into issues with serializing/deserializing JSON.
-
-
 
 ### Full code examples
 
@@ -224,12 +224,39 @@ The project uses the [Google Java Style Guide](https://google.github.io/stylegui
 Format settings definition files for importing into IDEs are available for [Eclipse](https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml)
 and [IntelliJ IDEA](https://github.com/google/styleguide/blob/gh-pages/intellij-java-google-style.xml).
 
+### Getting Access to the code base
+
+- Create a public github account preferably with your company email id
+- Get write/admin access to [https://github.com/forcedotcom/einstein-bot-sdk-java](https://github.com/forcedotcom/einstein-bot-sdk-java) via the `#opensource` slack channel
+- Clone the repository. Make the changes
+- Run "gh auth login" in the terminal and signup with your github account having the access ( you can install gh via brew )
+- Push your changes
+
+### Fixing Release Pipeline If It Fails With a 401 Error
+
+- We migrated from legacy ossh to the new Central maven repository. Snapshot Releases are no longer supported.
+- Go to the repo -> settings -> Secrets and Variables -> Actions
+- Maven_Central_Username and Maven_Central_Token have already been configured without an expiry for the [einstein-bot-platform@salesforce.com](mailto:einstein-bot-platform@salesforce.com) account that manages the release in Central repository
+- Update the MAVEN_GPG_PASSPHRASE and MAVEN_GPG_PRIVATE_KEY if needed in case of sigining failures.
+
+### Updating GPG Values For Release
+
+- Follow [https://confluence.internal.salesforce.com/spaces/corescm/pages/24294753/CLI+Commit+Signing](https://confluence.internal.salesforce.com/spaces/corescm/pages/24294753/CLI+Commit+Signing) to create a gpg key
+- Now you should have the passphrase and a key id
+- run "gpg --armor --export-secret-keys {key_id}" to create the private key.
+- Update the MAVEN_GPG_PASSPHRASE and MAVEN_GPG_PRIVATE_KEY with the new values
+- Also update the `keyname` in the `pom.xml` with the new key id we generated above
+- Run "gpg --armor --export {key_id}  > openSourceGpg.asc" and upload the openSourceGpg.asc file to [https://keys.openpgp.org/upload](https://keys.openpgp.org/upload)
+- Once done, we should be good to proceed with the release now.
+
 ### Publishing to Maven Central
 
 #### Publish Release Versions
+
 Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-release.yml) tab and select **Maven Release** action. Click *Run workflow* , provide good description and hit **Run workflow** button. 
 
 #### Publish Snapshot Versions
+
 Go to [actions](https://github.com/forcedotcom/einstein-bot-sdk-java/actions/workflows/maven-publish.yml) tab and select **Maven Publish Snapshot** action. Click *Run workflow* , provide good description and hit **Run workflow** button. 
 
 #### Choosing Release Versions
@@ -246,19 +273,22 @@ If you want to release a minor or major version, just update version in pom.xml,
 The **minor** and **patch** versions will be incremented for minor features and bug fixes.
 
 The **major** version will be incremented for 
-* Major changes made to SDK OR 
-* New Runtime API version support is added.
+
+- Major changes made to SDK OR 
+- New Runtime API version support is added.
 
 Here is the SDK version and corresponding Runtime API version supported by it.
 
-| SDK Version | Supported Runtime API                     
-|-------------| --------------------------------------
-| 1.x.x       | /v4.0.0                        
-| 2.0.x       | /v5.0.0
-| 2.1.x       | /v5.1.0
-| 2.2.x       | /v5.2.0
-| 2.3.x       | /v5.3.0
-| 3.0.0       | /v5.3.0
+
+| SDK Version | Supported Runtime API |
+| ----------- | --------------------- |
+| 1.x.x       | /v4.0.0               |
+| 2.0.x       | /v5.0.0               |
+| 2.1.x       | /v5.1.0               |
+| 2.2.x       | /v5.2.0               |
+| 2.3.x       | /v5.3.0               |
+| 3.0.0       | /v5.3.0               |
+
 
 **Note**: The support for rich links has been removed from API V5.1.0, please upgrade from SDK V2.1.0 to V2.1.1 or later.
 
