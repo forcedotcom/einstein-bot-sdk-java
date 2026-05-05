@@ -227,7 +227,7 @@ and [IntelliJ IDEA](https://github.com/google/styleguide/blob/gh-pages/intellij-
 ### Getting Access to the code base
 
 - Create a public github account preferably with your company email id
-- Get write/admin access to [https://github.com/forcedotcom/einstein-bot-sdk-java](https://github.com/forcedotcom/einstein-bot-sdk-java) via the #opensource slack channel
+- Get write/admin access to [https://github.com/forcedotcom/einstein-bot-sdk-java](https://github.com/forcedotcom/einstein-bot-sdk-java) via the `#opensource` slack channel
 - Clone the repository. Make the changes
 - Run "gh auth login" in the terminal and signup with your github account having the access ( you can install gh via brew )
 - Push your changes
@@ -245,7 +245,7 @@ and [IntelliJ IDEA](https://github.com/google/styleguide/blob/gh-pages/intellij-
 - Now you should have the passphrase and a key id
 - run "gpg --armor --export-secret-keys {key_id}" to create the private key.
 - Update the MAVEN_GPG_PASSPHRASE and MAVEN_GPG_PRIVATE_KEY with the new values
-- Also update the {keyname} in the pom.xml with the new key id we generated above
+- Also update the `keyname` in the `pom.xml` with the new key id we generated above
 - Run "gpg --armor --export {key_id}  > openSourceGpg.asc" and upload the openSourceGpg.asc file to [https://keys.openpgp.org/upload](https://keys.openpgp.org/upload)
 - Once done, we should be good to proceed with the release now.
 
