@@ -61,7 +61,7 @@ public class BotHttpHeaders {
   }
 
   public static BotHttpHeaders fromSpringHttpHeaders(HttpHeaders httpHeaders) {
-    return new BotHttpHeaders(httpHeaders.entrySet());
+    return new BotHttpHeaders(httpHeaders.headerSet());
   }
 
   public String getRequestIdHeaderAsCSV() {

@@ -35,8 +35,8 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.openapitools.jackson.nullable.JsonNullableModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.http.HttpHeaders;
 
 /**
@@ -137,7 +137,7 @@ public class UtilFunctions {
   }
 
   public static Map<String, List<String>> maskAuthorizationHeader(HttpHeaders headers){
-    return headers.entrySet()
+    return headers.headerSet()
         .stream()
         .collect(Collectors.toMap(
             Map.Entry::getKey,
