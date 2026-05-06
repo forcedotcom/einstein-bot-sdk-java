@@ -16,14 +16,10 @@ import static org.mockito.Mockito.when;
 
 import com.salesforce.einsteinbot.sdk.cache.Cache;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.spec.RSAPrivateKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.Random;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -83,12 +79,9 @@ public class JwtBearerOAuthTest {
   }
 
   private static PrivateKey createTestPrivateKey() throws Exception {
-    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-    BigInteger randomBigInteger = new BigInteger(512, new Random());
-
-    RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(randomBigInteger, randomBigInteger);
-
-    return keyFactory.generatePrivate(privateKeySpec);
+    java.security.KeyPairGenerator keyGen = java.security.KeyPairGenerator.getInstance("RSA");
+    keyGen.initialize(2048);
+    return keyGen.generateKeyPair().getPrivate();
   }
 
   @Test
