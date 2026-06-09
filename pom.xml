@@ -481,7 +481,7 @@
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
                             </gpgArguments>
-                            <keyname>0xA102B34F</keyname>
+                            <keyname>68223890A60795D1CDAF1A632C21173ED45B29B9</keyname>
                         </configuration>
                         <executions>
                             <execution>
