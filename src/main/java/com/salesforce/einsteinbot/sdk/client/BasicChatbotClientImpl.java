@@ -271,6 +271,15 @@ public class BasicChatbotClientImpl implements BasicChatbotClient {
   }
 
   private Mono<ClientResponse> mapErrorResponse(ClientResponse clientResponse) {
+    // Handle 429 directly without body extraction
+    if (clientResponse.statusCode().value() == 429) {
+      com.salesforce.einsteinbot.sdk.model.Error error = new com.salesforce.einsteinbot.sdk.model.Error()
+              .status(429)
+              .message("Too many requests");
+      return Mono.error(new ChatbotResponseException(clientResponse.statusCode(), error,
+              clientResponse.headers()));
+    }
+
     return clientResponse
             .body(WebClientUtil.errorBodyExtractor())
             .flatMap(errorDetails -> Mono
